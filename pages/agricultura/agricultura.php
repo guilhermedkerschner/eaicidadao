@@ -7,7 +7,7 @@
     <title>Setor de Agricultura - Eai Cidadão!</title>
     <!-- Font Awesome para ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" type="text/css" href="../../assets/css/agricultura.css">
+    <link rel="stylesheet" type="text/css" href="../../css/agricultura.css">
 </head>
 
 <body>
@@ -26,11 +26,11 @@
             <!-- Área de login -->
             <div class="login-area">
                 <!-- Botões de login (visíveis quando usuário não está logado) -->
-                <a href="login_cidadao.php" class="login-button user-login">
+                <a href="../login_cidadao.php" class="login-button user-login">
                     <i class="fas fa-user"></i>
                     Área do Cidadão
                 </a>
-                <a href="login.php" class="login-button admin-login">
+                <a href="../login.php" class="login-button admin-login">
                     <i class="fas fa-lock"></i>
                     Área Restrita
                 </a>
@@ -42,11 +42,11 @@
                         Olá, <span id="user-name">Nome do Usuário</span>
                     </div>
                     <div class="user-dropdown">
-                        <a href="meu_perfil.php" class="dropdown-item">
+                        <a href="../../app/usuario/perfil.php" class="dropdown-item">
                             <i class="fas fa-id-card"></i>
                             Meu Perfil
                         </a>
-                        <a href="logout.php" class="dropdown-item">
+                        <a href="./login/logout.php" class="dropdown-item">
                             <i class="fas fa-sign-out-alt"></i>
                             Logout
                         </a>
@@ -54,7 +54,7 @@
                 </div>
             </div>
             <!-- Botão Voltar para Página Inicial -->
-            <a href="index.php" class="back-button">
+            <a href="../../index.php" class="back-button">
                 <i class="fas fa-home"></i> 
                 Página Inicial
             </a>

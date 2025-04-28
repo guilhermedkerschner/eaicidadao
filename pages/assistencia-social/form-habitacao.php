@@ -440,17 +440,17 @@
         <div class="header-buttons">
             <!-- Área de login -->
             <div class="login-area">
-                <a href="login_cidadao.php" class="login-button user-login">
+                <a href="../login_cidadao.php" class="login-button user-login">
                     <i class="fas fa-user"></i>
                     Área do Cidadão
                 </a>
-                <a href="login.php" class="login-button admin-login">
+                <a href="../login.php" class="login-button admin-login">
                     <i class="fas fa-lock"></i>
                     Área Restrita
                 </a>
             </div>
             <!-- Botão Voltar para Página de Assistência Social -->
-            <a href="assistencia_social.php" class="back-button">
+            <a href="./assistencia-social.php" class="back-button">
                 <i class="fas fa-arrow-left"></i> 
                 Voltar para Assistência Social
             </a>

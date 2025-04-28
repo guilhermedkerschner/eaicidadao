@@ -531,7 +531,7 @@
         <div class="header-left">
             <div class="municipality-logo">
                 <!-- Substitua pelo caminho da sua logo -->
-                <img src="./images/logo_municipio.png" alt="Logo do Município">
+                <img src="../../img/logo_municipio.png" alt="Logo do Município">
             </div>
             <div class="title-container">
                 <h1>Eai Cidadão!</h1>
@@ -542,9 +542,9 @@
             <!-- Área de login -->
             <div class="login-area">
                 <!-- Botões de login (visíveis quando usuário não está logado) -->
-                <a href="login_cidadao.php" class="login-button user-login">
+                <a href="../login_cidadao.php" class="login-button user-login">
                     <i class="fas fa-user"></i>Área do Cidadão</a>
-                <a href="login.php" class="login-button admin-login">
+                <a href="../login.php" class="login-button admin-login">
                     <i class="fas fa-lock"></i>Área Restrita</a>
 
                 <!-- Menu do usuário quando está logado (oculto por padrão) -->
@@ -554,11 +554,11 @@
                         Olá, <span id="user-name">Nome do Usuário</span>
                     </div>
                     <div class="user-dropdown">
-                        <a href="meu_perfil.php" class="dropdown-item">
+                        <a href="../../app/usuario/perfil.php" class="dropdown-item">
                             <i class="fas fa-id-card"></i>
                             Meu Perfil
                         </a>
-                        <a href="logout.php" class="dropdown-item">
+                        <a href="../login/logout.php" class="dropdown-item">
                             <i class="fas fa-sign-out-alt"></i>
                             Logout
                         </a>
@@ -566,7 +566,7 @@
                 </div>
             </div>
             <!-- Botão Voltar para Página Inicial -->
-            <a href="index.php" class="back-button">
+            <a href="../../index.php" class="back-button">
                 <i class="fas fa-home"></i> 
                 Página Inicial
             </a>

@@ -532,7 +532,7 @@
         <div class="header-left">
             <div class="municipality-logo">
                 <!-- Substitua pelo caminho da sua logo -->
-                <img src="../img/logo_municipio.png" alt="Logo do Município">
+                <img src="../../img/logo_municipio.png" alt="Logo do Município">
             </div>
             <div class="title-container">
                 <h1>Eai Cidadão!</h1>
@@ -559,11 +559,11 @@
                         Olá, <span id="user-name">Nome do Usuário</span>
                     </div>
                     <div class="user-dropdown">
-                        <a href="meu_perfil.php" class="dropdown-item">
+                        <a href="../../app/usuario/perfil.php" class="dropdown-item">
                             <i class="fas fa-id-card"></i>
                             Meu Perfil
                         </a>
-                        <a href="logout.php" class="dropdown-item">
+                        <a href="../login/logout.php" class="dropdown-item">
                             <i class="fas fa-sign-out-alt"></i>
                             Logout
                         </a>
