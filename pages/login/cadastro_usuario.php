@@ -71,7 +71,7 @@ if (isset($_SESSION['dados_cadastro'])) {
         </div>
         <?php endif; ?>
 
-        <form class="cadastro-form" action="../../processos/processar_cadastro_usuario.php" method="post">
+        <form class="cadastro-form" action="../../controler/processar_cadastro_usuario.php" method="post">
             <h4 class="form-title">Dados Pessoais</h4>
             <div class="form-row">
                 <div class="form-col">

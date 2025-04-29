@@ -375,7 +375,7 @@
         <div class="header-left">
             <div class="municipality-logo">
                 <!-- Substitua pelo caminho da sua logo -->
-                <img src="../images/logo_municipio.png" alt="Logo do Município">
+                <img src="../../img/logo_municipio.png" alt="Logo do Município">
             </div>
             <div class="title-container">
                 <h1>Eai Cidadão!</h1>
@@ -383,15 +383,15 @@
             </div>
         </div>
         <div class="header-right">
-            <a href="../index.php"><i class="fas fa-home"></i> Página Inicial</a>
+            <a href="../../index.php"><i class="fas fa-home"></i> Página Inicial</a>
         </div>
     </div>
 
     <div class="container">
         <div class="breadcrumb">
-            <a href="../index.php">Página Inicial</a>
+            <a href="../../index.php">Página Inicial</a>
             <span class="separator">›</span>
-            <a href="../rodoviario.php">Setor Rodoviário</a>
+            <a href="rodoviario.php">Setor Rodoviário</a>
             <span class="separator">›</span>
             <span class="current">Solicitação de Serviços de Boeiros</span>
         </div>

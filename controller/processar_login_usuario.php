@@ -1,6 +1,6 @@
 <?php
 // Inicia a sessão
-require_once '../config/config.php';
+session_start();
 
 // Define o cabeçalho para JSON
 header('Content-Type: application/json');
@@ -54,10 +54,8 @@ if (isset($_SESSION['login_attempts'][$email]) && $_SESSION['login_attempts'][$e
     }
 }
 
-// A partir daqui, inclua seu código de conexão com o banco de dados e verificação de usuário
-// Por exemplo:
 
-// Inclui o arquivo de conexão
+require_once '../database/conect.php';
 
 
 try {
@@ -71,7 +69,7 @@ try {
         $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
         
         // Verifica se a conta está ativa
-        if ($usuario['status'] != 'ativo') {
+        if ($usuario['cad_usu_status'] != 'ativo') {
             // Registra a tentativa
             if (!isset($_SESSION['login_attempts'][$email])) {
                 $_SESSION['login_attempts'][$email] = ['count' => 0, 'time' => time()];
@@ -83,7 +81,7 @@ try {
         }
         
         // Verifica a senha usando password_verify
-        if (password_verify($password, $usuario['senha'])) {
+        if (password_verify($password, $usuario['cad_usu_senha'])) {
             // Sucesso no login
             
             // Reset das tentativas de login
@@ -95,23 +93,23 @@ try {
             $session_token = bin2hex(random_bytes(32));
             
             // Salva dados na sessão
-            $_SESSION['usuario_id'] = $usuario['id'];
-            $_SESSION['usuario_nome'] = $usuario['nome'];
+            $_SESSION['usuario_id'] = $usuario['cad_usu_id'];
+            $_SESSION['usuario_nome'] = $usuario['cad_usu_nome'];
             $_SESSION['usuario_email'] = $email;
             $_SESSION['usuario_token'] = $session_token;
             $_SESSION['ultimo_acesso'] = time();
             
             // Atualiza o último acesso no banco de dados
-            $stmt = $pdo->prepare("UPDATE tb_cad_usuarios SET cad_usu_ultimo_acess = NOW(), token_sessao = :token WHERE id = :id");
+            $stmt = $pdo->prepare("UPDATE tb_cad_usuarios SET cad_usu_ultimo_acess = NOW(), cad_usu_token_recuperacao = :token WHERE cad_usu_id = :id");
             $stmt->bindParam(':token', $session_token);
-            $stmt->bindParam(':id', $usuario['id']);
+            $stmt->bindParam(':id', $usuario['cad_usu_id']);
             $stmt->execute();
             
             // Registra o login no log
             $ip = $_SERVER['REMOTE_ADDR'];
             $user_agent = $_SERVER['HTTP_USER_AGENT'];
             $stmt = $pdo->prepare("INSERT INTO log_acessos (usuario_id, data_acesso, ip, user_agent) VALUES (:usuario_id, NOW(), :ip, :user_agent)");
-            $stmt->bindParam(':usuario_id', $usuario['id']);
+            $stmt->bindParam(':usuario_id', $usuario['cad_usu_id']);
             $stmt->bindParam(':ip', $ip);
             $stmt->bindParam(':user_agent', $user_agent);
             $stmt->execute();

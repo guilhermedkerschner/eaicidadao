@@ -51,7 +51,7 @@ if (isset($_SESSION['erro_login_usuario'])) {
         </div>
         <?php endif; ?>
 
-        <form class="login-form" id="login-form" method="post">
+        <form class="login-form" id="login-user" method="post">
             <div class="form-group">
                 <label for="email">E-mail</label>
                 <div class="input-group">
@@ -72,7 +72,7 @@ if (isset($_SESSION['erro_login_usuario'])) {
             </div>
 
             <div class="forgot-password">
-                <a href="./login/recuperar_senha_usuario.php">Esqueceu sua senha?</a>
+                <a id="recovery-pass" href="">Esqueceu sua senha?</a>
             </div>
 
             <button type="submit" id="btn_login" class="btn-login">Entrar</button>
@@ -99,104 +99,9 @@ if (isset($_SESSION['erro_login_usuario'])) {
             this.querySelector('i').classList.toggle('fa-eye-slash');
         });
     });
-
-    const loginForm = document.getElementById('login-form');
-
-    loginForm.addEventListener('submit', function(e) {
-        e.preventDefault(); // Impede o envio tradicional do formulário
-        
-        // Desabilita o botão de login para evitar múltiplos envios
-        const btnLogin = document.getElementById('btn_login');
-        btnLogin.disabled = true;
-        btnLogin.textContent = 'Aguarde...';
-        
-        // Coleta os dados do formulário
-        const email = document.getElementById('login_email').value.trim();
-        const password = document.getElementById('login_password').value;
-        
-        // Validação básica no cliente
-        if (!email || !password) {
-            showError('Por favor, preencha todos os campos.');
-            resetButton();
-            return;
-        }
-        
-        if (!validateEmail(email)) {
-            showError('Por favor, insira um email válido.');
-            resetButton();
-            return;
-        }
-        
-        // Cria um objeto FormData para enviar os dados
-        const formData = new FormData();
-        formData.append('login_email', email);
-        formData.append('login_password', password);
-        
-        // Envio via fetch API
-        fetch('./processos/processar_login_usuario.php',{
-            method: 'POST',
-            body: formData,
-            credentials: 'same-origin' // Importante para manter a sessão
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Erro na rede ou no servidor');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                // Login bem-sucedido
-                window.location.href = data.redirect || './pages/perfil.php';
-            } else {
-                // Login falhou
-                showError(data.message || 'Falha na autenticação. Verifique seus dados.');
-                resetButton();
-            }
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            showError('Ocorreu um erro duraaaaante a autenticação. Tente novamente mais tarde.');
-            resetButton();
-        });
-    });
-
-    // Função para exibir mensagens de erro
-    function showError(message) {
-        // Verifica se já existe um elemento de alerta
-        let alertElement = document.querySelector('.alert-error');
-        
-        if (!alertElement) {
-            // Cria um novo elemento se não existir
-            alertElement = document.createElement('div');
-            alertElement.className = 'alert-error';
-            const formElement = document.getElementById('login-form');
-            formElement.parentNode.insertBefore(alertElement, formElement);
-        }
-        
-        alertElement.textContent = message;
-        alertElement.style.display = 'block';
-        
-        // Remove a mensagem após 5 segundos
-        setTimeout(() => {
-            alertElement.style.display = 'none';
-        }, 5000);
-    }
     
-    // Função para resetar o botão
-    function resetButton() {
-        const btnLogin = document.getElementById('btn_login');
-        btnLogin.disabled = false;
-        btnLogin.textContent = 'Entrar';
-    }
-    
-    // Função para validar email
-    function validateEmail(email) {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(email);
-    }
-
     </script>
+    <script src="../js/login.js"></script>
 </body>
 
 </html>
