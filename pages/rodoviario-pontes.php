@@ -1,3 +1,12 @@
+<?php
+// Inicia a sessão
+session_start();
+
+if (!isset($_SESSION['user_logado'])) {
+    header("Location: ../acessdenied.php"); 
+  }
+?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 

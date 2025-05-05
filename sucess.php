@@ -58,27 +58,24 @@
             line-height: 1.5;
         }
 
-        .button {
+        .redirect-message {
+            color: #0d47a1;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .counter {
             display: inline-block;
             background-color: #0d47a1;
             color: white;
-            padding: 12px 25px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s;
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-
-        .button:hover {
-            background-color: #083378;
-            transform: translateY(-2px);
-        }
-
-        .button i {
-            margin-right: 8px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            line-height: 40px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-top: 5px;
         }
 
         .footer {
@@ -101,6 +98,25 @@
             }
         }
     </style>
+    <script>
+        // Função para redirecionar após contagem regressiva
+        window.onload = function() {
+            let count = 5;
+            const counterElement = document.getElementById('counter');
+            
+            // Atualiza o contador a cada segundo
+            const interval = setInterval(function() {
+                count--;
+                counterElement.innerText = count;
+                
+                // Quando o contador chegar a zero, redirecionar
+                if (count <= 0) {
+                    clearInterval(interval);
+                    window.location.href = "./login_cidadao.php";
+                }
+            }, 1000);
+        };
+    </script>
 </head>
 <body>
     <div class="success-container">
@@ -113,10 +129,10 @@
             Agora você pode acessar todos os serviços disponíveis para os cidadãos 
             de Santa Izabel do Oeste.
         </p>
-        <a href="../login_cidadao.php" class="button">
-            <i class="fas fa-sign-in-alt"></i>
-            Fazer Login
-        </a>
+        <p class="redirect-message">
+            Você será redirecionado em breve, aguarde
+        </p>
+        <div class="counter" id="counter">5</div>
         <p class="footer">
             &copy; 2025 Prefeitura Municipal de Santa Izabel do Oeste
         </p>

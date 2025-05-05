@@ -11,6 +11,6 @@ if (session_status() === PHP_SESSION_ACTIVE) {
 }
 
 // Redireciona para a página inicial
-header("Location: index.php");
+header("Location: ../login_cidadao.php");
 exit();
 ?>

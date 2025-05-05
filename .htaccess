@@ -1,0 +1,9 @@
+DirectoryIndex index.php index.html index.htm
+
+Options -Indexes
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-DirectoryIndex
+
+
+# RewriteEngine Options

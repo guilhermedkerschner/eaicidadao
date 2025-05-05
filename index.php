@@ -1,3 +1,10 @@
+<?php
+session_start();
+// Verifica se o usuário está logado
+$usuario_logado = isset($_SESSION['user_logado']) && $_SESSION['user_logado'] === true;
+$nome_usuario = isset($_SESSION['user_nome']) ? $_SESSION['user_nome'] : '';
+?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -24,11 +31,11 @@
         </div>
 
         <div class="login-area">
-            <a href="./pages/login_cidadao.php" class="login-button user-login">
+            <a href="login_cidadao.php" class="login-button user-login">
                 <i class="fas fa-user"></i>
                 Área do Cidadão
             </a>
-            <a href="./pages/login.php" class="login-button admin-login">
+            <a href="login.php" class="login-button admin-login">
                 <i class="fas fa-lock"></i>
                 Área Restrita
             </a>
@@ -44,7 +51,7 @@
                         <i class="fas fa-id-card"></i>
                         Meu Perfil
                     </a>
-                    <a href="./processos/logout.php" class="dropdown-item">
+                    <a href="./controller/logout_user.php" class="dropdown-item">
                         <i class="fas fa-sign-out-alt"></i>
                         Logout
                     </a>
@@ -53,7 +60,7 @@
         </div>
     </header>
 
-    <!-- Container principal com as opções de menu -->
+
     <div class="main-container">
         <!-- Mensagem de boas-vindas e instruções -->
         <div class="welcome-message">
@@ -69,47 +76,47 @@
 
         <div class="options">
             <!-- Opções de menu com ícones -->
-            <a href="./pages/esporte/esporte.php" class="option-box">
+            <a href="./pages/esporte.php" class="option-box">
                 <i class="fas fa-volleyball-ball"></i>
                 <h3>Esporte</h3>
             </a>
-            <a href="./pages/assistencia-social/assistencia-social.php" class="option-box">
+            <a href="./pages/social.php" class="option-box">
                 <i class="fas fa-heart"></i>
                 <h3>Assistência Social</h3>
             </a>
-            <a href="./pages/agricultura/agricultura.php" class="option-box">
+            <a href="./pages/agricultura.php" class="option-box">
                 <i class="fas fa-seedling"></i>
                 <h3>Agricultura</h3>
             </a>
-            <a href="./pages/rodoviario/rodoviario.php" class="option-box">
+            <a href="./pages/rodoviario.php" class="option-box">
                 <i class="fas fa-bus-alt"></i>
                 <h3>Rodoviário</h3>
             </a>
-            <a href="./pages/meio_ambiente/meio_ambiente.php" class="option-box">
+            <a href="./pages/meio_ambiente.php" class="option-box">
                 <i class="fas fa-tree"></i>
                 <h3>Meio Ambiente</h3>
             </a>
-            <a href="./pages/servicos_urbanos/servicos_urbanos.php" class="option-box">
+            <a href="./pages/servicos_urbanos.php" class="option-box">
                 <i class="fas fa-building"></i>
                 <h3>Serviços Urbanos</h3>
             </a>
-            <a href="./pages/educacao/educacao.php" class="option-box">
+            <a href="./pages/educacao.php" class="option-box">
                 <i class="fas fa-book-open"></i>
                 <h3>Educação</h3>
             </a>
-            <a href="./pages/fiscalizacao/fiscalizacao.php" class="option-box">
+            <a href="./pages/fiscalizacao.php" class="option-box">
                 <i class="fas fa-search-dollar"></i>
                 <h3>Fiscalização</h3>
             </a>
-            <a href="./pages/obras/obras.php" class="option-box">
+            <a href="./pages/obras.php" class="option-box">
                 <i class="fas fa-tools"></i>
                 <h3>Obras</h3>
             </a>
-            <a href="./pages/cultura_turismo/cultura_turismo.php" class="option-box">
+            <a href="./pages/cultura_turismo.php" class="option-box">
                 <i class="fas fa-monument"></i>
                 <h3>Cultura e Turismo</h3>
             </a>
-            <a href="./pages/fazenda/fazenda.php" class="option-box">
+            <a href="./pages/fazenda.php" class="option-box">
                 <i class="fas fa-landmark"></i>
                 <h3>Fazenda</h3>
             </a>
@@ -158,30 +165,56 @@
     </footer>
 
     <!-- Script para exibir nome do usuário quando estiver logado (exemplo) -->
-    <script>
-        // Exemplo de verificação de login (substitua por sua lógica real)
-        // Quando o usuário estiver logado, oculte os botões de login e mostre a mensagem de boas-vindas
+    <!-- Script para exibir nome do usuário quando estiver logado -->
+<script>
+    // Usando as variáveis PHP diretamente no JavaScript
+    const isLoggedIn = <?php echo $usuario_logado ? 'true' : 'false'; ?>;
+    const userName = "<?php echo addslashes($nome_usuario); ?>";
+    
+    document.addEventListener("DOMContentLoaded", function() {
+        if (isLoggedIn) {
+            // Oculta botões de login
+            document.querySelectorAll('.login-button').forEach(btn => {
+                btn.style.display = 'none';
+            });
+            
+            // Mostra mensagem de usuário logado
+            const userLoggedElement = document.querySelector('.user-logged-in');
+            userLoggedElement.style.display = 'flex';
+            
+            // Define o nome do usuário
+            document.getElementById('user-name').textContent = userName;
+        } else {
+            // Garante que os botões de login estejam visíveis
+            document.querySelectorAll('.login-button').forEach(btn => {
+                btn.style.display = 'flex';
+            });
+            
+            // Garante que a área de usuário logado esteja oculta
+            const userLoggedElement = document.querySelector('.user-logged-in');
+            userLoggedElement.style.display = 'none';
+        }
+    });
+    
+    // Adiciona funcionalidade ao dropdown do usuário
+    document.addEventListener("DOMContentLoaded", function() {
+        const userButton = document.querySelector('.user-button');
+        const userDropdown = document.querySelector('.user-dropdown');
         
-        // Exemplo: se usuário estiver logado
-        const isLoggedIn = false; // Mude para true para testar o estado de logado
-        const userName = "João Silva"; // Nome do usuário logado
-        
-        document.addEventListener("DOMContentLoaded", function() {
-            if (isLoggedIn) {
-                // Oculta botões de login
-                document.querySelectorAll('.login-button').forEach(btn => {
-                    btn.style.display = 'none';
-                });
-                
-                // Mostra mensagem de usuário logado
-                const userLoggedElement = document.querySelector('.user-logged-in');
-                userLoggedElement.style.display = 'flex';
-                
-                // Define o nome do usuário
-                document.getElementById('user-name').textContent = userName;
-            }
-        });
-    </script>
+        if (userButton) {
+            userButton.addEventListener('click', function() {
+                userDropdown.classList.toggle('show');
+            });
+            
+            // Fecha o dropdown quando clicar fora dele
+            document.addEventListener('click', function(event) {
+                if (!userButton.contains(event.target) && !userDropdown.contains(event.target)) {
+                    userDropdown.classList.remove('show');
+                }
+            });
+        }
+    });
+</script>
 </body>
 
 </html>

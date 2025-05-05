@@ -3,15 +3,15 @@
 session_start();
 
 // Verifica se o usuário está logado
-if (!isset($_SESSION['usuario_logado']) || $_SESSION['usuario_logado'] !== true) {
+if (!isset($_SESSION['user_logado']) || $_SESSION['user_logado'] !== true) {
     // Se não estiver logado, redireciona para a página de login
-    header("Location: login_usuario.php");
+    header("Location: ../../login_cidadao.php");
     exit();
 }
 
 // Obtém informações do usuário da sessão
-$nome_usuario = $_SESSION['usuario_nome'];
-$email_usuario = $_SESSION['usuario_email'];
+$nome_usuario = $_SESSION['user_nome'];
+$email_usuario = $_SESSION['user_email'];
 ?>
 
 <!DOCTYPE html>
@@ -24,7 +24,7 @@ $email_usuario = $_SESSION['usuario_email'];
     <!-- Font Awesome para ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- CSS personalizado -->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../../css/style.css">
     <style>
         .welcome-box {
             background-color: #e8f5e9;
@@ -132,7 +132,7 @@ $email_usuario = $_SESSION['usuario_email'];
         <div class="header-container">
             <div class="municipality-logo">
                 <!-- Substitua pelo caminho da sua logo -->
-                <img src="./images/logo_municipio.png" alt="Logo do Município">
+                <img src="../../img/logo_municipio.png" alt="Logo do Município">
             </div>
             <div class="title-container">
                 <h1>Eai Cidadão!</h1>
@@ -162,7 +162,7 @@ $email_usuario = $_SESSION['usuario_email'];
                 <h4><i class="fas fa-plus-circle"></i> Nova Solicitação</h4>
                 <p>Envie uma nova solicitação ou pedido para a prefeitura.</p>
                 <div class="card-actions">
-                    <a href="index.php" class="btn-action">Criar</a>
+                    <a href="../../index.php" class="btn-action">Criar</a>
                 </div>
             </div>
 
@@ -183,7 +183,7 @@ $email_usuario = $_SESSION['usuario_email'];
             </div>
         </div>
 
-        <form action="logout_usuario.php" method="post">
+        <form action="../../controller/logout_user.php" method="post">
             <button type="submit" class="logout-btn">
                 <i class="fas fa-sign-out-alt"></i> Sair
             </button>

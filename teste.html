@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de API - Eai Cidadão!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #2e7d32;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+        }
+        .section {
+            margin-bottom: 30px;
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow: auto;
+        }
+        button {
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1b5e20;
+        }
+        .result {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Teste de API - Eai Cidadão!</h1>
+    
+    <div class="section">
+        <h2>Teste Básico de API</h2>
+        <p>Esse teste verifica se o servidor está configurado corretamente para retornar JSON.</p>
+        <button id="test-basic-api">Testar API Básica</button>
+        <div id="basic-api-result" class="result"></div>
+    </div>
+    
+    <div class="section">
+        <h2>Teste de Processamento de Login</h2>
+        <p>Esse teste verifica se a página de processamento de login está funcionando corretamente.</p>
+        <button id="test-login-api">Testar Processamento de Login</button>
+        <div id="login-api-result" class="result"></div>
+    </div>
+    
+    <div class="section">
+        <h2>Teste de Conexão com o Banco de Dados</h2>
+        <p>Esse teste verifica se a conexão com o banco de dados está funcionando.</p>
+        <button id="test-db-connection">Testar Conexão com o BD</button>
+        <div id="db-connection-result" class="result"></div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Teste básico de API
+            document.getElementById('test-basic-api').addEventListener('click', function() {
+                const resultElement = document.getElementById('basic-api-result');
+                resultElement.innerHTML = '<p>Testando...</p>';
+                
+                fetch('./teste_api.php')
+                    .then(response => response.text())
+                    .then(data => {
+                        try {
+                            const jsonData = JSON.parse(data);
+                            resultElement.innerHTML = `
+                                <p style="color: green;">✓ API funcionando corretamente!</p>
+                                <pre>${JSON.stringify(jsonData, null, 2)}</pre>
+                            `;
+                        } catch (e) {
+                            resultElement.innerHTML = `
+                                <p style="color: red;">✗ Erro: A resposta não é um JSON válido</p>
+                                <textarea style="width: 100%; height: 150px;">${data}</textarea>
+                            `;
+                        }
+                    })
+                    .catch(error => {
+                        resultElement.innerHTML = `
+                            <p style="color: red;">✗ Erro na requisição</p>
+                            <pre>${error}</pre>
+                        `;
+                    });
+            });
+            
+            // Teste de processamento de login
+            document.getElementById('test-login-api').addEventListener('click', function() {
+                const resultElement = document.getElementById('login-api-result');
+                resultElement.innerHTML = '<p>Testando...</p>';
+                
+                const formData = new FormData();
+                formData.append('action', 'login');
+                formData.append('login_email', 'teste@teste.com');
+                formData.append('login_password', '123456');
+                
+                fetch('./processa/processa_login.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.text())
+                .then(data => {
+                    try {
+                        const jsonData = JSON.parse(data);
+                        resultElement.innerHTML = `
+                            <p style="color: green;">✓ Processamento de login funcionando!</p>
+                            <pre>${JSON.stringify(jsonData, null, 2)}</pre>
+                        `;
+                    } catch (e) {
+                        resultElement.innerHTML = `
+                            <p style="color: red;">✗ Erro: A resposta não é um JSON válido</p>
+                            <textarea style="width: 100%; height: 150px;">${data}</textarea>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    resultElement.innerHTML = `
+                        <p style="color: red;">✗ Erro na requisição</p>
+                        <pre>${error}</pre>
+                    `;
+                });
+            });
+            
+            // Teste de conexão com o banco de dados
+            document.getElementById('test-db-connection').addEventListener('click', function() {
+                const resultElement = document.getElementById('db-connection-result');
+                resultElement.innerHTML = '<p>Testando...</p>';
+                
+                // Usar AJAX para buscar o conteúdo do teste_conexao.php
+                fetch('./teste_conexao.php')
+                    .then(response => response.text())
+                    .then(data => {
+                        resultElement.innerHTML = `
+                            <div>${data}</div>
+                        `;
+                    })
+                    .catch(error => {
+                        resultElement.innerHTML = `
+                            <p style="color: red;">✗ Erro na requisição</p>
+                            <pre>${error}</pre>
+                        `;
+                    });
+            });
+        });
+    </script>
+</body>
+</html>

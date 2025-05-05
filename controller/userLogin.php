@@ -1,6 +1,6 @@
 <?php
 
-include_once '../database/conect.php';
+include_once '../lib/config.php';
 
 
 $response = [];

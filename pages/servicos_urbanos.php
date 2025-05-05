@@ -1,13 +1,21 @@
+<?php
+session_start();
+// Verifica se o usuário está logado
+$usuario_logado = isset($_SESSION['user_logado']) && $_SESSION['user_logado'] === true;
+$nome_usuario = isset($_SESSION['user_nome']) ? $_SESSION['user_nome'] : '';
+?>
+
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Setor Rodoviário - Eai Cidadão!</title>
+    <title>Setor de Serviços Urbanos - Eai Cidadão!</title>
     <!-- Font Awesome para ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-   <style>
+    <style>
         * {
             margin: 0;
             padding: 0;
@@ -238,7 +246,7 @@
 
         .section-title i {
             margin-right: 10px;
-            color: #ff8f00;
+            color: #ff9800;
             font-size: 1.5rem;
         }
 
@@ -279,7 +287,7 @@
         .service-button i {
             font-size: 2.5rem;
             margin-bottom: 15px;
-            color: #ff8f00;
+            color: #ff9800;
             transition: all 0.3s;
         }
 
@@ -317,7 +325,7 @@
 
         .contact-title i {
             margin-right: 10px;
-            color: #ff8f00;
+            color: #ff9800;
         }
 
         .contact-grid {
@@ -341,7 +349,7 @@
         }
 
         .contact-item i {
-            color: #ff8f00;
+            color: #ff9800;
             font-size: 1.2rem;
             margin-right: 15px;
             margin-top: 2px;
@@ -382,7 +390,7 @@
 
         .opening-hours h4 i {
             margin-right: 10px;
-            color: #ff8f00;
+            color: #ff9800;
         }
 
         .hours-table {
@@ -481,6 +489,49 @@
                 text-align: center;
             }
         }
+
+        @media (max-width: 768px) {
+            a[href="status_servicos.php"] {
+                flex-direction: row !important;
+                align-items: center !important;
+                padding: 15px 20px !important;
+            }
+            
+            a[href="status_servicos.php"] i {
+                font-size: 1.5rem !important;
+                margin-right: 15px !important;
+            }
+            
+            a[href="status_servicos.php"] > div:nth-child(2) {
+                height: 30px !important; /* Barra vertical menor em telas médias */
+                margin-right: 15px !important;
+            }
+            
+            a[href="status_servicos.php"] h3 {
+                font-size: 1.1rem !important;
+            }
+            
+            a[href="status_servicos.php"] p {
+                font-size: 0.9rem !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            a[href="status_servicos.php"] {
+                padding: 12px 15px !important;
+            }
+            
+            a[href="status_servicos.php"] i {
+                font-size: 1.2rem !important;
+                margin-right: 10px !important;
+            }
+            
+            a[href="status_servicos.php"] > div:nth-child(2) {
+                height: 25px !important; /* Barra vertical ainda menor em telas pequenas */
+                margin-right: 10px !important;
+            }
+        }
+
     </style>
 </head>
 
@@ -489,7 +540,7 @@
         <div class="header-left">
             <div class="municipality-logo">
                 <!-- Substitua pelo caminho da sua logo -->
-                <img src="../../img/logo_municipio.png" alt="Logo do Município">
+                <img src="../img/logo_municipio.png" alt="Logo do Município">
             </div>
             <div class="title-container">
                 <h1>Eai Cidadão!</h1>
@@ -516,11 +567,11 @@
                         Olá, <span id="user-name">Nome do Usuário</span>
                     </div>
                     <div class="user-dropdown">
-                        <a href="../../app/usuario/perfil.php" class="dropdown-item">
+                        <a href="../app/usuario/perfil.php" class="dropdown-item">
                             <i class="fas fa-id-card"></i>
                             Meu Perfil
                         </a>
-                        <a href="../logout.php" class="dropdown-item">
+                        <a href="../controller/logout.php" class="dropdown-item">
                             <i class="fas fa-sign-out-alt"></i>
                             Logout
                         </a>
@@ -536,58 +587,88 @@
     </div>
 
     <div class="container">
-        <h2 class="section-title"><i class="fas fa-truck-moving"></i> Setor Rodoviário</h2>
+        <h2 class="section-title"><i class="fas fa-city"></i> Setor de Serviços Urbanos</h2>
 
         <p class="intro-text">
-            O Setor Rodoviário do Município de Santa Izabel do Oeste é responsável pela manutenção e conservação das estradas municipais, garantindo a mobilidade e o acesso a todas as localidades do município. Selecione abaixo o serviço que você deseja solicitar.
+            O Setor de Serviços Urbanos do Município de Santa Izabel do Oeste é responsável pela manutenção, conservação e melhoria da infraestrutura urbana do município. Atuamos para garantir a qualidade de vida dos cidadãos por meio de serviços como limpeza urbana, iluminação pública, manutenção de praças e vias públicas, entre outros. Selecione abaixo o serviço que você deseja solicitar.
         </p>
 
         <div class="service-buttons">
-            <a href="form_boeiros.php" class="service-button">
-                <i class="fas fa-water"></i>
-                <h3>Boeiros</h3>
-                <p>Instalação, limpeza e manutenção de boeiros</p>
+            <a href="" class="service-button">
+                <i class="fas fa-lightbulb"></i>
+                <h3>Iluminação Pública</h3>
+                <!-- <p>Solicitação de reparos em postes e lâmpadas</p> -->
+                <p>Em desenvolvimento</p>
             </a>
 
-            <a href="form_estradas.php" class="service-button">
-                <i class="fas fa-road"></i>
-                <h3>Estradas</h3>
-                <p>Manutenção e recuperação de estradas rurais</p>
-            </a>
-
-            <a href="form_acesso.php" class="service-button">
-                <i class="fas fa-sign-in-alt"></i>
-                <h3>Acesso</h3>
-                <p>Melhorias nos acessos a propriedades rurais</p>
-            </a>
-
-            <a href="form_limpeza.php" class="service-button">
+            <a href="" class="service-button">
                 <i class="fas fa-broom"></i>
-                <h3>Limpeza de Estrada</h3>
-                <p>Roçada e limpeza de margens de estradas</p>
+                <h3>Limpeza Urbana</h3>
+                <!--<p>Informações sobre varrição, capina e limpeza de ruas</p>-->
+                <p>Em desenvolvimento</p>
             </a>
 
-            <a href="form_cascalho.php" class="service-button">
-                <i class="fas fa-truck-pickup"></i>
-                <h3>Cascalhamento</h3>
-                <p>Aplicação de cascalho em estradas rurais</p>
+            <a href="" class="service-button">
+                <i class="fas fa-trash-alt"></i>
+                <h3>Coleta de Entulhos</h3>
+                <!--<p>Agendamento para recolhimento de entulhos e materiais volumosos</p>-->
+                <p>Em desenvolvimento</p>
             </a>
 
-            <a href="form_pontes.php" class="service-button">
-                <i class="fas fa-archway"></i>
-                <h3>Pontes</h3>
-                <p>Construção e manutenção de pontes rurais</p>
+            <a href="" class="service-button">
+                <i class="fas fa-road"></i>
+                <h3>Pavimentação</h3>
+                <!--<p>Solicitação de manutenção em vias pavimentadas</p>-->
+                <p>Em desenvolvimento</p>
+            </a>
+
+            <a href="" class="service-button">
+                <i class="fas fa-tree"></i>
+                <h3>Praças e Jardins</h3>
+                <!--<p>Manutenção de áreas verdes e espaços públicos</p>-->
+                <p>Em desenvolvimento</p>
+            </a>
+
+            <a href="" class="service-button">
+                <i class="fas fa-water"></i>
+                <h3>Bocas de Lobo</h3>
+                <!--<p>Limpeza e desobstrução de bocas de lobo e bueiros</p>-->
+                <p>Em desenvolvimento</p>
+            </a>
+
+            <a href="" class="service-button">
+                <i class="fas fa-cross"></i>
+                <h3>Cemitério Municipal</h3>
+                <!--<p>Informações sobre serviços no cemitério municipal</p>-->
+                <p>Em desenvolvimento</p>
+            </a>
+
+            <a href="" class="service-button">
+                <i class="fas fa-cut"></i>
+                <h3>Poda de Árvores</h3>
+                <!--<p>Solicitação de poda ou remoção de árvores em vias públicas</p>-->
+                <p>Em desenvolvimento</p>
+            </a>
+
+            <a href="" class="service-button">
+                <i class="fas fa-walking"></i>
+                <h3>Calçadas</h3>
+                <!--<p>Manutenção e regularização de calçadas públicas</p>-->
+                <p>Em desenvolvimento</p>
             </a>
         </div>
 
-        <a href="status_servicos.php" class="service-button" style="max-width: 300px; margin: 0 auto; background-color: #0d47a1; color: white;">
-            <i class="fas fa-tasks" style="color: white;"></i>
-            <h3 style="color: white;">Consultar Status de Serviços</h3>
-            <p style="color: #e0e0e0;">Acompanhe o andamento das suas solicitações</p>
+        <a href="status_servicos.php" class="service-button" style="width: 100%; max-width: 600px; margin: 0 auto 30px auto; background-color: #0d47a1; color: white; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; padding: 20px 25px; text-align: left;">
+            <i class="fas fa-tasks" style="color: white; font-size: 2rem; margin-right: 20px; margin-bottom: 0;"></i>
+            <div style="width: 1px; height: 40px; background-color: rgba(255, 255, 255, 0.5); margin-right: 20px;"></div>
+            <div>
+                <h3 style="color: white; margin-bottom: 5px; font-size: 1.3rem;">Consultar Status de Solicitações</h3>
+                <p style="color: #e0e0e0; font-size: 1rem;">Acompanhe o andamento das suas solicitações</p>
+            </div>
         </a>
 
         <div class="contact-section">
-            <h3 class="contact-title"><i class="fas fa-address-card"></i> Contato do Setor Rodoviário</h3>
+            <h3 class="contact-title"><i class="fas fa-address-card"></i> Contato do Setor de Serviços Urbanos</h3>
             
             <div class="contact-grid">
                 <div class="contact-info">
@@ -595,7 +676,7 @@
                         <i class="fas fa-map-marker-alt"></i>
                         <div class="contact-text">
                             <h4>Endereço</h4>
-                            <p>Rua Acácia, 1254 - Centro<br>Santa Izabel do Oeste - PR<br>CEP: 85650-000</p>
+                            <p>Rua Pinheiro, 375 - Centro<br>Santa Izabel do Oeste - PR<br>CEP: 85650-000</p>
                         </div>
                     </div>
                 </div>
@@ -605,7 +686,7 @@
                         <i class="fas fa-phone"></i>
                         <div class="contact-text">
                             <h4>Telefones</h4>
-                            <p>(46) 3552-1237 (Gabinete)<br>(46) 3552-1300 (Pátio de Máquinas)</p>
+                            <p>(46) 3552-1387 (Secretaria)<br>(46) 3552-1388 (Emergências)</p>
                         </div>
                     </div>
                 </div>
@@ -615,7 +696,7 @@
                         <i class="fas fa-envelope"></i>
                         <div class="contact-text">
                             <h4>E-mail</h4>
-                            <p>rodoviario@santaizabel.pr.gov.br<br>obras@santaizabel.pr.gov.br</p>
+                            <p>urbano@santaizabel.pr.gov.br<br>iluminacao@santaizabel.pr.gov.br</p>
                         </div>
                     </div>
                 </div>
@@ -649,8 +730,8 @@
                         <td>07:30 às 11:30 | 13:00 às 17:00</td>
                     </tr>
                     <tr>
-                        <td>Sábado, Domingo e Feriados</td>
-                        <td>Fechado</td>
+                        <td>Plantão Iluminação Pública</td>
+                        <td>Disponível 24h pelo telefone (46) 3552-1388</td>
                     </tr>
                 </table>
             </div>
@@ -661,31 +742,55 @@
         &copy; 2025 Prefeitura Municipal de Santa Izabel do Oeste. Todos os direitos reservados.
     </footer>
 
-    <!-- Script para exibir nome do usuário quando estiver logado (exemplo) -->
     <script>
-        // Exemplo de verificação de login (substitua por sua lógica real)
-        // Quando o usuário estiver logado, oculte os botões de login e mostre a mensagem de boas-vindas
+    // Usando as variáveis PHP diretamente no JavaScript
+    const isLoggedIn = <?php echo $usuario_logado ? 'true' : 'false'; ?>;
+    const userName = "<?php echo addslashes($nome_usuario); ?>";
+    
+    document.addEventListener("DOMContentLoaded", function() {
+        if (isLoggedIn) {
+            // Oculta botões de login
+            document.querySelectorAll('.login-button').forEach(btn => {
+                btn.style.display = 'none';
+            });
+            
+            // Mostra mensagem de usuário logado
+            const userLoggedElement = document.querySelector('.user-logged-in');
+            userLoggedElement.style.display = 'flex';
+            
+            // Define o nome do usuário
+            document.getElementById('user-name').textContent = userName;
+        } else {
+            // Garante que os botões de login estejam visíveis
+            document.querySelectorAll('.login-button').forEach(btn => {
+                btn.style.display = 'flex';
+            });
+            
+            // Garante que a área de usuário logado esteja oculta
+            const userLoggedElement = document.querySelector('.user-logged-in');
+            userLoggedElement.style.display = 'none';
+        }
+    });
+    
+    // Adiciona funcionalidade ao dropdown do usuário
+    document.addEventListener("DOMContentLoaded", function() {
+        const userButton = document.querySelector('.user-button');
+        const userDropdown = document.querySelector('.user-dropdown');
         
-        // Exemplo: se usuário estiver logado
-        const isLoggedIn = false; // Mude para true para testar o estado de logado
-        const userName = "João Silva"; // Nome do usuário logado
-        
-        document.addEventListener("DOMContentLoaded", function() {
-            if (isLoggedIn) {
-                // Oculta botões de login
-                document.querySelectorAll('.login-button').forEach(btn => {
-                    btn.style.display = 'none';
-                });
-                
-                // Mostra mensagem de usuário logado
-                const userLoggedElement = document.querySelector('.user-logged-in');
-                userLoggedElement.style.display = 'flex';
-                
-                // Define o nome do usuário
-                document.getElementById('user-name').textContent = userName;
-            }
-        });
-    </script>
+        if (userButton) {
+            userButton.addEventListener('click', function() {
+                userDropdown.classList.toggle('show');
+            });
+            
+            // Fecha o dropdown quando clicar fora dele
+            document.addEventListener('click', function(event) {
+                if (!userButton.contains(event.target) && !userDropdown.contains(event.target)) {
+                    userDropdown.classList.remove('show');
+                }
+            });
+        }
+    });
+</script>
 </body>
 
 </html>

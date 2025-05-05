@@ -9,6 +9,13 @@ if (isset($_SESSION['erro_cadastro'])) {
     unset($_SESSION['erro_cadastro']); // Remove a mensagem após exibi-la
 }
 
+// Verifica se há mensagem de sucesso
+$mensagem_sucesso = "";
+if (isset($_SESSION['mensagem_sucesso'])) {
+    $mensagem_sucesso = $_SESSION['mensagem_sucesso'];
+    unset($_SESSION['mensagem_sucesso']); // Remove a mensagem após exibi-la
+}
+
 // Verifica se há dados preenchidos anteriormente (para manter após erro)
 $nome = isset($_SESSION['dados_cadastro']['nome']) ? $_SESSION['dados_cadastro']['nome'] : '';
 $cpf = isset($_SESSION['dados_cadastro']['cpf']) ? $_SESSION['dados_cadastro']['cpf'] : '';
@@ -36,14 +43,14 @@ if (isset($_SESSION['dados_cadastro'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro do Cidadão - Eai Cidadão!</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" type="text/css" href="../../css/style.css">
-    <link rel="stylesheet" type="text/css" href="../../css/login-cidadao.css">
-    <link rel="stylesheet" type="text/css" href="../../css/cad-cidadao.css">
+    <link rel="stylesheet" type="text/css" href="./css/style.css">
+    <link rel="stylesheet" type="text/css" href="./css/login-cidadao.css">
+    <link rel="stylesheet" type="text/css" href="./css/cad-cidadao.css">
+    <link rel="stylesheet" type="text/css" href="./css/cadastro-cidadao-extras.css">
 </head>
 
 <body>
-    <!-- Botão para voltar -->
-    <a href="../login_cidadao.php" class="back-link">
+    <a href="login_cidadao.php" class="back-link">
         <i class="fas fa-arrow-left"></i>
         Voltar para login
     </a>
@@ -51,8 +58,7 @@ if (isset($_SESSION['dados_cadastro'])) {
     <div class="container">
         <div class="header-container">
             <div class="municipality-logo">
-                <!-- Substitua pelo caminho da sua logo -->
-                <img src="../../img/logo_municipio.png" alt="Logo do Município">
+                <img src="./img/logo_municipio.png" alt="Logo do Município">
             </div>
             <div class="title-container">
                 <h1>Eai Cidadão!</h1>
@@ -71,7 +77,13 @@ if (isset($_SESSION['dados_cadastro'])) {
         </div>
         <?php endif; ?>
 
-        <form class="cadastro-form" action="../../controler/processar_cadastro_usuario.php" method="post">
+        <?php if (!empty($mensagem_sucesso)): ?>
+        <div class="alert-success">
+            <?php echo $mensagem_sucesso; ?>
+        </div>
+        <?php endif; ?>
+
+        <form class="cadastro-form" action="./controller/processar_cadastro_usuario.php" method="post">
             <h4 class="form-title">Dados Pessoais</h4>
             <div class="form-row">
                 <div class="form-col">
@@ -292,143 +304,13 @@ if (isset($_SESSION['dados_cadastro'])) {
             <button type="submit" class="btn-cadastrar">Cadastrar</button>
 
             <div style="text-align: center; margin-top: 20px;">
-                Já tem uma conta? <a href="../login_cidadao.php" style="color: #2e7d32; text-decoration: none; font-weight: bold;">Faça login</a>
+                Já tem uma conta? <a href="login_cidadao.php" style="color: #2e7d32; text-decoration: none; font-weight: bold;">Faça login</a>
             </div>
         </form>
     </div>
 
-    <!-- JavaScript para funcionalidade de mostrar/ocultar senha e validação do formulário -->
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Função para alternar visibilidade da senha
-        function setupPasswordToggle(toggleId, passwordId) {
-            const toggle = document.getElementById(toggleId);
-            const password = document.getElementById(passwordId);
-            
-            toggle.addEventListener('click', function() {
-                const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-                password.setAttribute('type', type);
-                
-                // Alterna o ícone
-                this.querySelector('i').classList.toggle('fa-eye');
-                this.querySelector('i').classList.toggle('fa-eye-slash');
-            });
-        }
-        
-        // Setup para ambos os campos de senha
-        setupPasswordToggle('toggleSenha', 'senha');
-        setupPasswordToggle('toggleConfirmaSenha', 'confirma_senha');
-        
-        // Máscara para CPF
-        const cpfInput = document.getElementById('cpf');
-        cpfInput.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 11) {
-                value = value.slice(0, 11);
-            }
-            
-            if (value.length > 9) {
-                value = value.replace(/^(\d{3})(\d{3})(\d{3})(\d{2}).*/, '$1.$2.$3-$4');
-            } else if (value.length > 6) {
-                value = value.replace(/^(\d{3})(\d{3})(\d{0,3}).*/, '$1.$2.$3');
-            } else if (value.length > 3) {
-                value = value.replace(/^(\d{3})(\d{0,3}).*/, '$1.$2');
-            }
-            
-            e.target.value = value;
-        });
-        
-        // Máscara para telefone
-        const telefoneInput = document.getElementById('telefone');
-        telefoneInput.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 11) {
-                value = value.slice(0, 11);
-            }
-            
-            if (value.length > 10) {
-                value = value.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
-            } else if (value.length > 6) {
-                value = value.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
-            } else if (value.length > 2) {
-                value = value.replace(/^(\d{2})(\d{0,5}).*/, '($1) $2');
-            }
-            
-            e.target.value = value;
-        });
-        
-        // Máscara para CEP
-        const cepInput = document.getElementById('cep');
-        cepInput.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 8) {
-                value = value.slice(0, 8);
-            }
-            
-            if (value.length > 5) {
-                value = value.replace(/^(\d{5})(\d{0,3}).*/, '$1-$2');
-            }
-            
-            e.target.value = value;
-        });
-        
-        // Busca de endereço por CEP
-        cepInput.addEventListener('blur', function() {
-            const cep = this.value.replace(/\D/g, '');
-            
-            if (cep.length !== 8) {
-                return;
-            }
-            
-            fetch(`https://viacep.com.br/ws/${cep}/json/`)
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.erro) {
-                        document.getElementById('endereco').value = data.logradouro;
-                        document.getElementById('bairro').value = data.bairro;
-                        document.getElementById('cidade').value = data.localidade;
-                        document.getElementById('uf').value = data.uf;
-                    }
-                })
-                .catch(error => console.error('Erro ao buscar CEP:', error));
-        });
-        
-        // Validação do formulário antes de enviar
-        document.querySelector('.cadastro-form').addEventListener('submit', function(e) {
-            const senha = document.getElementById('senha').value;
-            const confirmaSenha = document.getElementById('confirma_senha').value;
-            const email = document.getElementById('email').value;
-            const confirmaEmail = document.getElementById('confirma_email').value;
-            
-            // Validação de senha
-            if (senha.length < 8) {
-                alert('A senha deve ter pelo menos 8 caracteres.');
-                e.preventDefault();
-                return;
-            }
-            
-            if (!/[a-zA-Z]/.test(senha) || !/[0-9]/.test(senha)) {
-                alert('A senha deve conter pelo menos uma letra e um número.');
-                e.preventDefault();
-                return;
-            }
-            
-            // Confirmação de senha
-            if (senha !== confirmaSenha) {
-                alert('As senhas não coincidem.');
-                e.preventDefault();
-                return;
-            }
-            
-            // Confirmação de e-mail
-            if (email !== confirmaEmail) {
-                alert('Os e-mails não coincidem.');
-                e.preventDefault();
-                return;
-            }
-        });
-    });
-    </script>
+    <!-- Carrega o arquivo JavaScript externo em vez do script embutido -->
+    <script src="./js/cadastro-cidadao.js"></script>
 </body>
 
 </html>

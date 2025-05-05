@@ -4,10 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Setor de Assistência Social - Eai Cidadão!</title>
+    <title>Setor Rodoviário - Eai Cidadão!</title>
     <!-- Font Awesome para ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
+   <style>
         * {
             margin: 0;
             padding: 0;
@@ -238,7 +238,7 @@
 
         .section-title i {
             margin-right: 10px;
-            color: #e91e63;
+            color: #ff8f00;
             font-size: 1.5rem;
         }
 
@@ -279,7 +279,7 @@
         .service-button i {
             font-size: 2.5rem;
             margin-bottom: 15px;
-            color: #e91e63;
+            color: #ff8f00;
             transition: all 0.3s;
         }
 
@@ -317,7 +317,7 @@
 
         .contact-title i {
             margin-right: 10px;
-            color: #e91e63;
+            color: #ff8f00;
         }
 
         .contact-grid {
@@ -341,7 +341,7 @@
         }
 
         .contact-item i {
-            color: #e91e63;
+            color: #ff8f00;
             font-size: 1.2rem;
             margin-right: 15px;
             margin-top: 2px;
@@ -382,7 +382,7 @@
 
         .opening-hours h4 i {
             margin-right: 10px;
-            color: #e91e63;
+            color: #ff8f00;
         }
 
         .hours-table {
@@ -481,49 +481,6 @@
                 text-align: center;
             }
         }
-
-        @media (max-width: 768px) {
-            a[href="status_servicos.php"] {
-                flex-direction: row !important;
-                align-items: center !important;
-                padding: 15px 20px !important;
-            }
-            
-            a[href="status_servicos.php"] i {
-                font-size: 1.5rem !important;
-                margin-right: 15px !important;
-            }
-            
-            a[href="status_servicos.php"] > div:nth-child(2) {
-                height: 30px !important; /* Barra vertical menor em telas médias */
-                margin-right: 15px !important;
-            }
-            
-            a[href="status_servicos.php"] h3 {
-                font-size: 1.1rem !important;
-            }
-            
-            a[href="status_servicos.php"] p {
-                font-size: 0.9rem !important;
-            }
-        }
-
-        @media (max-width: 480px) {
-            a[href="status_servicos.php"] {
-                padding: 12px 15px !important;
-            }
-            
-            a[href="status_servicos.php"] i {
-                font-size: 1.2rem !important;
-                margin-right: 10px !important;
-            }
-            
-            a[href="status_servicos.php"] > div:nth-child(2) {
-                height: 25px !important; /* Barra vertical ainda menor em telas pequenas */
-                margin-right: 10px !important;
-            }
-        }
-
     </style>
 </head>
 
@@ -532,7 +489,7 @@
         <div class="header-left">
             <div class="municipality-logo">
                 <!-- Substitua pelo caminho da sua logo -->
-                <img src="../../img/logo_municipio.png" alt="Logo do Município">
+                <img src="../img/logo_municipio.png" alt="Logo do Município">
             </div>
             <div class="title-container">
                 <h1>Eai Cidadão!</h1>
@@ -563,7 +520,7 @@
                             <i class="fas fa-id-card"></i>
                             Meu Perfil
                         </a>
-                        <a href="../login/logout.php" class="dropdown-item">
+                        <a href="../logout.php" class="dropdown-item">
                             <i class="fas fa-sign-out-alt"></i>
                             Logout
                         </a>
@@ -571,7 +528,7 @@
                 </div>
             </div>
             <!-- Botão Voltar para Página Inicial -->
-            <a href="../../index.php" class="back-button">
+            <a href="../index.php" class="back-button">
                 <i class="fas fa-home"></i> 
                 Página Inicial
             </a>
@@ -579,56 +536,58 @@
     </div>
 
     <div class="container">
-        <h2 class="section-title"><i class="fas fa-hands-helping"></i> Setor de Assistência Social</h2>
+        <h2 class="section-title"><i class="fas fa-truck-moving"></i> Setor Rodoviário</h2>
 
         <p class="intro-text">
-            O Setor de Assistência Social do Município de Santa Izabel do Oeste é responsável por garantir a proteção social aos cidadãos, ou seja, apoio a indivíduos, famílias e à comunidade no enfrentamento de suas dificuldades, por meio de serviços, benefícios, programas e projetos. Nosso objetivo é promover a inclusão social, a qualidade de vida e a dignidade humana. Selecione abaixo o serviço que você deseja acessar.
+            O Setor Rodoviário do Município de Santa Izabel do Oeste é responsável pela manutenção e conservação das estradas municipais, garantindo a mobilidade e o acesso a todas as localidades do município. Selecione abaixo o serviço que você deseja solicitar.
         </p>
 
         <div class="service-buttons">
-            <a href="form_cras.php" class="service-button">
-                <i class="fas fa-home"></i>
-                <h3>CRAS</h3>
-                <p>Centro de Referência de Assistência Social</p>
+            <a href="rodoviario-boeiro.php" class="service-button">
+                <i class="fas fa-water"></i>
+                <h3>Boeiros</h3>
+                <p>Instalação, limpeza e manutenção de boeiros</p>
             </a>
 
-            <a href="form_creas.php" class="service-button">
-                <i class="fas fa-shield-alt"></i>
-                <h3>CREAS</h3>
-                <p>Centro de Referência Especializado de Assistência Social</p>
+            <a href="rodoviario-estradas.php" class="service-button">
+                <i class="fas fa-road"></i>
+                <h3>Estradas</h3>
+                <p>Manutenção e recuperação de estradas rurais</p>
             </a>
 
-            <a href="form-habitacao.php" class="service-button">
-                <i class="fas fa-building"></i>
-                <h3>Habitação</h3>
-                <p>Programas habitacionais e moradias populares</p>
+            <a href="rodoviario-acesso.php" class="service-button">
+                <i class="fas fa-sign-in-alt"></i>
+                <h3>Acesso</h3>
+                <p>Melhorias nos acessos a propriedades rurais</p>
             </a>
 
-            <a href="form_idosos.php" class="service-button">
-                <i class="fas fa-user-friends"></i>
-                <h3>Serviços para Idosos</h3>
-                <p>Programas e serviços de atenção à pessoa idosa</p>
+            <a href="rodoviario-limpeza.php" class="service-button">
+                <i class="fas fa-broom"></i>
+                <h3>Limpeza de Estrada</h3>
+                <p>Roçada e limpeza de margens de estradas</p>
             </a>
 
-            <a href="form_criancas.php" class="service-button">
-                <i class="fas fa-child"></i>
-                <h3>Crianças e Adolescentes</h3>
-                <p>Proteção e atendimento a crianças e adolescentes</p>
+            <a href="rodoviario-cascalho.php" class="service-button">
+                <i class="fas fa-truck-pickup"></i>
+                <h3>Cascalhamento</h3>
+                <p>Aplicação de cascalho em estradas rurais</p>
             </a>
 
+            <a href="rodoviario-pontes.php" class="service-button">
+                <i class="fas fa-archway"></i>
+                <h3>Pontes</h3>
+                <p>Construção e manutenção de pontes rurais</p>
+            </a>
         </div>
 
-        <a href="status_servicos.php" class="service-button" style="width: 100%; max-width: 600px; margin: 0 auto 30px auto; background-color: #0d47a1; color: white; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; padding: 20px 25px; text-align: left;">
-            <i class="fas fa-tasks" style="color: white; font-size: 2rem; margin-right: 20px; margin-bottom: 0;"></i>
-            <div style="width: 1px; height: 40px; background-color: rgba(255, 255, 255, 0.5); margin-right: 20px;"></div>
-            <div>
-                <h3 style="color: white; margin-bottom: 5px; font-size: 1.3rem;">Consultar Status de Solicitações</h3>
-                <p style="color: #e0e0e0; font-size: 1rem;">Acompanhe o andamento das suas solicitações</p>
-            </div>
+        <a href="status_servicos.php" class="service-button" style="max-width: 300px; margin: 0 auto; background-color: #0d47a1; color: white;">
+            <i class="fas fa-tasks" style="color: white;"></i>
+            <h3 style="color: white;">Consultar Status de Serviços</h3>
+            <p style="color: #e0e0e0;">Acompanhe o andamento das suas solicitações</p>
         </a>
 
         <div class="contact-section">
-            <h3 class="contact-title"><i class="fas fa-address-card"></i> Contato do Setor de Assistência Social</h3>
+            <h3 class="contact-title"><i class="fas fa-address-card"></i> Contato do Setor Rodoviário</h3>
             
             <div class="contact-grid">
                 <div class="contact-info">
@@ -636,7 +595,7 @@
                         <i class="fas fa-map-marker-alt"></i>
                         <div class="contact-text">
                             <h4>Endereço</h4>
-                            <p>Rua Jacarandá, 620 - Centro<br>Santa Izabel do Oeste - PR<br>CEP: 85650-000</p>
+                            <p>Rua Acácia, 1254 - Centro<br>Santa Izabel do Oeste - PR<br>CEP: 85650-000</p>
                         </div>
                     </div>
                 </div>
@@ -646,7 +605,7 @@
                         <i class="fas fa-phone"></i>
                         <div class="contact-text">
                             <h4>Telefones</h4>
-                            <p>(46) 3552-1512 (Secretaria)<br>(46) 3552-1513 (CRAS)</p>
+                            <p>(46) 3552-1237 (Gabinete)<br>(46) 3552-1300 (Pátio de Máquinas)</p>
                         </div>
                     </div>
                 </div>
@@ -656,7 +615,7 @@
                         <i class="fas fa-envelope"></i>
                         <div class="contact-text">
                             <h4>E-mail</h4>
-                            <p>social@santaizabel.pr.gov.br<br>cras@santaizabel.pr.gov.br</p>
+                            <p>rodoviario@santaizabel.pr.gov.br<br>obras@santaizabel.pr.gov.br</p>
                         </div>
                     </div>
                 </div>
@@ -671,23 +630,23 @@
                     </tr>
                     <tr>
                         <td>Segunda-feira</td>
-                        <td>08:00 às 11:30 | 13:00 às 17:00</td>
+                        <td>07:30 às 11:30 | 13:00 às 17:00</td>
                     </tr>
                     <tr>
                         <td>Terça-feira</td>
-                        <td>08:00 às 11:30 | 13:00 às 17:00</td>
+                        <td>07:30 às 11:30 | 13:00 às 17:00</td>
                     </tr>
                     <tr>
                         <td>Quarta-feira</td>
-                        <td>08:00 às 11:30 | 13:00 às 17:00</td>
+                        <td>07:30 às 11:30 | 13:00 às 17:00</td>
                     </tr>
                     <tr>
                         <td>Quinta-feira</td>
-                        <td>08:00 às 11:30 | 13:00 às 17:00</td>
+                        <td>07:30 às 11:30 | 13:00 às 17:00</td>
                     </tr>
                     <tr>
                         <td>Sexta-feira</td>
-                        <td>08:00 às 11:30 | 13:00 às 17:00</td>
+                        <td>07:30 às 11:30 | 13:00 às 17:00</td>
                     </tr>
                     <tr>
                         <td>Sábado, Domingo e Feriados</td>

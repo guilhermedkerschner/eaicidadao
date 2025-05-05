@@ -2,12 +2,9 @@
 // Inicia a sessão
 session_start();
 
-// Verifica se há mensagem de erro
-$mensagem_erro = "";
-if (isset($_SESSION['erro_login_usuario'])) {
-    $mensagem_erro = $_SESSION['erro_login_usuario'];
-    unset($_SESSION['erro_login_usuario']); // Remove a mensagem após exibi-la
-}
+if (isset($_SESSION['user_logado'])) {
+    header("Location: index.php"); 
+  }
 ?>
 
 <!DOCTYPE html>
@@ -18,13 +15,13 @@ if (isset($_SESSION['erro_login_usuario'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Área do Cidadão - Eai Cidadão!</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" type="text/css" href="../css/style.css">
-    <link rel="stylesheet" type="text/css" href="../css/login-cidadao.css">
+    <link rel="stylesheet" type="text/css" href="./css/style.css">
+    <link rel="stylesheet" type="text/css" href="./css/login-cidadao.css">
 </head>
 
 <body>
     <!-- Botão para voltar -->
-    <a href="../index.php" class="back-link">
+    <a href="index.php" class="back-link">
         <i class="fas fa-arrow-left"></i>
         Voltar
     </a>
@@ -33,7 +30,7 @@ if (isset($_SESSION['erro_login_usuario'])) {
         <div class="header-container">
             <div class="municipality-logo">
                 <!-- Substitua pelo caminho da sua logo -->
-                <img src="../img/logo_municipio.png" alt="Logo do Município">
+                <img src="./img/logo_municipio.png" alt="Logo do Município">
             </div>
             <div class="title-container">
                 <h1>Eai Cidadão!</h1>
@@ -51,9 +48,9 @@ if (isset($_SESSION['erro_login_usuario'])) {
         </div>
         <?php endif; ?>
 
-        <form class="login-form" id="login-user" method="post">
+        <form class="login-form" action="./controller/processar_login_usuario.php" method="post">
             <div class="form-group">
-                <label for="email">E-mail</label>
+                <label for="login_email">E-mail</label>
                 <div class="input-group">
                     <i class="fas fa-envelope"></i>
                     <input type="email" id="login_email" name="login_email" class="form-control" required>
@@ -61,7 +58,7 @@ if (isset($_SESSION['erro_login_usuario'])) {
             </div>
 
             <div class="form-group">
-                <label for="password">Senha</label>
+                <label for="login_password">Senha</label>
                 <div class="input-group">
                     <i class="fas fa-lock"></i>
                     <input type="password" id="login_password" name="login_password" class="form-control" required>
@@ -72,13 +69,13 @@ if (isset($_SESSION['erro_login_usuario'])) {
             </div>
 
             <div class="forgot-password">
-                <a id="recovery-pass" href="">Esqueceu sua senha?</a>
+                <a id="recovery-pass" href="recuperar_senha.php">Esqueceu sua senha?</a>
             </div>
 
             <button type="submit" id="btn_login" class="btn-login">Entrar</button>
 
             <div class="register-link">
-                Ainda não tem uma conta? <a href="./login/cadastro_usuario.php">Cadastre-se</a>
+                Ainda não tem uma conta? <a href="cad_user.php">Cadastre-se</a>
             </div>
         </form>
     </div>
@@ -99,9 +96,8 @@ if (isset($_SESSION['erro_login_usuario'])) {
             this.querySelector('i').classList.toggle('fa-eye-slash');
         });
     });
-    
     </script>
-    <script src="../js/login.js"></script>
+    <script src="./js/login.js"></script>
 </body>
 
 </html>

@@ -1,114 +1,108 @@
 <?php
-// Arquivo: processar_login.php
-// Validação de login para o app "Eai Cidadão!"
+/*
+**********************************************************************
+       PROCESSA_LOGIN.PHP - VALIDAÇÃO DE LOGIN - EAI CIDADAO
+**********************************************************************
+*/
 
-// Inicia a sessão
+// Iniciando a Sessão
 session_start();
 
-// Configurações de conexão com o banco de dados
-$servidor = "localhost";
-$usuario_bd = "root"; // Altere para o usuário do seu banco de dados
-$senha_bd = ""; // Altere para a senha do seu banco de dados
-$banco = "eai_cidadao"; // Altere para o nome do seu banco de dados
+// Configuração de Timezone
+date_default_timezone_set("America/Sao_Paulo");
 
-// Função para limpar e validar input
-function limparInput($data) {
-    $data = trim($data);
-    $data = stripslashes($data);
-    $data = htmlspecialchars($data);
-    return $data;
-}
+// Inclui o arquivo de conexão com o banco
+require_once '../database/conect.php';
 
-// Verifica se o formulário foi enviado via POST
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+// Inicializa a resposta
+$response = [
+    'success' => false,
+    'message' => '',
+    'redirect' => ''
+];
+
+// Verifica se a requisição é do tipo POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
-    // Obtém e limpa os dados do formulário
-    $username = limparInput($_POST['username']);
-    $password = limparInput($_POST['password']);
-    
-    // Valida se os campos foram preenchidos
-    if (empty($username) || empty($password)) {
-        $_SESSION['erro_login'] = "Todos os campos são obrigatórios.";
-        header("Location: login.php");
-        exit();
-    }
-    
-    try {
-        // Conecta ao banco de dados usando PDO
-        $conn = new PDO("mysql:host=$servidor;dbname=$banco", $usuario_bd, $senha_bd);
-        // Configura o PDO para lançar exceções em caso de erros
-        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // Verifica a ação solicitada
+    if (isset($_POST['action']) && $_POST['action'] === 'login') {
         
-        // Prepara a consulta SQL (usando prepared statements para evitar injeção SQL)
-        $stmt = $conn->prepare("SELECT id, nome, username, senha, nivel_acesso FROM usuarios WHERE username = :username OR email = :email");
-        $stmt->bindParam(':username', $username);
-        $stmt->bindParam(':email', $username); // Permite login com email ou username
-        $stmt->execute();
+        // Obtém os dados do formulário
+        $email = filter_input(INPUT_POST, 'login_email', FILTER_SANITIZE_EMAIL);
+        $senha = filter_input(INPUT_POST, 'login_password', FILTER_SANITIZE_STRING);
         
-        // Verifica se encontrou o usuário
-        if ($stmt->rowCount() == 1) {
-            // Obtém os dados do usuário
-            $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            // Verifica se a senha está correta (usando password_verify para senhas hasheadas)
-            if (password_verify($password, $usuario['senha'])) {
-                // Credenciais corretas - inicia a sessão
-                
-                // Armazena informações do usuário na sessão (evite armazenar a senha)
-                $_SESSION['usuario_id'] = $usuario['id'];
-                $_SESSION['usuario_nome'] = $usuario['nome'];
-                $_SESSION['nivel_acesso'] = $usuario['nivel_acesso'];
-                $_SESSION['logado'] = true;
-                
-                // Registra o horário do login
-                $_SESSION['ultimo_acesso'] = time();
-                
-                // Opcional: Registra o login no banco de dados
-                $ip = $_SERVER['REMOTE_ADDR'];
-                $stmt_log = $conn->prepare("INSERT INTO logs_acesso (usuario_id, data_acesso, ip) VALUES (:usuario_id, NOW(), :ip)");
-                $stmt_log->bindParam(':usuario_id', $usuario['id']);
-                $stmt_log->bindParam(':ip', $ip);
-                $stmt_log->execute();
-                
-                // Redireciona para a página adequada conforme o nível de acesso
-                switch ($usuario['nivel_acesso']) {
-                    case 'admin':
-                        header("Location: admin/dashboard.php");
-                        break;
-                    case 'moderador':
-                        header("Location: moderador/painel.php");
-                        break;
-                    default:
-                        header("Location: usuario/inicio.php");
-                        break;
-                }
-                exit();
-            } else {
-                // Senha incorreta
-                $_SESSION['erro_login'] = "Usuário ou senha incorretos.";
-                header("Location: login.php");
-                exit();
-            }
-        } else {
-            // Usuário não encontrado
-            $_SESSION['erro_login'] = "Usuário ou senha incorretos.";
-            header("Location: login.php");
-            exit();
+        // Valida o email
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $response['message'] = 'Email inválido. Por favor, insira um email válido.';
+            echo json_encode($response);
+            exit;
         }
-    } catch(PDOException $e) {
-        // Erro na conexão ou consulta
-        $_SESSION['erro_login'] = "Erro no sistema. Por favor, tente novamente mais tarde.";
-        // Para desenvolvimento, descomente a linha abaixo para ver o erro específico
-        // $_SESSION['erro_login'] = "Erro: " . $e->getMessage();
-        header("Location: login.php");
-        exit();
+        
+        // Valida a senha
+        if (strlen($senha) < 6) {
+            $response['message'] = 'Senha inválida. A senha deve ter pelo menos 6 caracteres.';
+            echo json_encode($response);
+            exit;
+        }
+        
+        try {
+            // Prepara consulta SQL para verificar o usuário
+            $sql = "SELECT * FROM tb_cad_usuarios WHERE cad_usu_email = :email LIMIT 1";
+            $stmt = $conn->prepare($sql);
+            $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+            $stmt->execute();
+            
+            // Verifica se o usuário existe
+            if ($stmt->rowCount() > 0) {
+                $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                // Verifica se a senha está correta
+                if (password_verify($senha, $usuario['cad_usu_senha'])) {
+                    
+                    // Atualiza a data do último acesso
+                    $update_sql = "UPDATE tb_cad_usuarios SET cad_usu_ultimo_acess = NOW() WHERE cad_usu_email = :email";
+                    $update_stmt = $conn->prepare($update_sql);
+                    $update_stmt->bindParam(':email', $email, PDO::PARAM_STR);
+                    $update_stmt->execute();
+                    
+                    // Define dados da sessão
+                    $_SESSION['usuario'] = [
+                        'id' => $usuario['cad_usu_id'],
+                        'nome' => $usuario['cad_usu_nome'],
+                        'email' => $usuario['cad_usu_email'],
+                        'cidade' => $usuario['cad_usu_cidade'],
+                        'estado' => $usuario['cad_usu_estado'],
+                        'ultimo_acesso' => $usuario['cad_usu_ultimo_acess']
+                    ];
+                    
+                    // Define resposta de sucesso
+                    $response['success'] = true;
+                    $response['message'] = 'Login realizado com sucesso!';
+                    $response['redirect'] = '../painel_cidadao.php';
+                    
+                } else {
+                    // Senha incorreta
+                    $response['message'] = 'Email ou senha incorretos.';
+                }
+            } else {
+                // Usuário não encontrado
+                $response['message'] = 'Email ou senha incorretos.';
+            }
+        } catch (PDOException $e) {
+            // Erro no banco de dados
+            $response['message'] = 'Erro ao processar login. Tente novamente mais tarde.';
+            error_log('Erro no processamento de login: ' . $e->getMessage());
+        }
+    } else {
+        // Ação não reconhecida
+        $response['message'] = 'Ação inválida.';
     }
-    
-    // Fecha a conexão
-    $conn = null;
 } else {
-    // Se alguém tentar acessar este arquivo diretamente sem enviar o formulário
-    header("Location: login.php");
-    exit();
+    // Método HTTP não permitido
+    $response['message'] = 'Método não permitido.';
 }
-?>
+
+// Retorna a resposta como JSON
+header('Content-Type: application/json');
+echo json_encode($response);
+exit;
