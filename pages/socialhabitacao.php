@@ -248,7 +248,7 @@ $data_nascimento = isset($_SESSION['user_data_nasc']) ? $_SESSION['user_data_nas
             </li>
         </ul>
 
-        <form id="habitacao-form" method="post" action="./controller/processar_habitacao.php" enctype="multipart/form-data">
+        <form id="habitacao-form" method="post" action="../controller/processar_habitacao.php" enctype="multipart/form-data">
             
             <!-- STEP 1: INFORMAÇÕES DO RESPONSÁVEL FAMILIAR -->
             <div class="step-content active" id="step-1">
