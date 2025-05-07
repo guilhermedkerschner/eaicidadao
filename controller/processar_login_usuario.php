@@ -67,6 +67,13 @@ try {
     $_SESSION['user_contato'] = $usuario['cad_usu_contato'];
     $_SESSION['user_email'] = $usuario['cad_usu_email'];
     $_SESSION['user_endereco'] = $usuario['cad_usu_endereco'];
+    $_SESSION['user_numero'] = $usuario['cad_usu_numero'];
+    $_SESSION['user_bairro'] = $usuario['cad_usu_bairro'];
+    $_SESSION['user_cidade'] = $usuario['cad_usu_cidade'];
+    $_SESSION['user_endereco'] = $usuario['cad_usu_endereco'];
+    $_SESSION['user_complemento'] = $usuario['cad_usu_complemento'];
+    $_SESSION['user_data_nasc'] = $usuario['cad_usu_data_nasc'];
+    $_SESSION['user_cep'] = $usuario['cad_usu_cep'];
     $_SESSION['user_logado'] = true;
     $_SESSION['user_nivel'] = $usuario['cad_usu_nivel'] ?? 'cidadao';
     $_SESSION['user_hora_login'] = time();

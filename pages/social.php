@@ -60,7 +60,7 @@ $nome_usuario = isset($_SESSION['user_nome']) ? $_SESSION['user_nome'] : '';
                 </div>
             </div>
             <!-- Botão Voltar para Página Inicial -->
-            <a href="../../index.php" class="back-button">
+            <a href="../index.php" class="back-button">
                 <i class="fas fa-home"></i> 
                 Página Inicial
             </a>
@@ -79,12 +79,6 @@ $nome_usuario = isset($_SESSION['user_nome']) ? $_SESSION['user_nome'] : '';
                 <i class="fas fa-home"></i>
                 <h3>CRAS</h3>
                 <p>Centro de Referência de Assistência Social</p>
-            </a>
-
-            <a href="form_creas.php" class="service-button">
-                <i class="fas fa-shield-alt"></i>
-                <h3>CREAS</h3>
-                <p>Centro de Referência Especializado de Assistência Social</p>
             </a>
 
             <a href="socialhabitacao.php" class="service-button">

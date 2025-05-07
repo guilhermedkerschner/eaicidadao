@@ -412,3 +412,8 @@ footer {
         text-align: center;
     }
 }
+
+.progress-container {
+    margin: 30px 0;
+    position: relative;
+}
