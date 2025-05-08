@@ -79,16 +79,23 @@ document.addEventListener('DOMContentLoaded', function() {
                         // Mostrar botão de impressão do comprovante
                         document.querySelector('.buttons-container').style.display = 'flex';
                         
-                        // Desabilitar formulário
-                        const formElements = form.elements;
-                        for (let i = 0; i < formElements.length; i++) {
-                            formElements[i].disabled = true;
+                        const buttonsContainer = document.querySelector('.buttons-container');
+                        if (buttonsContainer) {
+                            buttonsContainer.style.display = 'flex';
                         }
                         
-                        // Configurar botão de impressão
-                        document.getElementById('print-button').onclick = function() {
-                            window.location.href = response.redirect;
-                        };
+                        const printButton = document.getElementById('print-button');
+                        if (printButton) {
+                            // Armazenar ID da inscrição no botão
+                            printButton.setAttribute('data-inscricao-id', response.inscricao_id);
+                            
+                            // Configurar evento de clique
+                            printButton.onclick = function() {
+                                const inscricaoId = this.getAttribute('data-inscricao-id');
+                                console.log('Redirecionando para relatório de inscrição: ' + inscricaoId);
+                                window.location.href = 'social-relatorio-habitacao.php?id=' + inscricaoId;
+                            };
+                        }
                         
                         // Rolar para o botão de impressão
                         document.querySelector('.buttons-container').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -161,24 +168,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             return digitoVerificador2 === parseInt(cpf.charAt(10));
         }
-        
-       /* // Verificação de idade mínima (18 anos para o responsável)
-        const dataNascimento = new Date(document.getElementById('data_nascimento').value);
-        const hoje = new Date();
-        const idade = hoje.getFullYear() - dataNascimento.getFullYear();
-        const mesAtual = hoje.getMonth();
-        const mesNascimento = dataNascimento.getMonth();
-        
-        // Ajuste de idade considerando mês e dia
-        if (mesAtual < mesNascimento || (mesAtual === mesNascimento && hoje.getDate() < dataNascimento.getDate())) {
-            idade--;
-        }
-        
-        if (idade < 18) {
-            formValido = false;
-            mensagensErro.push('O responsável deve ter pelo menos 18 anos de idade.');
-        }*/
-        
+           
         // Validar CPF principal
         const cpfInput = document.getElementById('cpf');
         if (cpfInput && cpfInput.value.trim() !== '') {
@@ -439,4 +429,5 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+    console.log('Redirecionando para relatório de inscrição: ' + inscricaoId);
 });

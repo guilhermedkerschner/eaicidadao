@@ -32,6 +32,7 @@ if (!isset($_SESSION['user_logado'])) {
     exit;
 }
 
+
 // Incluir arquivo de configuração com conexão ao banco de dados
 require_once "../lib/config.php";
 
@@ -77,11 +78,17 @@ function processarUpload($arquivo, $tipo) {
         return false;
     }
     
-    // Criar nome único para o arquivo
-    $timestamp = time();
-    $hash = md5(uniqid($timestamp, true));
+   
+    // Obter extensão do arquivo
     $ext = pathinfo($arquivo['name'], PATHINFO_EXTENSION);
-    $novo_nome = "hab_{$tipo}_{$timestamp}_{$hash}.{$ext}";
+        
+    // Obter a data atual no formato AAAAMMDD
+    $data_atual = date('Ymd');
+
+    $cpf = isset($_POST['cpf']) ? sanitize($_POST['cpf']) : null;
+    $cpf = $cpf ? preg_replace('/[^0-9]/', '', $cpf) : null;
+    // Criar nome do arquivo usando o tipo, CPF e data
+    $novo_nome = "HAB_{$tipo}_{$cpf}_{$data_atual}.{$ext}";
     
     // Definir caminho para salvar
     $upload_dir = "../uploads/habitacao/";
@@ -244,42 +251,74 @@ try {
     
     // Iniciar transação
     $conn->beginTransaction();
-    
-    // Gerar protocolo
     $data_atual = date('Ymd');
-    $protocolo = "HAB-{$data_atual}-" . sprintf('%06d', rand(1, 999999));
+    $prefixo_protocolo = "HAB-{$data_atual}-";
+    
+    // Buscar o último número de protocolo do dia
+    $sql_ultimo_protocolo = "SELECT cad_social_protocolo FROM tb_cad_social 
+                             WHERE cad_social_protocolo LIKE :prefixo_protocolo 
+                             ORDER BY cad_social_protocolo DESC LIMIT 1";
+    
+    $stmt_protocolo = $conn->prepare($sql_ultimo_protocolo);
+    $prefixo_busca = $prefixo_protocolo . '%'; // HAB-20250508-%
+    $stmt_protocolo->bindParam(':prefixo_protocolo', $prefixo_busca);
+    $stmt_protocolo->execute();
+    
+    if ($stmt_protocolo->rowCount() > 0) {
+        // Existe um protocolo do dia, vamos incrementar
+        $ultimo_protocolo = $stmt_protocolo->fetch(PDO::FETCH_ASSOC)['cad_social_protocolo'];
+        $ultimo_numero = (int)substr($ultimo_protocolo, -3); // Extrai os últimos 3 dígitos
+        $novo_numero = $ultimo_numero + 1;
+        $protocolo = $prefixo_protocolo . sprintf('%03d', $novo_numero); // Formato com 3 dígitos (001, 002, etc)
+    } else {
+        // Primeiro protocolo do dia
+        $protocolo = $prefixo_protocolo . '001';
+    }
     
     try {
-        // 1. Inserir dados do responsável na tabela de inscrições
-        $sql_inscricao = "INSERT INTO tb_habitacao_inscricao (
-            hab_usuario_id, hab_protocolo, hab_nome, hab_cpf, hab_nacionalidade,
-            hab_nome_social_opcao, hab_nome_social, hab_genero, hab_data_nasc, hab_raca,
-            hab_cad_unico, hab_nis, hab_escolaridade, hab_estado_civil, hab_deficiencia,
-            hab_deficiencia_detalhe, hab_endereco, hab_numero, hab_complemento, hab_bairro,
-            hab_cidade, hab_cep, hab_referencia, hab_telefone, hab_celular, hab_email,
-            hab_nome_mae, hab_nome_pai, hab_sit_trabalho, hab_profissao, hab_empregador,
-            hab_cargo, hab_ramo, hab_tempo_servico, hab_tipo_moradia, hab_sit_propriedade,
-            hab_valor_aluguel, hab_programa, hab_autoriza_email, hab_data_inscricao,
-            hab_status, hab_doc_cpf, hab_doc_escolaridade, hab_doc_obito, 
-            hab_doc_deficiencia, hab_doc_ctps
+        // 1. Inserir dados do responsável na tabela principal
+        $sql_inscricao = "INSERT INTO tb_cad_social (
+            cad_usu_id, cad_social_nome, cad_social_cpf, cad_social_cpf_documento, cad_social_rg,
+            cad_social_nacionalidade, cad_social_nome_social_opcao, cad_social_nome_social, 
+            cad_social_genero, cad_social_data_nascimento, cad_social_raca, cad_social_cad_unico, 
+            cad_social_nis, cad_social_escolaridade, cad_social_escolaridade_documento, 
+            cad_social_estado_civil, cad_social_viuvo_documento, cad_social_conjuge_nome,
+            cad_social_conjuge_cpf, cad_social_conjuge_rg, cad_social_conjuge_data_nascimento,
+            cad_social_conjuge_renda, cad_social_conjuge_comprovante_renda, cad_social_deficiencia,
+            cad_social_deficiencia_fisica_detalhe, cad_social_laudo_deficiencia, cad_social_num_dependentes,
+            cad_social_nome_mae, cad_social_nome_pai, cad_social_situacao_trabalho, cad_social_profissao,
+            cad_social_empregador, cad_social_cargo, cad_social_ramo_atividade, cad_social_tempo_servico,
+            cad_social_carteira_trabalho, cad_social_tipo_moradia, cad_social_situacao_propriedade,
+            cad_social_valor_aluguel, cad_social_rua, cad_social_numero, cad_social_complemento,
+            cad_social_bairro, cad_social_cidade, cad_social_cep, cad_social_ponto_referencia,
+            cad_social_telefone, cad_social_celular, cad_social_email, cad_social_programa_interesse,
+            cad_social_autoriza_email, cad_social_data_cadastro, cad_social_status, cad_social_protocolo
         ) VALUES (
-            :usuario_id, :protocolo, :nome, :cpf, :nacionalidade,
-            :nome_social_opcao, :nome_social, :genero, :data_nascimento, :raca,
-            :cad_unico, :nis, :escolaridade, :estado_civil, :deficiencia,
-            :deficiencia_detalhe, :endereco, :numero, :complemento, :bairro,
-            :cidade, :cep, :referencia, :telefone, :celular, :email,
-            :nome_mae, :nome_pai, :sit_trabalho, :profissao, :empregador,
-            :cargo, :ramo, :tempo_servico, :tipo_moradia, :sit_propriedade,
-            :valor_aluguel, :programa, :autoriza_email, NOW(),
-            'PENDENTE DE ANÁLISE', :doc_cpf, :doc_escolaridade, :doc_obito, 
-            :doc_deficiencia, :doc_ctps
+            :usuario_id, :nome, :cpf, :cpf_documento, :rg,
+            :nacionalidade, :nome_social_opcao, :nome_social, 
+            :genero, :data_nascimento, :raca, :cad_unico, 
+            :nis, :escolaridade, :escolaridade_documento, 
+            :estado_civil, :viuvo_documento, :conjuge_nome,
+            :conjuge_cpf, :conjuge_rg, :conjuge_data_nascimento,
+            :conjuge_renda, :conjuge_comprovante_renda, :deficiencia,
+            :deficiencia_detalhe, :laudo_deficiencia, :num_dependentes,
+            :nome_mae, :nome_pai, :sit_trabalho, :profissao,
+            :empregador, :cargo, :ramo, :tempo_servico,
+            :carteira_trabalho, :tipo_moradia, :sit_propriedade,
+            :valor_aluguel, :rua, :numero, :complemento,
+            :bairro, :cidade, :cep, :referencia,
+            :telefone, :celular, :email, :programa,
+            :autoriza_email, NOW(), 'PENDENTE DE ANÁLISE', :protocolo
         )";
         
         $stmt = $conn->prepare($sql_inscricao);
+        
+        // Binding de parâmetros
         $stmt->bindParam(':usuario_id', $_SESSION['user_id']);
-        $stmt->bindParam(':protocolo', $protocolo);
         $stmt->bindParam(':nome', $nome);
         $stmt->bindParam(':cpf', $cpf);
+        $stmt->bindParam(':cpf_documento', $cpf_documento);
+        $stmt->bindParam(':rg', $rg);
         $stmt->bindParam(':nacionalidade', $nacionalidade);
         $stmt->bindParam(':nome_social_opcao', $nome_social_opcao);
         $stmt->bindParam(':nome_social', $nome_social);
@@ -289,10 +328,32 @@ try {
         $stmt->bindParam(':cad_unico', $cad_unico);
         $stmt->bindParam(':nis', $nis);
         $stmt->bindParam(':escolaridade', $escolaridade);
+        $stmt->bindParam(':escolaridade_documento', $escolaridade_documento);
         $stmt->bindParam(':estado_civil', $estado_civil);
+        $stmt->bindParam(':viuvo_documento', $viuvo_documento);
+        $stmt->bindParam(':conjuge_nome', $conjuge_nome);
+        $stmt->bindParam(':conjuge_cpf', $conjuge_cpf);
+        $stmt->bindParam(':conjuge_rg', $conjuge_rg);
+        $stmt->bindParam(':conjuge_data_nascimento', $conjuge_data_nascimento);
+        $stmt->bindParam(':conjuge_renda', $conjuge_renda);
+        $stmt->bindParam(':conjuge_comprovante_renda', $conjuge_comprovante_renda);
         $stmt->bindParam(':deficiencia', $deficiencia);
         $stmt->bindParam(':deficiencia_detalhe', $deficiencia_fisica_detalhe);
-        $stmt->bindParam(':endereco', $rua);
+        $stmt->bindParam(':laudo_deficiencia', $laudo_deficiencia);
+        $stmt->bindParam(':num_dependentes', $num_dependentes);
+        $stmt->bindParam(':nome_mae', $nome_mae);
+        $stmt->bindParam(':nome_pai', $nome_pai);
+        $stmt->bindParam(':sit_trabalho', $situacao_trabalho);
+        $stmt->bindParam(':profissao', $profissao);
+        $stmt->bindParam(':empregador', $empregador);
+        $stmt->bindParam(':cargo', $cargo);
+        $stmt->bindParam(':ramo', $ramo_atividade);
+        $stmt->bindParam(':tempo_servico', $tempo_servico);
+        $stmt->bindParam(':carteira_trabalho', $carteira_trabalho);
+        $stmt->bindParam(':tipo_moradia', $tipo_moradia);
+        $stmt->bindParam(':sit_propriedade', $situacao_propriedade);
+        $stmt->bindParam(':valor_aluguel', $valor_aluguel);
+        $stmt->bindParam(':rua', $rua);
         $stmt->bindParam(':numero', $numero);
         $stmt->bindParam(':complemento', $complemento);
         $stmt->bindParam(':bairro', $bairro);
@@ -302,59 +363,24 @@ try {
         $stmt->bindParam(':telefone', $telefone);
         $stmt->bindParam(':celular', $celular);
         $stmt->bindParam(':email', $email);
-        $stmt->bindParam(':nome_mae', $nome_mae);
-        $stmt->bindParam(':nome_pai', $nome_pai);
-        $stmt->bindParam(':sit_trabalho', $situacao_trabalho);
-        $stmt->bindParam(':profissao', $profissao);
-        $stmt->bindParam(':empregador', $empregador);
-        $stmt->bindParam(':cargo', $cargo);
-        $stmt->bindParam(':ramo', $ramo_atividade);
-        $stmt->bindParam(':tempo_servico', $tempo_servico);
-        $stmt->bindParam(':tipo_moradia', $tipo_moradia);
-        $stmt->bindParam(':sit_propriedade', $situacao_propriedade);
-        $stmt->bindParam(':valor_aluguel', $valor_aluguel);
         $stmt->bindParam(':programa', $programa_interesse);
         $stmt->bindParam(':autoriza_email', $autoriza_email);
-        $stmt->bindParam(':doc_cpf', $cpf_documento);
-        $stmt->bindParam(':doc_escolaridade', $escolaridade_documento);
-        $stmt->bindParam(':doc_obito', $viuvo_documento);
-        $stmt->bindParam(':doc_deficiencia', $laudo_deficiencia);
-        $stmt->bindParam(':doc_ctps', $carteira_trabalho);
+        $stmt->bindParam(':protocolo', $protocolo);
         
         $stmt->execute();
         $inscricao_id = $conn->lastInsertId();
         
-        // 2. Inserir dados do cônjuge, se aplicável
-        if ($has_conjuge && $conjuge_nome) {
-            $sql_conjuge = "INSERT INTO tb_habitacao_conjuge (
-                hab_conj_inscricao_id, hab_conj_nome, hab_conj_cpf, hab_conj_rg,
-                hab_conj_data_nasc, hab_conj_renda, hab_conj_doc_renda
-            ) VALUES (
-                :inscricao_id, :nome, :cpf, :rg, 
-                :data_nascimento, :renda, :doc_renda
-            )";
-            
-            $stmt = $conn->prepare($sql_conjuge);
-            $stmt->bindParam(':inscricao_id', $inscricao_id);
-            $stmt->bindParam(':nome', $conjuge_nome);
-            $stmt->bindParam(':cpf', $conjuge_cpf);
-            $stmt->bindParam(':rg', $conjuge_rg);
-            $stmt->bindParam(':data_nascimento', $conjuge_data_nascimento);
-            $stmt->bindParam(':renda', $conjuge_renda);
-            $stmt->bindParam(':doc_renda', $conjuge_comprovante_renda);
-            $stmt->execute();
-        }
-        
         // 3. Inserir dependentes, se houver
-        if (count($dependentes) > 0) {
-            $sql_dependente = "INSERT INTO tb_habitacao_dependentes (
-                hab_dep_inscricao_id, hab_dep_nome, hab_dep_data_nasc,
-                hab_dep_cpf, hab_dep_rg, hab_dep_deficiencia, 
-                hab_dep_renda, hab_dep_docs
+        if (count($dependentes) > 0 && $inscricao_id) {
+            $sql_dependente = "INSERT INTO tb_cad_social_dependentes (
+                cad_social_id, cad_social_dependente_nome, cad_social_dependente_data_nascimento,
+                cad_social_dependente_cpf, cad_social_dependente_rg, cad_social_dependente_documentos,
+                cad_social_dependente_deficiencia, cad_social_dependente_renda, 
+                cad_social_dependente_comprovante_renda
             ) VALUES (
                 :inscricao_id, :nome, :data_nascimento, 
-                :cpf, :rg, :deficiencia, 
-                :renda, :docs
+                :cpf, :rg, :documentos,
+                :deficiencia, :renda, :comprovante_renda
             )";
             
             $stmt = $conn->prepare($sql_dependente);
@@ -364,7 +390,14 @@ try {
                 $dep_docs = null;
                 if (isset($_FILES["dependente_documentos_" . ($i+1)]) && 
                     $_FILES["dependente_documentos_" . ($i+1)]['error'] === UPLOAD_ERR_OK) {
-                    $dep_docs = processarUpload($_FILES["dependente_documentos_" . ($i+1)], "dep_" . ($i+1));
+                    $dep_docs = processarUpload($_FILES["dependente_documentos_" . ($i+1)], "dep" . ($i+1), $cpf);
+                }
+                
+                // Processar comprovante de renda do dependente
+                $dep_renda_docs = null;
+                if ($dep['renda'] === 'SIM' && isset($_FILES["dependente_comprovante_renda_" . ($i+1)]) && 
+                    $_FILES["dependente_comprovante_renda_" . ($i+1)]['error'] === UPLOAD_ERR_OK) {
+                    $dep_renda_docs = processarUpload($_FILES["dependente_comprovante_renda_" . ($i+1)], "deprenda" . ($i+1), $cpf);
                 }
                 
                 $stmt->bindValue(':inscricao_id', $inscricao_id);
@@ -372,16 +405,17 @@ try {
                 $stmt->bindValue(':data_nascimento', $dep['data_nascimento']);
                 $stmt->bindValue(':cpf', $dep['cpf']);
                 $stmt->bindValue(':rg', $dep['rg']);
+                $stmt->bindValue(':documentos', $dep_docs);
                 $stmt->bindValue(':deficiencia', $dep['deficiencia']);
                 $stmt->bindValue(':renda', $dep['renda']);
-                $stmt->bindValue(':docs', $dep_docs);
+                $stmt->bindValue(':comprovante_renda', $dep_renda_docs);
                 $stmt->execute();
             }
         }
         
         // Commit da transação
         $conn->commit();
-        
+             
         // Resposta para requisição AJAX
         if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
             echo json_encode([

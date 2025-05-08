@@ -1,3 +1,12 @@
+<?php
+// Inicia a sessão
+session_start();
+
+if (!isset($_SESSION['usersystem_logado'])) {
+    header("Location: ../acessdeniedrestrict.php"); 
+  }
+?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
