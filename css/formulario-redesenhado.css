@@ -1,301 +1,502 @@
-/* Multi-step Form Styles */
+/* Formulário Redesenhado - CSS */
 
-/* Progress bar container */
-.progress-container {
-    margin: 30px 0;
-    position: relative;
+:root {
+    --primary-color: #2196F3;
+    --primary-dark: #1976D2;
+    --primary-light: #BBDEFB;
+    --secondary-color: #FF9800;
+    --success-color: #4CAF50;
+    --danger-color: #F44336;
+    --text-color: #333;
+    --light-text: #767676;
+    --border-color: #ddd;
+    --background-color: #f9f9f9;
+    --card-background: #fff;
+    --shadow: 0 2px 10px rgba(0,0,0,0.1);
+    --radius: 8px;
+    --transition: all 0.3s ease;
 }
 
-/* Step container */
-.step-container {
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Page Title */
+.page-title {
+    margin-bottom: 30px;
+    color: var(--primary-dark);
+    border-bottom: 2px solid var(--primary-light);
+    padding-bottom: 15px;
+    font-size: 1.8rem;
+}
+
+.page-title i {
+    margin-right: 10px;
+    color: var(--primary-color);
+}
+
+/* Form Wrapper - Layout Principal */
+.form-wrapper {
     display: flex;
-    justify-content: space-between;
+    background: var(--card-background);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+/* Container de Abas Lateral */
+.tabs-container {
+    width: 250px;
+    background: var(--primary-dark);
+    color: white;
+    padding: 20px 0;
+}
+
+/* Navegação por Abas */
+.tab-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tab-item {
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: var(--transition);
+    border-left: 4px solid transparent;
     position: relative;
-    z-index: 2;
 }
 
-/* Progress bar */
-.progress-bar {
-    position: absolute;
-    top: 18px;
-    left: 0;
-    height: 4px;
-    background-color: #4CAF50;
-    width: 0%;
-    transition: width 0.5s ease;
-    z-index: 1;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+.tab-item:hover {
+    background: rgba(255, 255, 255, 0.1);
 }
 
-/* Individual step */
-.step {
-    text-align: center;
-    flex: 1;
-    position: relative;
+.tab-item.active {
+    background: rgba(255, 255, 255, 0.15);
+    border-left-color: var(--secondary-color);
 }
 
-/* Step circle */
-.step-circle {
-    width: 40px;
-    height: 40px;
+.tab-number {
+    width: 30px;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.2);
     border-radius: 50%;
-    background-color: #f1f1f1;
-    border: 2px solid #ccc;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 10px;
+    margin-right: 15px;
     font-weight: bold;
-    transition: all 0.3s ease;
+    transition: var(--transition);
 }
 
-/* Step text */
-.step-text {
+.tab-item.active .tab-number {
+    background: var(--secondary-color);
+}
+
+.tab-label {
     font-size: 14px;
-    color: #666;
-    transition: color 0.3s ease;
 }
 
-/* Active step */
-.step.active .step-circle {
-    background-color: #4CAF50;
-    border-color: #4CAF50;
-    color: white;
+/* Barra de Progresso */
+.progress-container {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 20px 20px 0;
+    border-radius: 2px;
+    overflow: hidden;
 }
 
-.step.active .step-text {
-    color: #4CAF50;
-    font-weight: bold;
+.progress-bar {
+    height: 100%;
+    background: var(--secondary-color);
+    width: 0;
+    transition: width 0.5s ease;
 }
 
-/* Form step containers */
-.form-step {
+/* Conteúdo do Formulário */
+.form-content {
+    flex: 1;
+    padding: 0;
+    position: relative;
+    overflow-y: auto;
+    max-height: 80vh;
+}
+
+/* Estilo das Abas de Conteúdo */
+.tab-content {
     display: none;
-    animation: fadeIn 0.5s;
+    animation: fadeIn 0.5s ease;
+    padding: 0;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+.tab-content.active {
+    display: block;
 }
 
-/* Navigation buttons */
-.form-navigation {
+/* Cabeçalho da Aba */
+.tab-header {
+    background: var(--primary-light);
+    padding: 20px 30px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tab-header h3 {
+    margin: 0 0 5px 0;
+    color: var(--primary-dark);
+    font-size: 1.5rem;
+}
+
+.tab-header i {
+    margin-right: 10px;
+}
+
+.tab-description {
+    margin: 0;
+    color: var(--light-text);
+    font-size: 14px;
+}
+
+/* Grade do Formulário */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    padding: 30px;
+}
+
+/* Campos do Formulário */
+.form-field {
+    margin-bottom: 15px;
+}
+
+.form-field.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-field label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: var(--text-color);
+    font-size: 14px;
+}
+
+.form-field label.required:after {
+    content: " *";
+    color: var(--danger-color);
+}
+
+.form-field input, 
+.form-field select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    font-size: 15px;
+    transition: var(--transition);
+    background-color: #fff;
+}
+
+.form-field input:focus,
+.form-field select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-light);
+    outline: none;
+}
+
+.form-field input.invalid,
+.form-field select.invalid {
+    border-color: var(--danger-color);
+    background-color: rgba(244, 67, 54, 0.05);
+}
+
+.form-field small {
+    display: block;
+    font-size: 12px;
+    color: var(--light-text);
+    margin-top: 5px;
+}
+
+/* File Upload Estilizado */
+.file-upload {
+    position: relative;
+    display: block;
+    width: 100%;
+}
+
+.file-upload input[type="file"] {
+    position: absolute;
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    z-index: -1;
+}
+
+.file-upload label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 15px;
+    color: white;
+    background-color: var(--primary-color);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: normal;
+    text-align: center;
+}
+
+.file-upload label:hover {
+    background-color: var(--primary-dark);
+}
+
+.file-upload label i {
+    margin-right: 8px;
+}
+
+.hint {
+    color: var(--light-text);
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+/* Divisores de Seção */
+.section-divider {
+    border-top: 1px solid var(--border-color);
+    margin: 0 30px 20px;
+    padding-top: 20px;
+}
+
+.section-divider h4 {
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+}
+
+.section-divider h4 i {
+    margin-right: 8px;
+}
+
+/* Estilos para Dependentes */
+.dependentes-container {
+    padding: 0 30px;
+}
+
+.dependente-card {
+    background: var(--background-color);
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    overflow: hidden;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+    border-left: 3px solid var(--secondary-color);
+}
+
+.dependente-header {
+    background: rgba(255, 152, 0, 0.1);
+    padding: 15px 20px;
+}
+
+.dependente-header h4 {
+    margin: 0;
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.dependente-header h4 i {
+    margin-right: 8px;
+}
+
+/* Checkbox Personalizado */
+.custom-checkbox {
+    display: flex;
+    align-items: flex-start;
+    cursor: pointer;
+    padding: 5px 0;
+}
+
+.custom-checkbox input[type="checkbox"] {
+    width: auto;
+    margin-right: 10px;
+    margin-top: 3px;
+}
+
+.custom-checkbox label {
+    font-weight: normal;
+    cursor: pointer;
+}
+
+/* Botões de Ação */
+.tab-actions {
     display: flex;
     justify-content: space-between;
-    margin-top: 30px;
-    padding-top: 20px;
-    border-top: 1px solid #eee;
-    position: sticky;
-    bottom: 0;
-    background-color: #fff;
-    padding: 15px 0;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-    z-index: 10;
+    padding: 20px 30px;
+    background: var(--background-color);
+    border-top: 1px solid var(--border-color);
 }
 
-.btn-prev, .btn-next, .btn-submit {
-    padding: 10px 20px;
-    border-radius: 4px;
-    font-weight: bold;
-    cursor: pointer;
+.btn-prev,
+.btn-next,
+.btn-submit {
     display: inline-flex;
     align-items: center;
-    transition: background-color 0.3s;
+    justify-content: center;
+    padding: 12px 25px;
     border: none;
+    border-radius: var(--radius);
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 15px;
 }
 
 .btn-prev {
-    background-color: #f1f1f1;
-    color: #333;
-    transition: all 0.3s ease;
+    background: var(--background-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
 }
 
-.btn-next, .btn-submit {
-    background-color: #4CAF50;
+.btn-next {
+    background: var(--primary-color);
     color: white;
-    transition: all 0.3s ease;
+}
+
+.btn-submit {
+    background: var(--success-color);
+    color: white;
 }
 
 .btn-prev:hover {
-    background-color: #ddd;
+    background: var(--border-color);
     transform: translateX(-3px);
 }
 
-.btn-next:hover, .btn-submit:hover {
-    background-color: #45a049;
+.btn-next:hover {
+    background: var(--primary-dark);
     transform: translateX(3px);
 }
 
 .btn-submit:hover {
-    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-}
-
-.btn-prev i, .btn-next i {
-    margin: 0 5px;
-}
-
-/* Required field validation */
-input.invalid, select.invalid {
-    border: 2px solid #ff6b6b;
-    background-color: #ffefef;
-}
-
-/* Custom styling for file inputs in a multi-step form */
-.file-input-container {
-    position: relative;
-    overflow: hidden;
-    display: inline-block;
-    width: 100%;
-}
-
-.file-input {
-    position: relative;
-    width: 100%;
-    height: 40px;
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background-color: #fff;
-    color: #333;
-    cursor: pointer;
-}
-
-/* Estilos adicionais para melhorar a aparência do formulário */
-.form-section {
-    background-color: #fff;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-}
-
-.form-section-title {
-    color: #4CAF50;
-    border-bottom: 2px solid #f1f1f1;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
-    font-size: 1.4em;
-}
-
-.dependent-title, .dependent-fields h4 {
-    color: #666;
-    font-size: 1.1em;
-    margin-top: 20px;
-    margin-bottom: 15px;
-    padding-bottom: 8px;
-    border-bottom: 1px dashed #ddd;
-}
-
-.form-control:focus {
-    border-color: #4CAF50;
-    box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
-    outline: none;
-}
-
-.required:after {
-    content: " *";
-    color: #e74c3c;
-}
-
-.dependent-container {
-    background-color: #f9f9f9;
-    border-radius: 6px;
-    padding: 15px;
-    margin-bottom: 15px;
-    border-left: 3px solid #4CAF50;
-}
-
-/* Estilo para mensagens de erro */
-.error-message {
-    color: #e74c3c;
-    font-size: 12px;
-    margin-top: 5px;
-    display: none;
-}
-
-input.invalid + .error-message, 
-select.invalid + .error-message {
-    display: block;
-}
-
-/* Estilo para botão de impressão */
-.print-button {
-    background-color: #3498db;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-}
-
-.print-button:hover {
-    background-color: #2980b9;
+    background: #3d8b40;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-.print-button i {
+.btn-prev i,
+.btn-next i,
+.btn-submit i {
+    margin: 0 5px;
+}
+
+/* Container de Envio e Impressão */
+.submit-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px 30px;
+    background: var(--background-color);
+    border-top: 1px solid var(--border-color);
+}
+
+.print-container {
+    padding: 20px 30px;
+    text-align: center;
+    background: var(--background-color);
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-print {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 25px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 15px;
+}
+
+.btn-print:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.btn-print i {
     margin-right: 8px;
 }
 
+/* Animações */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 /* Responsividade */
-@media screen and (max-width: 768px) {
-    .step-text {
-        font-size: 12px;
-    }
-    
-    .step-circle {
-        width: 30px;
-        height: 30px;
-    }
-    
-    .progress-bar {
-        top: 15px;
-    }
-    
-    .form-navigation {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .btn-prev, .btn-next, .btn-submit {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    .form-row {
+@media (max-width: 1024px) {
+    .form-wrapper {
         flex-direction: column;
     }
     
-    .form-group.third-width,
-    .form-group.half-width,
-    .form-group.quarter-width {
+    .tabs-container {
         width: 100%;
+        padding: 10px 0;
+    }
+    
+    .tab-nav {
+        display: flex;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x mandatory;
+    }
+    
+    .tab-item {
+        flex: 0 0 auto;
+        border-left: none;
+        border-bottom: 4px solid transparent;
+        scroll-snap-align: start;
+    }
+    
+    .tab-item.active {
+        border-bottom-color: var(--secondary-color);
+    }
+    
+    .progress-container {
+        display: none;
     }
 }
 
-/* Para telas muito pequenas */
-@media screen and (max-width: 480px) {
-    .step-container {
-        flex-wrap: wrap;
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
     }
     
-    .step {
-        flex-basis: 33.33%;
-        margin-bottom: 15px;
+    .tab-actions,
+    .submit-container {
+        flex-direction: column;
+        gap: 15px;
     }
     
-    .progress-bar {
-        display: none;
+    .btn-prev,
+    .btn-next,
+    .btn-submit,
+    .btn-print {
+        width: 100%;
     }
     
-    .form-section {
-        padding: 15px 10px;
+    .tab-header {
+        padding: 15px 20px;
+    }
+    
+    .form-grid {
+        padding: 20px;
     }
 }

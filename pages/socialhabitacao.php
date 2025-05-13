@@ -747,7 +747,7 @@ $data_nascimento = isset($_SESSION['user_data_nasc']) ? $_SESSION['user_data_nas
             </div>
 
             <div class="buttons-container" style="display: none;">
-                <button type="button" class="print-button" id="print-button" href="social-relatorio-habitacao.php">
+                <button type="button" class="print-button" id="print-button">
                     <i class="fas fa-print"></i> Imprimir Comprovante
                 </button>
             </div>

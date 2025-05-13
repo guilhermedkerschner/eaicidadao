@@ -151,10 +151,10 @@ $email_usuario = $_SESSION['user_email'];
 
         <div class="service-cards">
             <div class="service-card">
-                <h4><i class="fas fa-file-alt"></i> Minhas Solicitações</h4>
-                <p>Acompanhe o status das suas solicitações enviadas para a prefeitura.</p>
+                <h4><i class="fas fa-user-cog"></i> Meu Perfil</h4>
+                <p>Atualize suas informações pessoais e altere sua senha.</p>
                 <div class="card-actions">
-                    <a href="minhas_solicitacoes.php" class="btn-action">Ver Todas</a>
+                    <a href="useratt.php" class="btn-action">Editar</a>
                 </div>
             </div>
 
@@ -167,18 +167,10 @@ $email_usuario = $_SESSION['user_email'];
             </div>
 
             <div class="service-card">
-                <h4><i class="fas fa-file-invoice"></i> Meus Documentos</h4>
-                <p>Acesse seus documentos emitidos pela prefeitura.</p>
+                <h4><i class="fas fa-file-alt"></i> Minhas Solicitações</h4>
+                <p>Acompanhe o status das suas solicitações enviadas para a prefeitura.</p>
                 <div class="card-actions">
-                    <a href="meus_documentos.php" class="btn-action">Acessar</a>
-                </div>
-            </div>
-
-            <div class="service-card">
-                <h4><i class="fas fa-user-cog"></i> Meu Perfil</h4>
-                <p>Atualize suas informações pessoais e altere sua senha.</p>
-                <div class="card-actions">
-                    <a href="editar_perfil.php" class="btn-action">Editar</a>
+                    <a href="minhas_solicitacoes.php" class="btn-action">Ver Todas</a>
                 </div>
             </div>
         </div>

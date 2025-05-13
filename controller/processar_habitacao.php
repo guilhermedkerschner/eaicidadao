@@ -60,9 +60,33 @@ function sanitize($data) {
     $data = htmlspecialchars($data);
     return $data;
 }
+    $data_atual = date('Ymd');
+    $prefixo_protocolo = "HAB-{$data_atual}-";
+    
+    // Buscar o último número de protocolo do dia
+    $sql_ultimo_protocolo = "SELECT cad_social_protocolo FROM tb_cad_social 
+                             WHERE cad_social_protocolo LIKE :prefixo_protocolo 
+                             ORDER BY cad_social_protocolo DESC LIMIT 1";
+    
+    $stmt_protocolo = $conn->prepare($sql_ultimo_protocolo);
+    $prefixo_busca = $prefixo_protocolo . '%'; // HAB-20250508-%
+    $stmt_protocolo->bindParam(':prefixo_protocolo', $prefixo_busca);
+    $stmt_protocolo->execute();
+    
+    if ($stmt_protocolo->rowCount() > 0) {
+        // Existe um protocolo do dia, vamos incrementar
+        $ultimo_protocolo = $stmt_protocolo->fetch(PDO::FETCH_ASSOC)['cad_social_protocolo'];
+        $ultimo_numero = (int)substr($ultimo_protocolo, -3); // Extrai os últimos 3 dígitos
+        $novo_numero = $ultimo_numero + 1;
+        $protocolo = $prefixo_protocolo . sprintf('%03d', $novo_numero); // Formato com 3 dígitos (001, 002, etc)
+    } else {
+        // Primeiro protocolo do dia
+        $protocolo = $prefixo_protocolo . '001';
+    }
+    $_SESSION['user_prot_hab'] = $protocolo;
 
 // Função para processar upload de arquivo
-function processarUpload($arquivo, $tipo) {
+function processarUpload($arquivo, $tipo, $protocolo) {
     if (!isset($arquivo) || !isset($arquivo['tmp_name']) || empty($arquivo['tmp_name'])) {
         return null;
     }
@@ -85,10 +109,9 @@ function processarUpload($arquivo, $tipo) {
     // Obter a data atual no formato AAAAMMDD
     $data_atual = date('Ymd');
 
-    $cpf = isset($_POST['cpf']) ? sanitize($_POST['cpf']) : null;
-    $cpf = $cpf ? preg_replace('/[^0-9]/', '', $cpf) : null;
-    // Criar nome do arquivo usando o tipo, CPF e data
-    $novo_nome = "HAB_{$tipo}_{$cpf}_{$data_atual}.{$ext}";
+ 
+    // Criar nome do arquivo usando o tipo e protocolo;
+    $novo_nome = "{$protocolo}_{$tipo}.{$ext}";
     
     // Definir caminho para salvar
     $upload_dir = "../uploads/habitacao/";
@@ -251,30 +274,7 @@ try {
     
     // Iniciar transação
     $conn->beginTransaction();
-    $data_atual = date('Ymd');
-    $prefixo_protocolo = "HAB-{$data_atual}-";
-    
-    // Buscar o último número de protocolo do dia
-    $sql_ultimo_protocolo = "SELECT cad_social_protocolo FROM tb_cad_social 
-                             WHERE cad_social_protocolo LIKE :prefixo_protocolo 
-                             ORDER BY cad_social_protocolo DESC LIMIT 1";
-    
-    $stmt_protocolo = $conn->prepare($sql_ultimo_protocolo);
-    $prefixo_busca = $prefixo_protocolo . '%'; // HAB-20250508-%
-    $stmt_protocolo->bindParam(':prefixo_protocolo', $prefixo_busca);
-    $stmt_protocolo->execute();
-    
-    if ($stmt_protocolo->rowCount() > 0) {
-        // Existe um protocolo do dia, vamos incrementar
-        $ultimo_protocolo = $stmt_protocolo->fetch(PDO::FETCH_ASSOC)['cad_social_protocolo'];
-        $ultimo_numero = (int)substr($ultimo_protocolo, -3); // Extrai os últimos 3 dígitos
-        $novo_numero = $ultimo_numero + 1;
-        $protocolo = $prefixo_protocolo . sprintf('%03d', $novo_numero); // Formato com 3 dígitos (001, 002, etc)
-    } else {
-        // Primeiro protocolo do dia
-        $protocolo = $prefixo_protocolo . '001';
-    }
-    
+        
     try {
         // 1. Inserir dados do responsável na tabela principal
         $sql_inscricao = "INSERT INTO tb_cad_social (
@@ -412,6 +412,54 @@ try {
                 $stmt->execute();
             }
         }
+
+        // Registrar a solicitação para acompanhamento
+        $sql_solicitacao = "INSERT INTO tb_solicitacoes (
+            usuario_id, 
+            tipo_solicitacao,
+            subtipo,
+            protocolo,
+            data_solicitacao,
+            status,
+            ultima_atualizacao,
+            departamento_responsavel
+        ) VALUES (
+            :usuario_id,
+            'HABITACAO',
+            :subtipo,
+            :protocolo,
+            NOW(),
+            'PENDENTE DE ANÁLISE',
+            NOW(),
+            'SECRETARIA DE ASSISTÊNCIA SOCIAL'
+        )";
+
+        $stmt_solic = $conn->prepare($sql_solicitacao);
+        $stmt_solic->bindParam(':usuario_id', $_SESSION['user_id']);
+        $stmt_solic->bindParam(':subtipo', $programa_interesse);
+        $stmt_solic->bindParam(':protocolo', $protocolo);
+        $stmt_solic->execute();
+
+        // Registrar no histórico
+        $solicitacao_id = $conn->lastInsertId();
+
+        $sql_historico = "INSERT INTO tb_solicitacoes_historico (
+            solicitacao_id,
+            status_anterior,
+            status_novo,
+            detalhes,
+            data_operacao
+        ) VALUES (
+            :solicitacao_id,
+            NULL,
+            'PENDENTE DE ANÁLISE',
+            'Solicitação recebida e aguardando análise',
+            NOW()
+        )";
+
+        $stmt_hist = $conn->prepare($sql_historico);
+        $stmt_hist->bindParam(':solicitacao_id', $solicitacao_id);
+        $stmt_hist->execute();
         
         // Commit da transação
         $conn->commit();
