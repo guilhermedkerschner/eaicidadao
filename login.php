@@ -1,7 +1,10 @@
 <?php
+// Inicia a sessão
+session_start();
+
 // Incluir arquivos de configuração e funções
+require_once 'database/conect.php';
 require_once 'lib/functions.php';
-require 'lib/config.php';
 
 // Variável para armazenar mensagens de erro
 $mensagem_erro = "";
@@ -213,43 +216,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-// Função para obter o IP do cliente
-function getClientIP() {
-    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-        return $_SERVER['HTTP_CLIENT_IP'];
-    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        return $_SERVER['HTTP_X_FORWARDED_FOR'];
-    } else {
-        return $_SERVER['REMOTE_ADDR'];
-    }
-}
-
-// Função para registrar log no sistema
-function registrarLog($conn, $usuario_id, $acao, $modulo_id = null, $detalhes = '') {
-    try {
-        $stmt = $conn->prepare("
-            INSERT INTO tb_logs_acesso 
-            (usuario_id, log_ip, log_acao, log_modulo_id, log_detalhes) 
-            VALUES 
-            (:usuario_id, :ip, :acao, :modulo_id, :detalhes)
-        ");
-        
-        $ip = getClientIP();
-        
-        $stmt->bindParam(':usuario_id', $usuario_id);
-        $stmt->bindParam(':ip', $ip);
-        $stmt->bindParam(':acao', $acao);
-        $stmt->bindParam(':modulo_id', $modulo_id);
-        $stmt->bindParam(':detalhes', $detalhes);
-        $stmt->execute();
-        
-        return true;
-    } catch (Exception $e) {
-        // Em ambiente de produção, considere logar este erro em um arquivo
-        error_log("Erro ao registrar log: " . $e->getMessage());
-        return false;
-    }
-}
+// Nota: As funções getClientIP() e registrarLog() foram removidas daqui, 
+// pois estão definidas em lib/functions.php
 ?>
 
 <!DOCTYPE html>

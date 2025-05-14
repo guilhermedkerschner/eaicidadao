@@ -86,7 +86,7 @@ function sanitize($data) {
     $_SESSION['user_prot_hab'] = $protocolo;
 
 // Função para processar upload de arquivo
-function processarUpload($arquivo, $tipo, $protocolo) {
+function processarUpload($arquivo, $tipo) {
     if (!isset($arquivo) || !isset($arquivo['tmp_name']) || empty($arquivo['tmp_name'])) {
         return null;
     }
@@ -111,7 +111,8 @@ function processarUpload($arquivo, $tipo, $protocolo) {
 
  
     // Criar nome do arquivo usando o tipo e protocolo;
-    $novo_nome = "{$protocolo}_{$tipo}.{$ext}";
+    $protocoloimg = $_SESSION['user_prot_hab'];
+    $novo_nome = "{$protocoloimg}_{$tipo}.{$ext}";
     
     // Definir caminho para salvar
     $upload_dir = "../uploads/habitacao/";

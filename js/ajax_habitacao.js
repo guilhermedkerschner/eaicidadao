@@ -429,5 +429,5 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    console.log('Redirecionando para relatório de inscrição: ' + inscricaoId);
+    console.log('Redirecionando para relatório de inscrição: ' + $_SESSION['user_prot_hab']);
 });

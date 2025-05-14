@@ -272,8 +272,7 @@ if (!isset($_SESSION['usersystem_logado'])) {
                     <span class="arrow"><i class="fas fa-chevron-right"></i></span>
                 </a>
                 <ul class="submenu">
-                    <li><a href="#" class="submenu-link">Atendimentos</a></li>
-                    <li><a href="#" class="submenu-link">Benefícios</a></li>
+                    <li><a href="assistencia_habitacao.php" class="submenu-link">Habitação</a></li>
                     <li><a href="#" class="submenu-link">Relatórios</a></li>
                 </ul>
             </li>
