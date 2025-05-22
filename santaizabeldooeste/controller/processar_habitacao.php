@@ -34,7 +34,7 @@ if (!isset($_SESSION['user_logado'])) {
 
 
 // Incluir arquivo de configuração com conexão ao banco de dados
-require_once "../lib/config.php";
+require_once "../database/conect.php";
 
 // Verificar se o formulário foi enviado via POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -226,6 +226,8 @@ try {
     
     // INTERESSE
     $programa_interesse = isset($_POST['programa_interesse']) ? strtoupper(sanitize($_POST['programa_interesse'])) : null;
+    $autoriza_credito = isset($_POST['autoriza_credito']) ? 1 : 0;
+    $medida_protetiva = isset($_POST['medida_protetiva']) ? 1 : 0;
     $autoriza_email = isset($_POST['autoriza_email']) ? 1 : 0;
     
     // Processar uploads de documentos
@@ -293,7 +295,8 @@ try {
             cad_social_valor_aluguel, cad_social_rua, cad_social_numero, cad_social_complemento,
             cad_social_bairro, cad_social_cidade, cad_social_cep, cad_social_ponto_referencia,
             cad_social_telefone, cad_social_celular, cad_social_email, cad_social_programa_interesse,
-            cad_social_autoriza_email, cad_social_data_cadastro, cad_social_status, cad_social_protocolo
+            cad_social_autoriza_email, cad_social_data_cadastro, cad_social_status, cad_social_protocolo,
+            cad_social_autoriza_credito, cad_social_medida_protetiva
         ) VALUES (
             :usuario_id, :nome, :cpf, :cpf_documento, :rg,
             :nacionalidade, :nome_social_opcao, :nome_social, 
@@ -309,7 +312,7 @@ try {
             :valor_aluguel, :rua, :numero, :complemento,
             :bairro, :cidade, :cep, :referencia,
             :telefone, :celular, :email, :programa,
-            :autoriza_email, NOW(), 'PENDENTE DE ANÁLISE', :protocolo
+            :autoriza_email, NOW(), 'PENDENTE DE ANÁLISE', :protocolo, :autoriza_credito, :medida_protetiva
         )";
         
         $stmt = $conn->prepare($sql_inscricao);
@@ -367,6 +370,8 @@ try {
         $stmt->bindParam(':programa', $programa_interesse);
         $stmt->bindParam(':autoriza_email', $autoriza_email);
         $stmt->bindParam(':protocolo', $protocolo);
+        $stmt->bindParam(':autoriza_credito', $autoriza_credito);
+        $stmt->bindParam(':medida_protetiva', $medida_protetiva);
         
         $stmt->execute();
         $inscricao_id = $conn->lastInsertId();

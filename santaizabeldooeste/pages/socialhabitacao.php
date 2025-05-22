@@ -730,6 +730,24 @@ $data_nascimento = isset($_SESSION['user_data_nasc']) ? $_SESSION['user_data_nas
                     
                     <div class="form-row">
                         <div class="form-group full-width">
+                            <div style="display: flex; align-items: flex-start; margin-top: 15px; background-color: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 3px solid #0d47a1;">
+                                <input type="checkbox" id="autoriza_credito" name="autoriza_credito" style="margin-right: 10px; margin-top: 3px;" required>
+                                <label for="autoriza_credito" class="required">Estou ciente e autorizo que a Prefeitura Municipal de Santa Izabel do Oeste realize consultas de crédito em meu nome para fins de avaliação neste programa habitacional.</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <div style="display: flex; align-items: flex-start; margin-top: 15px; background-color: #fff3cd; padding: 15px; border-radius: 8px; border-left: 3px solid #e91e63;">
+                                <input type="checkbox" id="medida_protetiva" name="medida_protetiva" style="margin-right: 10px; margin-top: 3px;">
+                                <label for="medida_protetiva">Declaro que o titular ou cônjuge é mulher atendida pela Lei Federal Nº 11.340 de 7 de agosto de 2006 (Lei Maria da Penha).</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group full-width">
                             <div style="display: flex; align-items: flex-start; margin-top: 15px;">
                                 <input type="checkbox" id="autoriza_email" name="autoriza_email" style="margin-right: 10px; margin-top: 3px;">
                                 <label for="autoriza_email">Autorizo receber informações sobre os programas habitacionais por e-mail e por telefone/WhatsApp.</label>

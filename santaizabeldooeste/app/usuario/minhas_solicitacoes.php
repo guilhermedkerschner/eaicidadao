@@ -320,7 +320,7 @@ $status_lista = $stmt_status->fetchAll(PDO::FETCH_COLUMN);
     </div>
 
     <script>
-        // Se precisar de algum JavaScript adicional
+
     </script>
 </body>
 </html>

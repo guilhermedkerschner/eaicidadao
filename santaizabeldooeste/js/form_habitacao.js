@@ -47,17 +47,48 @@ document.addEventListener('DOMContentLoaded', function() {
             const isVisible = isElementVisible(input);
             
             if (isVisible && !input.value) {
-                isValid = false;
-                input.classList.add('invalid');
-                
-                // Remover classe ao digitar
-                input.addEventListener('input', function() {
-                    this.classList.remove('invalid');
-                }, { once: true });
+                // Para checkbox, verificar se está marcado
+                if (input.type === 'checkbox' && !input.checked) {
+                    isValid = false;
+                    input.classList.add('invalid');
+                    
+                    // Remover classe ao marcar
+                    input.addEventListener('change', function() {
+                        if (this.checked) {
+                            this.classList.remove('invalid');
+                        }
+                    }, { once: true });
+                } 
+                // Para outros inputs, verificar valor
+                else if (input.type !== 'checkbox') {
+                    isValid = false;
+                    input.classList.add('invalid');
+                    
+                    // Remover classe ao digitar
+                    input.addEventListener('input', function() {
+                        this.classList.remove('invalid');
+                    }, { once: true });
+                }
             } else {
                 input.classList.remove('invalid');
             }
         });
+        
+        // Verificação adicional para o passo 7 - checkbox de autorização de crédito
+        if (stepNumber === 7) {
+            const autorizaCredito = document.getElementById('autoriza_credito');
+            if (autorizaCredito && !autorizaCredito.checked) {
+                isValid = false;
+                autorizaCredito.classList.add('invalid');
+                alert('É necessário autorizar a consulta de crédito para prosseguir.');
+                
+                // Destacar o checkbox com animação
+                autorizaCredito.parentElement.classList.add('highlight-animation');
+                setTimeout(() => {
+                    autorizaCredito.parentElement.classList.remove('highlight-animation');
+                }, 1500);
+            }
+        }
         
         if (!isValid) {
             alert('Por favor, preencha todos os campos obrigatórios.');
@@ -491,6 +522,16 @@ document.addEventListener('DOMContentLoaded', function() {
             // Normalmente seria armazenado em algum lugar ou retornado pelo servidor
             const inscricaoId = this.getAttribute('data-inscricao-id') || '123';
             window.open(`social-relatorio-habitacao.php?id=${inscricaoId}`);
+        });
+    }
+    
+    // Configuração especial para o checkbox de autorização de crédito
+    const autorizaCreditoCheckbox = document.getElementById('autoriza_credito');
+    if (autorizaCreditoCheckbox) {
+        autorizaCreditoCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                this.classList.remove('invalid');
+            }
         });
     }
 });
