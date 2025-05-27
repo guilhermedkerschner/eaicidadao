@@ -29,7 +29,7 @@ try {
         $usuario_nivel_id = $usuario['usuario_nivel_id'];
         
         // Verificar se é administrador (assumindo que nivel_id = 1 é admin)
-        $is_admin = ($usuario_nivel_id == "1");
+        $is_admin = ($usuario_nivel_id == 1);
     }
 } catch (PDOException $e) {
     error_log("Erro ao buscar dados do usuário: " . $e->getMessage());
@@ -530,6 +530,53 @@ if ($is_admin) {
                 cursor: pointer;
                 color: var(--primary-color);
             }
+
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                padding: 15px 20px;
+                height: auto;
+            }
+
+            .header > div:first-child {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+            }
+
+            .user-details {
+                align-items: flex-start;
+            }
+
+            .user-name {
+                font-size: 0.9rem;
+            }
+
+            .admin-badge, .department-badge {
+                font-size: 0.7rem;
+                padding: 3px 6px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h2 {
+                font-size: 1.2rem;
+            }
+
+            .user-info {
+                gap: 8px;
+            }
+
+            .user-details {
+                min-width: 0;
+            }
+
+            .user-name {
+                font-size: 0.85rem;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
         }
 
         .mobile-toggle {
@@ -567,7 +614,7 @@ if ($is_admin) {
                     <span class="arrow"><i class="fas fa-chevron-right"></i></span>
                 </a>
                 <ul class="submenu">
-                    <li><a href="#" class="submenu-link">Lista de Usuários</a></li>
+                    <li><a href="lista_usuarios.php" class="submenu-link">Lista de Usuários</a></li>
                     <li><a href="#" class="submenu-link">Adicionar Usuário</a></li>
                     <li><a href="#" class="submenu-link">Permissões</a></li>
                 </ul>
@@ -650,12 +697,12 @@ if ($is_admin) {
                 <h2>Sistema de Gerenciamento da Prefeitura</h2>
             </div>
             <div class="user-info">
-                <div style="width: 35px; height: 35px; border-radius: 50%; background-color: var(--secondary-color); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 10px;">
+                <div style="width: 35px; height: 35px; border-radius: 50%; background-color: var(--secondary-color); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
                     <?php echo strtoupper(substr($usuario_nome, 0, 1)); ?>
                 </div>
-                <div>
-                    <div style="font-weight: bold;"><?php echo htmlspecialchars($usuario_nome); ?></div>
-                    <div style="font-size: 0.8rem; color: #666;">
+                <div class="user-details">
+                    <div class="user-name"><?php echo htmlspecialchars($usuario_nome); ?></div>
+                    <div class="user-role">
                         <?php if ($is_admin): ?>
                         <span class="admin-badge">
                             <i class="fas fa-crown"></i> Administrador
