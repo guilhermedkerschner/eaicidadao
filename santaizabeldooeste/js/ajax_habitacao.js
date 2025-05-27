@@ -1,6 +1,7 @@
 /**
  * Script AJAX para o formulário de Cadastro Habitacional
  * Sistema Eai Cidadão! - Prefeitura de Santa Izabel do Oeste
+ * Versão Completa Atualizada com Ocultamento de Botão
  */
 document.addEventListener('DOMContentLoaded', function() {
     // Referência ao formulário
@@ -10,73 +11,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const loadingOverlay = document.getElementById('loading-overlay');
     const statusMessage = document.getElementById('status-message');
     
-    function verificarCadastroExistente() {
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', '../controller/verificar_cadastro_habitacao.php', true);
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        
-        xhr.onload = function() {
-            if (xhr.status === 200) {
-                try {
-                    const response = JSON.parse(xhr.responseText);
-                    
-                    if (response.has_cadastro) {
-                        // Usuário já tem cadastro - mostrar mensagem e redirecionar
-                        showStatusMessage(
-                            `Você já possui um cadastro habitacional (Protocolo: ${response.protocolo}). Redirecionando...`, 
-                            'warning'
-                        );
-                        
-                        setTimeout(() => {
-                            window.location.href = `social-relatorio-habitacao.php?id=${response.cadastro_id}`;
-                        }, 3000);
-                        
-                        // Desabilitar o formulário
-                        const form = document.getElementById('habitacao-form');
-                        if (form) {
-                            form.style.display = 'none';
-                        }
-                    }
-                } catch (e) {
-                    console.error('Erro ao verificar cadastro existente:', e);
-                }
-            }
-        };
-        
-        xhr.send('action=verificar_cadastro');
-    }
-
-    // Modificar a função handleFormSubmit para incluir verificação adicional
-    function handleFormSubmit(e) {
-        e.preventDefault();
-        
-        // Primeiro, verificar se não existe cadastro
-        verificarCadastroExistente();
-        
-        // Aguardar um momento para a verificação
-        setTimeout(() => {
-            // Continuar com a validação normal se não houver cadastro existente
-            if (!validateForm()) {
-                return false;
-            }
-            
-            // Mostrar confirmação antes de enviar
-            if (!confirm('Tem certeza que deseja enviar o cadastro? Lembre-se: cada cidadão pode realizar apenas UM cadastro habitacional.')) {
-                return false;
-            }
-            
-            // Resto do código de envio permanece igual...
-            showLoading();
-            
-            const formData = new FormData(form);
-            
-            // ... resto da função handleFormSubmit
-        }, 500);
-        
-        return false;
-    }
-
     // Função para mostrar loading
     function showLoading(message = 'Processando seu cadastro...') {
         if (loadingOverlay) {
@@ -106,12 +40,133 @@ document.addEventListener('DOMContentLoaded', function() {
             if (type === 'success') {
                 setTimeout(() => {
                     statusMessage.style.display = 'none';
-                }, 5000);
+                }, 8000); // Aumentado para 8 segundos para dar tempo de ler
             }
         }
     }
     
-    // Função para lidar com a submissão do formulário via AJAX
+    // Função para ocultar permanentemente o botão de cadastrar
+    function ocultarBotaoCadastrar() {
+        const submitButton = document.getElementById('submit-button');
+        const stepActions = submitButton.closest('.step-actions');
+        
+        if (submitButton) {
+            // Ocultar o botão com animação suave
+            submitButton.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            submitButton.style.opacity = '0';
+            submitButton.style.transform = 'scale(0.8)';
+            
+            setTimeout(() => {
+                submitButton.style.display = 'none';
+            }, 500);
+        }
+        
+        // Adicionar mensagem informativa no lugar do botão
+        if (stepActions && !document.getElementById('cadastro-concluido-msg')) {
+            const mensagemConcluida = document.createElement('div');
+            mensagemConcluida.id = 'cadastro-concluido-msg';
+            mensagemConcluida.className = 'cadastro-concluido';
+            mensagemConcluida.innerHTML = `
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="success-text">
+                    <h4>Cadastro Realizado com Sucesso!</h4>
+                    <p>Seu cadastro foi enviado e está em análise. Use o botão abaixo para imprimir seu comprovante.</p>
+                </div>
+            `;
+            stepActions.appendChild(mensagemConcluida);
+        }
+    }
+    
+    // Função para reabilitar o botão em caso de erro
+    function reabilitarBotaoCadastrar(button, originalContent) {
+        button.disabled = false;
+        button.innerHTML = originalContent;
+        button.style.opacity = '1';
+        button.style.cursor = 'pointer';
+    }
+    
+    // Função para mostrar o botão de impressão
+    function mostrarBotaoImpressao(inscricaoId) {
+        const buttonsContainer = document.querySelector('.buttons-container');
+        if (buttonsContainer) {
+            buttonsContainer.style.display = 'flex';
+            
+            const printButton = document.getElementById('print-button');
+            if (printButton && inscricaoId) {
+                // Armazenar ID da inscrição no botão
+                printButton.setAttribute('data-inscricao-id', inscricaoId);
+                
+                // Configurar evento de clique
+                printButton.onclick = function() {
+                    const id = this.getAttribute('data-inscricao-id');
+                    window.open(`social-relatorio-habitacao.php?id=${id}`, '_blank');
+                };
+                
+                // Animar a entrada do botão
+                printButton.style.opacity = '0';
+                printButton.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    printButton.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    printButton.style.opacity = '1';
+                    printButton.style.transform = 'translateY(0)';
+                    
+                    // Adicionar efeito de destaque
+                    printButton.classList.add('highlight');
+                    setTimeout(() => {
+                        printButton.classList.remove('highlight');
+                    }, 6000);
+                }, 300);
+            }
+        }
+    }
+    
+    // Função para desabilitar todo o formulário após sucesso
+    function desabilitarFormulario() {
+        // Desabilitar todos os inputs, selects e textareas
+        const formElements = document.querySelectorAll('#habitacao-form input, #habitacao-form select, #habitacao-form textarea');
+        formElements.forEach(element => {
+            element.disabled = true;
+            element.style.backgroundColor = '#f5f5f5';
+            element.style.color = '#888';
+        });
+        
+        // Desabilitar botões de navegação das etapas
+        const navButtons = document.querySelectorAll('.btn-step-prev, .btn-step-next');
+        navButtons.forEach(button => {
+            button.disabled = true;
+            button.style.opacity = '0.5';
+            button.style.cursor = 'not-allowed';
+        });
+        
+        // Desabilitar navegação por clique nas etapas
+        const stepItems = document.querySelectorAll('.step-nav li');
+        stepItems.forEach(item => {
+            item.style.pointerEvents = 'none';
+            item.style.opacity = '0.7';
+            item.classList.add('disabled');
+        });
+        
+        // Adicionar overlay visual ao formulário
+        const formContainer = document.getElementById('habitacao-form');
+        if (formContainer && !document.getElementById('form-overlay')) {
+            const overlay = document.createElement('div');
+            overlay.id = 'form-overlay';
+            overlay.className = 'form-disabled-overlay';
+            overlay.innerHTML = `
+                <div class="overlay-message">
+                    <i class="fas fa-lock"></i>
+                    <span>Formulário protegido após cadastro bem-sucedido</span>
+                </div>
+            `;
+            formContainer.style.position = 'relative';
+            formContainer.appendChild(overlay);
+        }
+    }
+    
+    // Função para lidar com a submissão do formulário via AJAX (ATUALIZADA)
     function handleFormSubmit(e) {
         e.preventDefault();
         
@@ -119,6 +174,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!validateForm()) {
             return false;
         }
+        
+        // Desabilitar o botão de submit imediatamente para evitar duplo envio
+        const submitButton = document.getElementById('submit-button');
+        const originalButtonContent = submitButton.innerHTML;
+        
+        // Alterar aparência do botão para indicar processamento
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+        submitButton.style.opacity = '0.6';
+        submitButton.style.cursor = 'not-allowed';
         
         // Mostrar overlay de carregamento
         showLoading();
@@ -140,40 +205,41 @@ document.addEventListener('DOMContentLoaded', function() {
                     const response = JSON.parse(xhr.responseText);
                     
                     if (response.status === 'success') {
+                        // Sucesso - ocultar o botão permanentemente
+                        ocultarBotaoCadastrar();
+                        
                         // Mostrar mensagem de sucesso
                         showStatusMessage(response.message, 'success');
                         
                         // Mostrar botão de impressão do comprovante
-                        document.querySelector('.buttons-container').style.display = 'flex';
+                        mostrarBotaoImpressao(response.inscricao_id);
                         
-                        const buttonsContainer = document.querySelector('.buttons-container');
-                        if (buttonsContainer) {
-                            buttonsContainer.style.display = 'flex';
-                        }
+                        // Desabilitar todo o formulário para evitar alterações
+                        desabilitarFormulario();
                         
-                        const printButton = document.getElementById('print-button');
-                        if (printButton) {
-                            // Armazenar ID da inscrição no botão
-                            printButton.setAttribute('data-inscricao-id', response.inscricao_id);
-                            
-                            // Configurar evento de clique
-                            printButton.onclick = function() {
-                                const inscricaoId = this.getAttribute('data-inscricao-id');
-                                console.log('Redirecionando para relatório de inscrição: ' + inscricaoId);
-                                window.location.href = 'social-relatorio-habitacao.php?id=' + inscricaoId;
-                            };
-                        }
+                        // Rolar para a mensagem de sucesso
+                        setTimeout(() => {
+                            document.getElementById('status-message').scrollIntoView({ 
+                                behavior: 'smooth', 
+                                block: 'center' 
+                            });
+                        }, 1000);
                         
-                        // Rolar para o botão de impressão
-                        document.querySelector('.buttons-container').scrollIntoView({ behavior: 'smooth', block: 'center' });
                     } else {
+                        // Erro - reabilitar o botão
+                        reabilitarBotaoCadastrar(submitButton, originalButtonContent);
                         showStatusMessage(response.message, 'error');
                     }
                 } catch (e) {
+                    // Erro de parsing - reabilitar o botão
+                    reabilitarBotaoCadastrar(submitButton, originalButtonContent);
                     showStatusMessage('Erro ao processar a resposta do servidor. Por favor, tente novamente.', 'error');
                     console.error('Erro ao analisar a resposta JSON:', e);
+                    console.error('Resposta recebida:', xhr.responseText);
                 }
             } else {
+                // Erro HTTP - reabilitar o botão
+                reabilitarBotaoCadastrar(submitButton, originalButtonContent);
                 showStatusMessage('Erro de comunicação com o servidor. Por favor, tente novamente mais tarde.', 'error');
                 console.error('Erro na requisição AJAX. Status:', xhr.status);
             }
@@ -181,6 +247,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         xhr.onerror = function() {
             hideLoading();
+            // Erro de rede - reabilitar o botão
+            reabilitarBotaoCadastrar(submitButton, originalButtonContent);
             showStatusMessage('Falha na comunicação com o servidor. Por favor, verifique sua conexão e tente novamente.', 'error');
             console.error('Falha na requisição AJAX.');
         };
@@ -276,7 +344,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const camposObrigatorios = document.querySelectorAll('[required]');
         camposObrigatorios.forEach(campo => {
             if (campo.style.display !== 'none' && campo.style.visibility !== 'hidden') {
-                if (campo.value.trim() === '' || (campo.tagName === 'SELECT' && campo.value === '')) {
+                if (campo.type === 'checkbox' && !campo.checked) {
+                    formValido = false;
+                    const label = document.querySelector(`label[for="${campo.id}"]`);
+                    const nomeCampo = label ? label.textContent.replace('*', '').trim() : campo.id;
+                    mensagensErro.push(`É necessário marcar: "${nomeCampo}".`);
+                    campo.classList.add('input-error');
+                } else if (campo.type !== 'checkbox' && (campo.value.trim() === '' || (campo.tagName === 'SELECT' && campo.value === ''))) {
                     formValido = false;
                     const label = document.querySelector(`label[for="${campo.id}"]`);
                     const nomeCampo = label ? label.textContent.replace('*', '').trim() : campo.id;
@@ -287,6 +361,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
+        
+        // Validação específica: checkbox de autorização de crédito
+        const autorizaCredito = document.getElementById('autoriza_credito');
+        if (autorizaCredito && !autorizaCredito.checked) {
+            formValido = false;
+            mensagensErro.push('É obrigatório autorizar a consulta de crédito para prosseguir.');
+            autorizaCredito.classList.add('input-error');
+        }
         
         // Se o formulário não for válido, mostrar os erros
         if (!formValido) {
@@ -308,6 +390,36 @@ document.addEventListener('DOMContentLoaded', function() {
                 let mensagemErro = '';
                 
                 if (campoId === 'cpf' && campo.value.trim() !== '') {
+                    function validarCPF(cpf) {
+                        cpf = cpf.replace(/[^\d]/g, '');
+                        
+                        if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) {
+                            return false;
+                        }
+                        
+                        let soma = 0;
+                        for (let i = 0; i < 9; i++) {
+                            soma += parseInt(cpf.charAt(i)) * (10 - i);
+                        }
+                        
+                        let resto = 11 - (soma % 11);
+                        let digitoVerificador1 = resto === 10 || resto === 11 ? 0 : resto;
+                        
+                        if (digitoVerificador1 !== parseInt(cpf.charAt(9))) {
+                            return false;
+                        }
+                        
+                        soma = 0;
+                        for (let i = 0; i < 10; i++) {
+                            soma += parseInt(cpf.charAt(i)) * (11 - i);
+                        }
+                        
+                        resto = 11 - (soma % 11);
+                        let digitoVerificador2 = resto === 10 || resto === 11 ? 0 : resto;
+                        
+                        return digitoVerificador2 === parseInt(cpf.charAt(10));
+                    }
+                    
                     if (!validarCPF(campo.value)) {
                         mensagemErro = 'CPF inválido. Verifique os números informados.';
                     }
@@ -319,7 +431,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (campoId === 'data_nascimento' && campo.value.trim() !== '') {
                     const dataNascimento = new Date(campo.value);
                     const hoje = new Date();
-                    const idade = hoje.getFullYear() - dataNascimento.getFullYear();
+                    let idade = hoje.getFullYear() - dataNascimento.getFullYear();
                     const mesAtual = hoje.getMonth();
                     const mesNascimento = dataNascimento.getMonth();
                     
@@ -353,6 +465,36 @@ document.addEventListener('DOMContentLoaded', function() {
     if (cpfConjuge) {
         cpfConjuge.addEventListener('blur', function() {
             if (this.value.trim() !== '') {
+                function validarCPF(cpf) {
+                    cpf = cpf.replace(/[^\d]/g, '');
+                    
+                    if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) {
+                        return false;
+                    }
+                    
+                    let soma = 0;
+                    for (let i = 0; i < 9; i++) {
+                        soma += parseInt(cpf.charAt(i)) * (10 - i);
+                    }
+                    
+                    let resto = 11 - (soma % 11);
+                    let digitoVerificador1 = resto === 10 || resto === 11 ? 0 : resto;
+                    
+                    if (digitoVerificador1 !== parseInt(cpf.charAt(9))) {
+                        return false;
+                    }
+                    
+                    soma = 0;
+                    for (let i = 0; i < 10; i++) {
+                        soma += parseInt(cpf.charAt(i)) * (11 - i);
+                    }
+                    
+                    resto = 11 - (soma % 11);
+                    let digitoVerificador2 = resto === 10 || resto === 11 ? 0 : resto;
+                    
+                    return digitoVerificador2 === parseInt(cpf.charAt(10));
+                }
+                
                 const feedbackElement = document.getElementById('conjuge_cpf-feedback');
                 if (!validarCPF(this.value)) {
                     if (feedbackElement) {
@@ -496,5 +638,17 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    console.log('Redirecionando para relatório de inscrição: ' + $_SESSION['user_prot_hab']);
+    
+    // Adicionar eventos para limpar erros quando o usuário interage com os campos
+    document.querySelectorAll('#habitacao-form input, #habitacao-form select, #habitacao-form textarea').forEach(campo => {
+        campo.addEventListener('input', function() {
+            this.classList.remove('input-error');
+        });
+        
+        campo.addEventListener('change', function() {
+            this.classList.remove('input-error');
+        });
+    });
+    
+    console.log('Ajax habitação carregado com sucesso - versão atualizada com ocultamento de botão');
 });

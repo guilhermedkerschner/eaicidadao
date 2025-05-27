@@ -765,18 +765,18 @@
                             <label for="setor">Setor/Departamento</label>
                             <select class="form-control" id="setor" name="setor">
                                 <option value="">Selecione...</option>
-                                <option value="administracao">Administração</option>
-                                <option value="agricultura">Agricultura</option>
-                                <option value="assistencia_social">Assistência Social</option>
-                                <option value="cultura_turismo">Cultura e Turismo</option>
-                                <option value="educacao">Educação</option>
-                                <option value="esporte">Esporte</option>
-                                <option value="fazenda">Fazenda</option>
-                                <option value="fiscalizacao">Fiscalização</option>
-                                <option value="meio_ambiente">Meio Ambiente</option>
-                                <option value="obras">Obras</option>
-                                <option value="rodoviario">Rodoviário</option>
-                                <option value="servicos_urbanos">Serviços Urbanos</option>
+                                <option value="ADMINISTRACAO">Administração</option>
+                                <option value="AGRICULTURA">Agricultura</option>
+                                <option value="ASSISTENCIA_SOCIAL">Assistência Social</option>
+                                <option value="CULTURA_E_TURISMO">Cultura e Turismo</option>
+                                <option value="EDUCACAO">Educação</option>
+                                <option value="ESPORTE">Esporte</option>
+                                <option value="FAZENDA">Fazenda</option>
+                                <option value="FISCALIZACAO">Fiscalização</option>
+                                <option value="MEIO_AMBIENTE">Meio Ambiente</option>
+                                <option value="OBRAS">Obras</option>
+                                <option value="RODOVIARIO">Rodoviário</option>
+                                <option value="SERVICOS_URBANOS">Serviços Urbanos</option>
                                 <option value="TI">Tecnologia da Informação</option>
                             </select>
                         </div>

@@ -554,3 +554,221 @@ input[type="checkbox"].invalid {
         justify-content: center;
     }
 }
+
+/* Estilo para o botão de submit durante o processamento */
+.btn-primary:disabled {
+    background-color: #999999 !important;
+    cursor: not-allowed !important;
+    opacity: 0.6;
+    transform: none;
+}
+
+.btn-primary:disabled:hover {
+    background-color: #999999 !important;
+    transform: none;
+}
+
+/* Mensagem de cadastro concluído */
+.cadastro-concluido {
+    display: flex;
+    align-items: center;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    animation: slideInUp 0.5s ease-out;
+}
+
+.cadastro-concluido .success-icon {
+    font-size: 2.5rem;
+    color: #28a745;
+    margin-right: 15px;
+}
+
+.cadastro-concluido .success-text h4 {
+    color: #155724;
+    margin-bottom: 5px;
+    font-size: 1.2rem;
+}
+
+.cadastro-concluido .success-text p {
+    color: #155724;
+    margin: 0;
+    font-size: 1rem;
+}
+
+/* Overlay para formulário desabilitado */
+.form-disabled-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    backdrop-filter: blur(2px);
+}
+
+.overlay-message {
+    background-color: #fff;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    color: #666;
+    font-weight: 500;
+}
+
+.overlay-message i {
+    margin-right: 10px;
+    color: #28a745;
+    font-size: 1.2rem;
+}
+
+/* Animações */
+@keyframes slideInUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+}
+
+/* Estilo para campos desabilitados após sucesso */
+input:disabled, select:disabled, textarea:disabled {
+    background-color: #f5f5f5 !important;
+    color: #888 !important;
+    cursor: not-allowed !important;
+    border-color: #e0e0e0 !important;
+}
+
+/* Estilo para botões de navegação desabilitados */
+.btn-step-prev:disabled, .btn-step-next:disabled {
+    background-color: #f5f5f5 !important;
+    color: #888 !important;
+    cursor: not-allowed !important;
+    opacity: 0.5;
+}
+
+.btn-step-prev:disabled:hover, .btn-step-next:disabled:hover {
+    background-color: #f5f5f5 !important;
+    transform: none !important;
+}
+
+/* Estilo para etapas desabilitadas */
+.step-nav li.disabled {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.step-nav li.disabled .step-circle {
+    background-color: #e0e0e0 !important;
+    color: #888 !important;
+}
+
+.step-nav li.disabled .step-text {
+    color: #888 !important;
+}
+
+/* Indicador visual de formulário bloqueado */
+.form-locked {
+    position: relative;
+}
+
+.form-locked::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        transparent 40%,
+        rgba(40, 167, 69, 0.1) 50%,
+        transparent 60%
+    );
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Botão de impressão com animação */
+.print-button {
+    transition: all 0.5s ease;
+    transform: translateY(20px);
+    opacity: 0;
+}
+
+.print-button.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* Status de processamento para inputs de arquivo */
+.file-input:disabled + .upload-progress-container {
+    display: none;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .cadastro-concluido {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .cadastro-concluido .success-icon {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+    
+    .overlay-message {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .overlay-message i {
+        margin-right: 0;
+        margin-bottom: 10px;
+        font-size: 2rem;
+    }
+}
+
+/* Efeito de pulso para destacar o botão de impressão */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    50% {
+        transform: scale(1.02);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+}
+
+.print-button.highlight {
+    animation: pulse 2s ease-in-out 3;
+}
