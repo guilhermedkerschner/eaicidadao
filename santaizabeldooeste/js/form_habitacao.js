@@ -40,7 +40,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function validateStep(stepNumber) {
         const step = document.getElementById('step-' + stepNumber);
         const requiredInputs = step.querySelectorAll('input[required], select[required]');
-        let isValid = true;
+        const validateStepOriginal = validateStep;
+        let isValid = validateStepOriginal(stepNumber);;
         
         requiredInputs.forEach(input => {
             // Verificar apenas elementos visíveis

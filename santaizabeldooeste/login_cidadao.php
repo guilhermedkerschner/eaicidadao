@@ -47,6 +47,14 @@ if (isset($_SESSION['user_logado'])) {
             <?php echo $mensagem_erro; ?>
         </div>
         <?php endif; ?>
+        <?php if (isset($_SESSION['sucesso_login'])): ?>
+            <div style="background-color: #d4edda; color: #155724; padding: 12px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #28a745;">
+                <?php 
+                echo $_SESSION['sucesso_login']; 
+                unset($_SESSION['sucesso_login']);
+                ?>
+            </div>
+        <?php endif; ?>
 
         <form class="login-form" action="./controller/processar_login_usuario.php" method="post">
             <div class="form-group">

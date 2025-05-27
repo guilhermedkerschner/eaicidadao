@@ -10,6 +10,73 @@ document.addEventListener('DOMContentLoaded', function() {
     const loadingOverlay = document.getElementById('loading-overlay');
     const statusMessage = document.getElementById('status-message');
     
+    function verificarCadastroExistente() {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '../controller/verificar_cadastro_habitacao.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    
+                    if (response.has_cadastro) {
+                        // Usuário já tem cadastro - mostrar mensagem e redirecionar
+                        showStatusMessage(
+                            `Você já possui um cadastro habitacional (Protocolo: ${response.protocolo}). Redirecionando...`, 
+                            'warning'
+                        );
+                        
+                        setTimeout(() => {
+                            window.location.href = `social-relatorio-habitacao.php?id=${response.cadastro_id}`;
+                        }, 3000);
+                        
+                        // Desabilitar o formulário
+                        const form = document.getElementById('habitacao-form');
+                        if (form) {
+                            form.style.display = 'none';
+                        }
+                    }
+                } catch (e) {
+                    console.error('Erro ao verificar cadastro existente:', e);
+                }
+            }
+        };
+        
+        xhr.send('action=verificar_cadastro');
+    }
+
+    // Modificar a função handleFormSubmit para incluir verificação adicional
+    function handleFormSubmit(e) {
+        e.preventDefault();
+        
+        // Primeiro, verificar se não existe cadastro
+        verificarCadastroExistente();
+        
+        // Aguardar um momento para a verificação
+        setTimeout(() => {
+            // Continuar com a validação normal se não houver cadastro existente
+            if (!validateForm()) {
+                return false;
+            }
+            
+            // Mostrar confirmação antes de enviar
+            if (!confirm('Tem certeza que deseja enviar o cadastro? Lembre-se: cada cidadão pode realizar apenas UM cadastro habitacional.')) {
+                return false;
+            }
+            
+            // Resto do código de envio permanece igual...
+            showLoading();
+            
+            const formData = new FormData(form);
+            
+            // ... resto da função handleFormSubmit
+        }, 500);
+        
+        return false;
+    }
+
     // Função para mostrar loading
     function showLoading(message = 'Processando seu cadastro...') {
         if (loadingOverlay) {

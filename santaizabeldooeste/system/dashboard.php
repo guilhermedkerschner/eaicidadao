@@ -401,7 +401,13 @@ if (!isset($_SESSION['usersystem_logado'])) {
                 <a href="#" class="menu-link">
                     <span class="menu-icon"><i class="fas fa-cog"></i></span>
                     <span class="menu-text">Configurações</span>
+                    <span class="arrow"><i class="fas fa-chevron-right"></i></span>
                 </a>
+                <ul class="submenu">
+                    <li><a href="cadastro_usuario.php" class="submenu-link">Cadastro Usuários</a></li>
+                    <li><a href="#" class="submenu-link">Manutenções</a></li>
+                    <li><a href="#" class="submenu-link">Relatórios</a></li>
+                </ul>
             </li>
         </ul>
     </div>

@@ -8,8 +8,8 @@
 session_start();
 
 // Incluir arquivos necessários
-require_once 'lib/config.php';
-require_once 'lib/functions.php';
+require_once '../database/conect.php';
+require_once '../lib/functions.php';
 
 // Verificar se o usuário está logado
 if (isset($_SESSION['usersystem_logado']) && $_SESSION['usersystem_logado'] === true) {

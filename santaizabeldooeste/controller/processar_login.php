@@ -35,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
         // Prepara a consulta SQL (usando prepared statements para evitar injeção SQL)
-        $stmt = $conn->prepare("SELECT id, nome, username, senha, nivel_acesso FROM usuarios WHERE username = :username OR email = :email");
+        $stmt = $conn->prepare("SELECT usuario_id, usuario_nome, usuario_login, usuario_senha, usuario_nivel_id FROM tb_usuarios_sistema WHERE usuario_login = :username OR usuario_email = :email");
         $stmt->bindParam(':username', $username);
         $stmt->bindParam(':email', $username); // Permite login com email ou username
         $stmt->execute();
@@ -46,14 +46,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
             
             // Verifica se a senha está correta (usando password_verify para senhas hasheadas)
-            if (password_verify($password, $usuario['senha'])) {
+            if (password_verify($password, $usuario['usuario_senha'])) {
                 // Credenciais corretas - inicia a sessão
                 
                 // Armazena informações do usuário na sessão (evite armazenar a senha)
-                $_SESSION['usuario_id'] = $usuario['id'];
-                $_SESSION['usuario_nome'] = $usuario['nome'];
-                $_SESSION['nivel_acesso'] = $usuario['nivel_acesso'];
-                $_SESSION['logado'] = true;
+                $_SESSION['usersystem_id'] = $usuario['usuario_id'];
+                $_SESSION['usersystem_nome'] = $usuario['usuario_nome'];
+                $_SESSION['usersystem_nivel_acesso'] = $usuario['usuario_nivel_id'];
+                $_SESSION['usersystem_logado'] = true;
                 
                 // Registra o horário do login
                 $_SESSION['ultimo_acesso'] = time();

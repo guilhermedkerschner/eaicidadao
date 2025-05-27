@@ -466,3 +466,91 @@ input[type="checkbox"].invalid {
 .highlight-animation {
     animation: highlight-pulse 1.5s ease-in-out;
 }
+
+/* Estilos para alertas de cadastro existente */
+.alert-info {
+    background-color: #e3f2fd;
+    border-left: 4px solid #2196f3;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.alert-info h4 {
+    color: #1976d2;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.alert-info h4 i {
+    margin-right: 8px;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.alert-warning h4 {
+    color: #856404;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.alert-warning h4 i {
+    margin-right: 8px;
+}
+
+.alert-warning p {
+    margin: 0;
+    color: #856404;
+}
+
+/* Estilo para botões de ação no alerta */
+.alert-info .btn-primary {
+    background-color: #2196f3;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.alert-info .btn-primary:hover {
+    background-color: #1976d2;
+    transform: translateY(-1px);
+}
+
+.alert-info .btn-primary i {
+    margin-right: 5px;
+}
+
+/* Responsividade para alertas */
+@media (max-width: 768px) {
+    .alert-info, .alert-warning {
+        padding: 12px;
+        margin-bottom: 15px;
+    }
+    
+    .alert-info div[style*="display: flex"] {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .alert-info .btn-primary {
+        width: 100%;
+        justify-content: center;
+    }
+}

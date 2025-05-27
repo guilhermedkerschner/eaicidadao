@@ -186,4 +186,32 @@ function validaCPF($cpf) {
     }
     return true;
 }
+
+// Enviar email de boas-vindas
+try {
+    require_once '../lib/EmailService.php';
+    $emailService = new EmailService();
+    
+    // Tentar enviar email de confirmação
+    $emailEnviado = $emailService->enviarConfirmacaoCadastro($email, $nome);
+    
+    if ($emailEnviado) {
+        error_log("Email de boas-vindas enviado para: " . $email);
+    } else {
+        error_log("Falha ao enviar email de boas-vindas para: " . $email);
+    }
+} catch (Exception $e) {
+    // Não interromper o processo se o email falhar
+    error_log("Erro ao enviar email de boas-vindas: " . $e->getMessage());
+}
+
+// Limpar dados da sessão
+unset($_SESSION['dados_cadastro']);
+
+// Definir mensagem de sucesso
+$_SESSION['mensagem_sucesso'] = "Cadastro realizado com sucesso! Verifique seu e-mail para mais informações.";
+
+// Redirecionar para a página de sucesso
+header("Location: ../sucess.php");
+exit;
 ?>

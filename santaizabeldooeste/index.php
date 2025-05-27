@@ -75,51 +75,52 @@ $nome_usuario = isset($_SESSION['user_nome']) ? $_SESSION['user_nome'] : '';
         <div class="divider"></div>
 
         <div class="options">
-            <!-- Opções de menu com ícones -->
-            <a href="./pages/esporte.php" class="option-box">
+            <!--
+            <a href="" class="option-box">
                 <i class="fas fa-volleyball-ball"></i>
                 <h3>Esporte</h3>
-            </a>
+            </a>-->
             <a href="./pages/social.php" class="option-box">
                 <i class="fas fa-heart"></i>
                 <h3>Assistência Social</h3>
             </a>
-            <a href="./pages/agricultura.php" class="option-box">
+            <!--
+            <a href="" class="option-box">
                 <i class="fas fa-seedling"></i>
                 <h3>Agricultura</h3>
             </a>
-            <a href="./pages/rodoviario.php" class="option-box">
+            <a href="" class="option-box">
                 <i class="fas fa-bus-alt"></i>
                 <h3>Rodoviário</h3>
             </a>
-            <a href="./pages/meio_ambiente.php" class="option-box">
+            <a href="" class="option-box">
                 <i class="fas fa-tree"></i>
                 <h3>Meio Ambiente</h3>
             </a>
-            <a href="./pages/servicos_urbanos.php" class="option-box">
+            <a href="" class="option-box">
                 <i class="fas fa-building"></i>
                 <h3>Serviços Urbanos</h3>
             </a>
-            <a href="./pages/educacao.php" class="option-box">
+            <a href="" class="option-box">
                 <i class="fas fa-book-open"></i>
                 <h3>Educação</h3>
             </a>
-            <a href="./pages/fiscalizacao.php" class="option-box">
+            <a href="" class="option-box">
                 <i class="fas fa-search-dollar"></i>
                 <h3>Fiscalização</h3>
             </a>
-            <a href="./pages/obras.php" class="option-box">
+            <a href="" class="option-box">
                 <i class="fas fa-tools"></i>
                 <h3>Obras</h3>
             </a>
-            <a href="./pages/cultura_turismo.php" class="option-box">
+            <a href="" class="option-box">
                 <i class="fas fa-monument"></i>
                 <h3>Cultura e Turismo</h3>
             </a>
-            <a href="./pages/fazenda.php" class="option-box">
+            <a href="" class="option-box">
                 <i class="fas fa-landmark"></i>
                 <h3>Fazenda</h3>
-            </a>
+            </a>-->
         </div>
     </div>
 
@@ -159,7 +160,7 @@ $nome_usuario = isset($_SESSION['user_nome']) ? $_SESSION['user_nome'] : '';
             </div>
 
             <div class="copyright">
-                &copy; 2025 Prefeitura Municipal de Santa Izabel do Oeste. Todos os direitos reservados.
+                &copy; 2025. Todos os direitos reservados.
             </div>
         </div>
     </footer>

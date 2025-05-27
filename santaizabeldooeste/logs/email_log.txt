@@ -1,0 +1,6 @@
+2025-05-26 18:23:35 - Email: guilherme_kerschner@hotmail.com | Tipo: recuperacao_senha | Status: sucesso
+2025-05-26 18:23:36 - Email: guilherme_kerschner@hotmail.com | Tipo: recuperacao_senha | Status: sucesso
+2025-05-26 13:25:12 - Email: guilherme_kerschner@hotmail.com | Tipo: recuperacao_senha | Status: sucesso
+2025-05-26 13:29:45 - Email: guilherme_kerschner@hotmail.com | Tipo: recuperacao_senha | Status: sucesso
+2025-05-26 13:30:44 - Email: guilherme_kerschner@hotmail.com | Tipo: recuperacao_senha | Status: sucesso
+2025-05-26 15:07:00 - Email: guilherme_kerschner@hotmail.com | Tipo: recuperacao_senha | Status: sucesso

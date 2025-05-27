@@ -1,0 +1,11 @@
+{
+    "name": "admin/santaizabeldooeste",
+    "autoload": {
+        "psr-4": {
+            "Admin\\Santaizabeldooeste\\": "src/"
+        }
+    },
+    "require": {
+        "phpmailer/phpmailer": "*"
+    }
+}

@@ -1,6 +1,5 @@
 <?php
 session_start();
-// Verifica se o usuário está logado
 $usuario_logado = isset($_SESSION['user_logado']) && $_SESSION['user_logado'] === true;
 $nome_usuario = isset($_SESSION['user_nome']) ? $_SESSION['user_nome'] : '';
 ?>
@@ -11,7 +10,6 @@ $nome_usuario = isset($_SESSION['user_nome']) ? $_SESSION['user_nome'] : '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Setor de Assistência Social - Eai Cidadão!</title>
-    <!-- Font Awesome para ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="../css/social.css">
 </head>
@@ -20,7 +18,6 @@ $nome_usuario = isset($_SESSION['user_nome']) ? $_SESSION['user_nome'] : '';
     <div class="header">
         <div class="header-left">
             <div class="municipality-logo">
-                <!-- Substitua pelo caminho da sua logo -->
                 <img src="../img/logo_municipio.png" alt="Logo do Município">
             </div>
             <div class="title-container">
@@ -29,9 +26,7 @@ $nome_usuario = isset($_SESSION['user_nome']) ? $_SESSION['user_nome'] : '';
             </div>
         </div>
         <div class="header-buttons">
-            <!-- Área de login -->
             <div class="login-area">
-                <!-- Botões de login (visíveis quando usuário não está logado) -->
                 <a href="../login_cidadao.php" class="login-button user-login">
                     <i class="fas fa-user"></i>
                     Área do Cidadão
@@ -41,7 +36,6 @@ $nome_usuario = isset($_SESSION['user_nome']) ? $_SESSION['user_nome'] : '';
                     Área Restrita
                 </a>
 
-                <!-- Menu do usuário quando está logado (oculto por padrão) -->
                 <div class="user-logged-in">
                     <div class="user-button">
                         <i class="fas fa-user-check"></i>
@@ -52,14 +46,13 @@ $nome_usuario = isset($_SESSION['user_nome']) ? $_SESSION['user_nome'] : '';
                             <i class="fas fa-id-card"></i>
                             Meu Perfil
                         </a>
-                        <a href="../controller/logout.php" class="dropdown-item">
+                        <a href="../controller/logout_user.php" class="dropdown-item">
                             <i class="fas fa-sign-out-alt"></i>
                             Logout
                         </a>
                     </div>
                 </div>
             </div>
-            <!-- Botão Voltar para Página Inicial -->
             <a href="../index.php" class="back-button">
                 <i class="fas fa-home"></i> 
                 Página Inicial
@@ -73,35 +66,35 @@ $nome_usuario = isset($_SESSION['user_nome']) ? $_SESSION['user_nome'] : '';
         <p class="intro-text">
             O Setor de Assistência Social do Município de Santa Izabel do Oeste é responsável por garantir a proteção social aos cidadãos, ou seja, apoio a indivíduos, famílias e à comunidade no enfrentamento de suas dificuldades, por meio de serviços, benefícios, programas e projetos. Nosso objetivo é promover a inclusão social, a qualidade de vida e a dignidade humana. Selecione abaixo o serviço que você deseja acessar.
         </p>
-
+<!--
         <div class="service-buttons">
-            <a href="form_cras.php" class="service-button">
+            <a href="" class="service-button">
                 <i class="fas fa-home"></i>
                 <h3>CRAS</h3>
                 <p>Centro de Referência de Assistência Social</p>
             </a>
-
+-->
             <a href="socialhabitacao.php" class="service-button">
                 <i class="fas fa-building"></i>
                 <h3>Habitação</h3>
                 <p>Programas habitacionais e moradias populares</p>
             </a>
-
-            <a href="form_idosos.php" class="service-button">
+<!--
+            <a href="" class="service-button">
                 <i class="fas fa-user-friends"></i>
                 <h3>Serviços para Idosos</h3>
                 <p>Programas e serviços de atenção à pessoa idosa</p>
             </a>
 
-            <a href="form_criancas.php" class="service-button">
+            <a href="" class="service-button">
                 <i class="fas fa-child"></i>
                 <h3>Crianças e Adolescentes</h3>
                 <p>Proteção e atendimento a crianças e adolescentes</p>
-            </a>
+            </a>-->
 
         </div>
 
-        <a href="status_servicos.php" class="service-button" style="width: 100%; max-width: 600px; margin: 0 auto 30px auto; background-color: #0d47a1; color: white; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; padding: 20px 25px; text-align: left;">
+        <a href="../app/usuario/minhas_solicitacoes.php" class="service-button" style="width: 100%; max-width: 600px; margin: 0 auto 30px auto; background-color: #0d47a1; color: white; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; padding: 20px 25px; text-align: left;">
             <i class="fas fa-tasks" style="color: white; font-size: 2rem; margin-right: 20px; margin-bottom: 0;"></i>
             <div style="width: 1px; height: 40px; background-color: rgba(255, 255, 255, 0.5); margin-right: 20px;"></div>
             <div>
@@ -110,7 +103,7 @@ $nome_usuario = isset($_SESSION['user_nome']) ? $_SESSION['user_nome'] : '';
             </div>
         </a>
 
-        <div class="contact-section">
+        <div class="contact-section" style="max-width: 1200px">
             <h3 class="contact-title"><i class="fas fa-address-card"></i> Contato do Setor de Assistência Social</h3>
             
             <div class="contact-grid">
@@ -119,7 +112,8 @@ $nome_usuario = isset($_SESSION['user_nome']) ? $_SESSION['user_nome'] : '';
                         <i class="fas fa-map-marker-alt"></i>
                         <div class="contact-text">
                             <h4>Endereço</h4>
-                            <p>Rua Jacarandá, 620 - Centro<br>Santa Izabel do Oeste - PR<br>CEP: 85650-000</p>
+                            <p>PREFEITURA<br>Rua Canela, 731 - Centro<br>Santa Izabel do Oeste - PR<br>CEP: 85650-000</p>
+                            <p>CRÀS<br>Rua Coqueiro, Esquina com Ipê, 515 - São José Operário <br>Santa Izabel do Oeste - PR <br>CEP: 85650-000</p>
                         </div>
                     </div>
                 </div>
@@ -129,7 +123,7 @@ $nome_usuario = isset($_SESSION['user_nome']) ? $_SESSION['user_nome'] : '';
                         <i class="fas fa-phone"></i>
                         <div class="contact-text">
                             <h4>Telefones</h4>
-                            <p>(46) 3552-1512 (Secretaria)<br>(46) 3552-1513 (CRAS)</p>
+                            <p>(46) 3542-1360 / Ramal 208 (Secretaria)<br>(46) 98832-3832 (WhatsApp)<br>(46) 98809-0826 (CRAS)<br>(46) 98818-8642 (Proteção Social Especial)</p>
                         </div>
                     </div>
                 </div>
@@ -139,7 +133,9 @@ $nome_usuario = isset($_SESSION['user_nome']) ? $_SESSION['user_nome'] : '';
                         <i class="fas fa-envelope"></i>
                         <div class="contact-text">
                             <h4>E-mail</h4>
-                            <p>social@santaizabel.pr.gov.br<br>cras@santaizabel.pr.gov.br</p>
+                            <p>ASSISTÊNCIA SOCIAL<br>assistenciasocial.sio@gmail.com</p>
+                            <p>CRAS<br>cras.sio2009@gmail.com</p>
+                            <p>PROTEÇÃO ESPECIAL<br>protecaoespecialsio@gmail.com</p>
                         </div>
                     </div>
                 </div>
@@ -154,23 +150,23 @@ $nome_usuario = isset($_SESSION['user_nome']) ? $_SESSION['user_nome'] : '';
                     </tr>
                     <tr>
                         <td>Segunda-feira</td>
-                        <td>08:00 às 11:30 | 13:00 às 17:00</td>
+                        <td>07:30 às 11:30 | 13:00 às 17:00</td>
                     </tr>
                     <tr>
                         <td>Terça-feira</td>
-                        <td>08:00 às 11:30 | 13:00 às 17:00</td>
+                        <td>07:30 às 11:30 | 13:00 às 17:00</td>
                     </tr>
                     <tr>
                         <td>Quarta-feira</td>
-                        <td>08:00 às 11:30 | 13:00 às 17:00</td>
+                        <td>07:30 às 11:30 | 13:00 às 17:00</td>
                     </tr>
                     <tr>
                         <td>Quinta-feira</td>
-                        <td>08:00 às 11:30 | 13:00 às 17:00</td>
+                        <td>07:30 às 11:30 | 13:00 às 17:00</td>
                     </tr>
                     <tr>
                         <td>Sexta-feira</td>
-                        <td>08:00 às 11:30 | 13:00 às 17:00</td>
+                        <td>07:30 às 11:30 | 13:00 às 17:00</td>
                     </tr>
                     <tr>
                         <td>Sábado, Domingo e Feriados</td>
@@ -182,41 +178,33 @@ $nome_usuario = isset($_SESSION['user_nome']) ? $_SESSION['user_nome'] : '';
     </div>
 
     <footer>
-        &copy; 2025 Prefeitura Municipal de Santa Izabel do Oeste. Todos os direitos reservados.
+        &copy; 2025. Todos os direitos reservados.
     </footer>
 
-    <!-- Script para exibir nome do usuário quando estiver logado (exemplo) -->
     <script>
-    // Usando as variáveis PHP diretamente no JavaScript
     const isLoggedIn = <?php echo $usuario_logado ? 'true' : 'false'; ?>;
     const userName = "<?php echo addslashes($nome_usuario); ?>";
     
     document.addEventListener("DOMContentLoaded", function() {
         if (isLoggedIn) {
-            // Oculta botões de login
-            document.querySelectorAll('.login-button').forEach(btn => {
+                document.querySelectorAll('.login-button').forEach(btn => {
                 btn.style.display = 'none';
             });
             
-            // Mostra mensagem de usuário logado
             const userLoggedElement = document.querySelector('.user-logged-in');
             userLoggedElement.style.display = 'flex';
             
-            // Define o nome do usuário
             document.getElementById('user-name').textContent = userName;
         } else {
-            // Garante que os botões de login estejam visíveis
             document.querySelectorAll('.login-button').forEach(btn => {
                 btn.style.display = 'flex';
             });
             
-            // Garante que a área de usuário logado esteja oculta
             const userLoggedElement = document.querySelector('.user-logged-in');
             userLoggedElement.style.display = 'none';
         }
     });
     
-    // Adiciona funcionalidade ao dropdown do usuário
     document.addEventListener("DOMContentLoaded", function() {
         const userButton = document.querySelector('.user-button');
         const userDropdown = document.querySelector('.user-dropdown');
@@ -226,7 +214,6 @@ $nome_usuario = isset($_SESSION['user_nome']) ? $_SESSION['user_nome'] : '';
                 userDropdown.classList.toggle('show');
             });
             
-            // Fecha o dropdown quando clicar fora dele
             document.addEventListener('click', function(event) {
                 if (!userButton.contains(event.target) && !userDropdown.contains(event.target)) {
                     userDropdown.classList.remove('show');

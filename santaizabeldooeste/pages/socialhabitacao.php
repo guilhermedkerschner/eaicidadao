@@ -4,7 +4,8 @@ session_start();
 
 if (!isset($_SESSION['user_logado'])) {
     header("Location: ../acessdenied.php"); 
-  }
+    exit;
+}
 
 // Campos do usuário a serem usados no formulário
 $nome = isset($_SESSION['user_nome']) ? $_SESSION['user_nome']:'';
@@ -18,6 +19,185 @@ $bairro = isset($_SESSION['user_bairro']) ? $_SESSION['user_bairro']:'';
 $cidade = isset($_SESSION['user_cidade']) ? $_SESSION['user_cidade']:'';
 $cep = isset($_SESSION['user_cep']) ? $_SESSION['user_cep']:'';
 $data_nascimento = isset($_SESSION['user_data_nasc']) ? $_SESSION['user_data_nasc']:'';
+
+// Verificar se o usuário já possui cadastro habitacional
+$cadastro_existente = null;
+$pode_cadastrar = true;
+$mensagem_aviso = '';
+
+try {
+    require_once '../database/conect.php';
+    
+    $stmt_check = $conn->prepare("
+        SELECT 
+            cad_social_id,
+            cad_social_protocolo, 
+            cad_social_status, 
+            cad_social_data_cadastro,
+            DATEDIFF(NOW(), cad_social_data_cadastro) as dias_desde_cadastro
+        FROM tb_cad_social 
+        WHERE cad_usu_id = :usuario_id
+        ORDER BY cad_social_data_cadastro DESC
+        LIMIT 1
+    ");
+    $stmt_check->bindParam(':usuario_id', $_SESSION['user_id']);
+    $stmt_check->execute();
+    
+    if ($stmt_check->rowCount() > 0) {
+        $cadastro_existente = $stmt_check->fetch();
+        $status = $cadastro_existente['cad_social_status'];
+        $dias_desde = intval($cadastro_existente['dias_desde_cadastro']);
+        $data_cadastro = date('d/m/Y', strtotime($cadastro_existente['cad_social_data_cadastro']));
+        
+        // Verificar se pode fazer novo cadastro
+        switch ($status) {
+            case 'PENDENTE DE ANÁLISE':
+            case 'EM ANÁLISE':
+            case 'AGUARDANDO DOCUMENTAÇÃO':
+                $pode_cadastrar = false;
+                $mensagem_aviso = "
+                    <div class='alert alert-info' style='margin: 20px 0; padding: 15px; background-color: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px; border-left: 4px solid #17a2b8;'>
+                        <h4 style='margin-top: 0; color: #0c5460;'><i class='fas fa-info-circle'></i> Cadastro em Andamento</h4>
+                        <p style='margin-bottom: 10px;'><strong>Você já possui um cadastro em andamento no Programa Habitacional.</strong></p>
+                        <p style='margin-bottom: 8px;'><strong>📋 Protocolo:</strong> {$cadastro_existente['cad_social_protocolo']}</p>
+                        <p style='margin-bottom: 8px;'><strong>📊 Status:</strong> {$status}</p>
+                        <p style='margin-bottom: 8px;'><strong>📅 Data do Cadastro:</strong> {$data_cadastro}</p>
+                        <hr style='margin: 15px 0;'>
+                        <p style='margin-bottom: 8px;'><strong>📞 Para acompanhar:</strong></p>
+                        <p style='margin-bottom: 5px;'>• Telefone: (46) 98832-3832</p>
+                        <p style='margin-bottom: 5px;'>• Email: assistenciasocial.sio@gmail.com</p>
+                        <p style='margin-bottom: 0;'>• Ou consulte o status das suas solicitações no portal</p>
+                    </div>
+                ";
+                break;
+                
+            case 'APROVADO':
+            case 'CONTEMPLADO':
+                $pode_cadastrar = false;
+                $mensagem_aviso = "
+                    <div class='alert alert-success' style='margin: 20px 0; padding: 15px; background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; border-left: 4px solid #28a745;'>
+                        <h4 style='margin-top: 0; color: #155724;'><i class='fas fa-check-circle'></i> Parabéns! Você foi Contemplado!</h4>
+                        <p style='margin-bottom: 10px;'><strong>Você já foi contemplado no Programa Habitacional.</strong></p>
+                        <p style='margin-bottom: 8px;'><strong>📋 Protocolo:</strong> {$cadastro_existente['cad_social_protocolo']}</p>
+                        <p style='margin-bottom: 8px;'><strong>📊 Status:</strong> {$status}</p>
+                        <p style='margin-bottom: 8px;'><strong>📅 Data do Cadastro:</strong> {$data_cadastro}</p>
+                        <hr style='margin: 15px 0;'>
+                        <p style='margin-bottom: 0;'>Para mais informações, entre em contato com a Secretaria de Assistência Social.</p>
+                    </div>
+                ";
+                break;
+                
+            case 'NEGADO':
+                $dias_necessarios = 180;
+                if ($dias_desde < $dias_necessarios) {
+                    $pode_cadastrar = false;
+                    $dias_restantes = $dias_necessarios - $dias_desde;
+                    $data_liberacao = date('d/m/Y', strtotime("+{$dias_restantes} days"));
+                    
+                    $mensagem_aviso = "
+                        <div class='alert alert-warning' style='margin: 20px 0; padding: 15px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; border-left: 4px solid #ffc107;'>
+                            <h4 style='margin-top: 0; color: #856404;'><i class='fas fa-clock'></i> Aguarde para Novo Cadastro</h4>
+                            <p style='margin-bottom: 10px;'><strong>Seu último cadastro foi negado. Você deve aguardar para fazer um novo.</strong></p>
+                            <p style='margin-bottom: 8px;'><strong>📋 Protocolo Anterior:</strong> {$cadastro_existente['cad_social_protocolo']}</p>
+                            <p style='margin-bottom: 8px;'><strong>📅 Data do Cadastro:</strong> {$data_cadastro}</p>
+                            <p style='margin-bottom: 8px;'><strong>⏳ Tempo Restante:</strong> {$dias_restantes} dias</p>
+                            <p style='margin-bottom: 8px;'><strong>🗓️ Liberado em:</strong> {$data_liberacao}</p>
+                            <hr style='margin: 15px 0;'>
+                            <p style='margin-bottom: 0;'>Para esclarecimentos sobre a negativa, entre em contato com a Secretaria de Assistência Social.</p>
+                        </div>
+                    ";
+                } else {
+                    $mensagem_aviso = "
+                        <div class='alert alert-info' style='margin: 20px 0; padding: 15px; background-color: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px; border-left: 4px solid #17a2b8;'>
+                            <h4 style='margin-top: 0; color: #0c5460;'><i class='fas fa-info-circle'></i> Novo Cadastro Liberado</h4>
+                            <p style='margin-bottom: 10px;'>Você pode realizar um novo cadastro no Programa Habitacional.</p>
+                            <p style='margin-bottom: 8px;'><strong>📋 Cadastro Anterior:</strong> {$cadastro_existente['cad_social_protocolo']} (Status: {$status})</p>
+                            <p style='margin-bottom: 0;'>Preencha o formulário abaixo para fazer sua nova solicitação.</p>
+                        </div>
+                    ";
+                }
+                break;
+                
+            case 'CANCELADO':
+                $dias_necessarios = 90;
+                if ($dias_desde < $dias_necessarios) {
+                    $pode_cadastrar = false;
+                    $dias_restantes = $dias_necessarios - $dias_desde;
+                    $data_liberacao = date('d/m/Y', strtotime("+{$dias_restantes} days"));
+                    
+                    $mensagem_aviso = "
+                        <div class='alert alert-warning' style='margin: 20px 0; padding: 15px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; border-left: 4px solid #ffc107;'>
+                            <h4 style='margin-top: 0; color: #856404;'><i class='fas fa-clock'></i> Aguarde para Novo Cadastro</h4>
+                            <p style='margin-bottom: 10px;'><strong>Seu último cadastro foi cancelado. Você deve aguardar para fazer um novo.</strong></p>
+                            <p style='margin-bottom: 8px;'><strong>📋 Protocolo Anterior:</strong> {$cadastro_existente['cad_social_protocolo']}</p>
+                            <p style='margin-bottom: 8px;'><strong>📅 Data do Cancelamento:</strong> {$data_cadastro}</p>
+                            <p style='margin-bottom: 8px;'><strong>⏳ Tempo Restante:</strong> {$dias_restantes} dias</p>
+                            <p style='margin-bottom: 8px;'><strong>🗓️ Liberado em:</strong> {$data_liberacao}</p>
+                            <hr style='margin: 15px 0;'>
+                            <p style='margin-bottom: 0;'>Para dúvidas, entre em contato com a Secretaria de Assistência Social.</p>
+                        </div>
+                    ";
+                } else {
+                    $mensagem_aviso = "
+                        <div class='alert alert-info' style='margin: 20px 0; padding: 15px; background-color: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px; border-left: 4px solid #17a2b8;'>
+                            <h4 style='margin-top: 0; color: #0c5460;'><i class='fas fa-info-circle'></i> Novo Cadastro Liberado</h4>
+                            <p style='margin-bottom: 10px;'>Você pode realizar um novo cadastro no Programa Habitacional.</p>
+                            <p style='margin-bottom: 8px;'><strong>📋 Cadastro Anterior:</strong> {$cadastro_existente['cad_social_protocolo']} (Status: {$status})</p>
+                            <p style='margin-bottom: 0;'>Preencha o formulário abaixo para fazer sua nova solicitação.</p>
+                        </div>
+                    ";
+                }
+                break;
+                
+            case 'INDEFERIDO':
+            case 'ARQUIVADO':
+                $dias_necessarios = 30;
+                if ($dias_desde < $dias_necessarios) {
+                    $pode_cadastrar = false;
+                    $dias_restantes = $dias_necessarios - $dias_desde;
+                    $data_liberacao = date('d/m/Y', strtotime("+{$dias_restantes} days"));
+                    
+                    $mensagem_aviso = "
+                        <div class='alert alert-warning' style='margin: 20px 0; padding: 15px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; border-left: 4px solid #ffc107;'>
+                            <h4 style='margin-top: 0; color: #856404;'><i class='fas fa-clock'></i> Aguarde para Novo Cadastro</h4>
+                            <p style='margin-bottom: 10px;'><strong>Você deve aguardar {$dias_restantes} dias para fazer um novo cadastro.</strong></p>
+                            <p style='margin-bottom: 8px;'><strong>📋 Protocolo Anterior:</strong> {$cadastro_existente['cad_social_protocolo']}</p>
+                            <p style='margin-bottom: 8px;'><strong>📊 Status Anterior:</strong> {$status}</p>
+                            <p style='margin-bottom: 8px;'><strong>📅 Data:</strong> {$data_cadastro}</p>
+                            <p style='margin-bottom: 8px;'><strong>🗓️ Liberado em:</strong> {$data_liberacao}</p>
+                        </div>
+                    ";
+                } else {
+                    $mensagem_aviso = "
+                        <div class='alert alert-info' style='margin: 20px 0; padding: 15px; background-color: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px; border-left: 4px solid #17a2b8;'>
+                            <h4 style='margin-top: 0; color: #0c5460;'><i class='fas fa-info-circle'></i> Novo Cadastro Liberado</h4>
+                            <p style='margin-bottom: 10px;'>Você pode realizar um novo cadastro no Programa Habitacional.</p>
+                            <p style='margin-bottom: 8px;'><strong>📋 Cadastro Anterior:</strong> {$cadastro_existente['cad_social_protocolo']} (Status: {$status})</p>
+                            <p style='margin-bottom: 0;'>Preencha o formulário abaixo para fazer sua nova solicitação.</p>
+                        </div>
+                    ";
+                }
+                break;
+                
+            default:
+                // Para outros status, mostrar info mas permitir cadastro
+                $mensagem_aviso = "
+                    <div class='alert alert-info' style='margin: 20px 0; padding: 15px; background-color: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px; border-left: 4px solid #17a2b8;'>
+                        <h4 style='margin-top: 0; color: #0c5460;'><i class='fas fa-info-circle'></i> Cadastro Anterior Encontrado</h4>
+                        <p style='margin-bottom: 8px;'><strong>📋 Protocolo:</strong> {$cadastro_existente['cad_social_protocolo']}</p>
+                        <p style='margin-bottom: 8px;'><strong>📊 Status:</strong> {$status}</p>
+                        <p style='margin-bottom: 8px;'><strong>📅 Data:</strong> {$data_cadastro}</p>
+                        <p style='margin-bottom: 0;'>Você pode realizar um novo cadastro se necessário.</p>
+                    </div>
+                ";
+                break;
+        }
+    }
+    
+} catch (Exception $e) {
+    // Erro silencioso, não impede o carregamento da página
+    error_log("Erro ao verificar cadastro anterior: " . $e->getMessage());
+}
 ?>
 
 <!DOCTYPE html>
@@ -170,6 +350,23 @@ $data_nascimento = isset($_SESSION['user_data_nasc']) ? $_SESSION['user_data_nas
             background-color: #fff8f8 !important;
         }
         
+        /* Estilos para formulário desabilitado */
+        .form-disabled {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .form-disabled::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            z-index: 1000;
+        }
+        
         @media (max-width: 768px) {
             .step-text {
                 display: none;
@@ -216,6 +413,12 @@ $data_nascimento = isset($_SESSION['user_data_nasc']) ? $_SESSION['user_data_nas
         <div id="status-message" class="status-message"></div>
         <h2 class="section-title"><i class="fas fa-building"></i> Cadastro para Programas Habitacionais</h2>
         
+        <!-- Mostrar aviso se houver cadastro existente -->
+        <?php if (!empty($mensagem_aviso)): ?>
+            <?php echo $mensagem_aviso; ?>
+        <?php endif; ?>
+        
+        <?php if ($pode_cadastrar): ?>
         <!-- Navegação em etapas -->
         <ul class="step-nav">
             <li class="active" data-step="1">
@@ -732,7 +935,7 @@ $data_nascimento = isset($_SESSION['user_data_nasc']) ? $_SESSION['user_data_nas
                         <div class="form-group full-width">
                             <div style="display: flex; align-items: flex-start; margin-top: 15px; background-color: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 3px solid #0d47a1;">
                                 <input type="checkbox" id="autoriza_credito" name="autoriza_credito" style="margin-right: 10px; margin-top: 3px;" required>
-                                <label for="autoriza_credito" class="required">Estou ciente e autorizo que a Prefeitura Municipal de Santa Izabel do Oeste realize consultas de crédito em meu nome para fins de avaliação neste programa habitacional.</label>
+                                <label for="autoriza_credito" class="required">Estou ciente e autorizo que a ACESIO, realize consultas de crédito em meu nome para fins de avaliação neste programa habitacional.</label>
                             </div>
                         </div>
                     </div>
@@ -765,11 +968,24 @@ $data_nascimento = isset($_SESSION['user_data_nasc']) ? $_SESSION['user_data_nas
             </div>
 
             <div class="buttons-container" style="display: none;">
-                <button type="button" class="print-button" id="print-button">
+                <button type="button" class="print-button" id="print-button" href="social-relatorio-habitacao.php">
                     <i class="fas fa-print"></i> Imprimir Comprovante
                 </button>
             </div>
         </form>
+        
+        <?php else: ?>
+        <div style="text-align: center; padding: 40px 20px;">
+            <p style="font-size: 1.1rem; margin-bottom: 20px;">
+                <i class="fas fa-info-circle" style="color: #0d47a1; font-size: 1.5rem; margin-right: 10px;"></i>
+                O formulário de cadastro não está disponível no momento devido ao status do seu cadastro anterior.
+            </p>
+            <a href="social.php" class="btn-primary" style="display: inline-flex; align-items: center; text-decoration: none;">
+                <i class="fas fa-arrow-left" style="margin-right: 10px;"></i>
+                Voltar para Assistência Social
+            </a>
+        </div>
+        <?php endif; ?>
     </div>
 
     <footer>
