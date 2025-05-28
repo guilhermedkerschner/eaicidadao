@@ -1519,6 +1519,27 @@ $cor_tema = $is_admin ? '#e74c3c' : '#e91e63';
             margin-bottom: 25px;
             line-height: 1.5;
         }
+
+        .btn-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background-color: #138496;
+        }
+
+        /* Estilo para destacar o botão principal */
+        .btn-view {
+            background-color: var(--secondary-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        .btn-view:hover {
+            background-color: #c2185b;
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
@@ -1992,10 +2013,18 @@ $cor_tema = $is_admin ? '#e74c3c' : '#e91e63';
                             </td>
                             <td>
                                 <div class="actions">
-                                    <a href="?id=<?php echo $inscricao['cad_social_id']; ?>" 
-                                       class="btn-action btn-view" title="Ver Detalhes">
+                                    <!-- Botão para a nova tela de visualização -->
+                                    <a href="visualizar_cadastro_habitacao.php?id=<?php echo $inscricao['cad_social_id']; ?>" 
+                                    class="btn-action btn-view" title="Ver Detalhes Completos">
                                         <i class="fas fa-eye"></i>
                                     </a>
+                                    
+                                    <!-- Botão para visualização rápida (modal atual) -->
+                                    <a href="assistencia.php?id=<?php echo $inscricao['cad_social_id']; ?>" 
+                                    class="btn-action btn-info" title="Visualização Rápida">
+                                        <i class="fas fa-search"></i>
+                                    </a>
+                                    
                                     <button type="button" class="btn-action btn-edit" 
                                             title="Alterar Status"
                                             onclick="openStatusModal(<?php echo $inscricao['cad_social_id']; ?>, '<?php echo htmlspecialchars($inscricao['cad_social_status']); ?>')">
