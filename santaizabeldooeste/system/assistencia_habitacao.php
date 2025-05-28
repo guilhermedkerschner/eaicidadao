@@ -11,6 +11,13 @@ if (!isset($_SESSION['usersystem_logado'])) {
 // Inclui arquivo de configuração com conexão ao banco de dados
 require_once "../lib/config.php";
 
+require_once 'controller/carregar_permissoes.php';
+
+if (!verificarPermissaoUsuario($conn, $_SESSION['usersystem_id'], 'relatorios', 'visualizar')) {
+    header("Location: acesso_negado.php");
+    exit;
+}
+
 // Definição de variáveis
 $mensagem = "";
 $tipo_mensagem = "";

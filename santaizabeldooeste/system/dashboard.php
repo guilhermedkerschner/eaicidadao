@@ -54,7 +54,7 @@ $menus_departamentos = [
         'submenu' => [
             'Atendimentos' => '#',
             'Benefícios' => '#',
-            'Programas Habitacionais' => 'habitacao_lista.php',
+            'Programas Habitacionais' => 'assistencia_habitacao.php',
             'Relatórios' => '#'
         ]
     ],
@@ -615,8 +615,8 @@ if ($is_admin) {
                 </a>
                 <ul class="submenu">
                     <li><a href="lista_usuarios.php" class="submenu-link">Lista de Usuários</a></li>
-                    <li><a href="#" class="submenu-link">Adicionar Usuário</a></li>
-                    <li><a href="#" class="submenu-link">Permissões</a></li>
+                    <li><a href="adicionar_usuario.php" class="submenu-link">Adicionar Usuário</a></li>
+                    <li><a href="permissoes.php" class="submenu-link">Permissões</a></li>
                 </ul>
             </li>
             
