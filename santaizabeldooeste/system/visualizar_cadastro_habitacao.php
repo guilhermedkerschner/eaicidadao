@@ -1,4 +1,9 @@
 <?php
+// Ativar exibição de erros para debug
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+
 // Inicia a sessão
 session_start();
 
@@ -46,7 +51,7 @@ if (!$tem_permissao) {
 
 // Verificar se o ID foi fornecido
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    header("Location: assistencia.php?erro=id_invalido");
+    header("Location: assistencia_habitacao.php?erro=id_invalido");
     exit;
 }
 
@@ -100,12 +105,12 @@ try {
         $stmt->execute();
         $arquivos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } else {
-        header("Location: assistencia.php?erro=inscricao_nao_encontrada");
+        header("Location: assistencia_habitacao.php?erro=inscricao_nao_encontrada");
         exit;
     }
 } catch (PDOException $e) {
     error_log("Erro ao buscar informações: " . $e->getMessage());
-    header("Location: assistencia.php?erro=erro_database");
+    header("Location: assistencia_habitacao.php?erro=erro_database");
     exit;
 }
 
@@ -168,7 +173,7 @@ $cor_tema = $is_admin ? '#e74c3c' : '#e91e63';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visualizar Cadastro Habitacional - Sistema da Prefeitura</title>
+    <title>Visualizar Cadastro Habitacional - Sistema</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -197,7 +202,7 @@ $cor_tema = $is_admin ? '#e74c3c' : '#e91e63';
             background-color: #f5f7fa;
         }
 
-        /* Sidebar - Mesmo padrão dos outros arquivos */
+        /* Sidebar */
         .sidebar {
             width: var(--sidebar-width);
             background-color: var(--primary-color);
@@ -567,6 +572,7 @@ $cor_tema = $is_admin ? '#e74c3c' : '#e91e63';
             display: flex;
             border-bottom: 2px solid #e9ecef;
             margin-bottom: 20px;
+            flex-wrap: wrap;
         }
 
         .tab {
@@ -885,7 +891,7 @@ $cor_tema = $is_admin ? '#e74c3c' : '#e91e63';
                 <ul class="submenu">
                     <li><a href="#" class="submenu-link">Atendimentos</a></li>
                     <li><a href="#" class="submenu-link">Benefícios</a></li>
-                    <li><a href="assistencia.php" class="submenu-link active">Programas Habitacionais</a></li>
+                    <li><a href="assistencia_habitacao.php" class="submenu-link active">Programas Habitacionais</a></li>
                     <li><a href="#" class="submenu-link">Relatórios</a></li>
                 </ul>
             </li>
@@ -905,7 +911,7 @@ $cor_tema = $is_admin ? '#e74c3c' : '#e91e63';
                 <ul class="submenu">
                     <li><a href="#" class="submenu-link">Atendimentos</a></li>
                     <li><a href="#" class="submenu-link">Benefícios</a></li>
-                    <li><a href="assistencia.php" class="submenu-link active">Programas Habitacionais</a></li>
+                    <li><a href="assistencia_habitacao.php" class="submenu-link active">Programas Habitacionais</a></li>
                     <li><a href="#" class="submenu-link">Relatórios</a></li>
                 </ul>
             </li>
@@ -931,8 +937,502 @@ $cor_tema = $is_admin ? '#e74c3c' : '#e91e63';
     </div>
 
     <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <div class="header">
+            <div>
+                <button class="mobile-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h2>Programas Habitacionais</h2>
+            </div>
+            <div class="user-info">
+                <div style="width: 35px; height: 35px; border-radius: 50%; background-color: var(--secondary-color); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                    <?php echo strtoupper(substr($usuario_nome, 0, 1)); ?>
+                </div>
+                <div class="user-details">
+                    <div class="user-name"><?php echo htmlspecialchars($usuario_nome); ?></div>
+                    <div class="user-role">
+                        <?php if ($is_admin): ?>
+                        <span class="admin-badge">
+                            <i class="fas fa-crown"></i> Administrador
+                        </span>
+                        <?php else: ?>
+                        <span class="department-badge">
+                            Assistência Social
+                        </span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <h1 class="page-title">
+            <i class="fas fa-eye"></i>
+            Visualizar Cadastro Habitacional
+        </h1>
+
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="dashboard.php">Dashboard</a>
+            <i class="fas fa-chevron-right"></i>
+            <a href="assistencia_habitacao.php">Assistência Habitacional</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Visualizar Cadastro</span>
+        </div>
+
+        <!-- Informações Principais -->
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <i class="fas fa-info-circle"></i>
+                    Informações Principais
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <span class="status-badge <?php echo getStatusClass($inscricao_atual['cad_social_status']); ?>">
+                        <?php echo htmlspecialchars($inscricao_atual['cad_social_status']); ?>
+                    </span>
+                    <a href="assistencia_habitacao.php" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-arrow-left"></i> Voltar
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="info-grid">
+                    <div class="info-section">
+                        <h4><i class="fas fa-clipboard-list"></i> Dados do Protocolo</h4>
+                        <div class="info-item">
+                            <div class="info-label">Protocolo</div>
+                            <div class="info-value"><?php echo htmlspecialchars($inscricao_atual['cad_social_protocolo']); ?></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Data de Cadastro</div>
+                            <div class="info-value"><?php echo formatarData($inscricao_atual['cad_social_data_cadastro']); ?></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Programa de Interesse</div>
+                            <div class="info-value"><?php echo htmlspecialchars($inscricao_atual['cad_social_programa_interesse'] ?? 'Não informado'); ?></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Cadastrado por</div>
+                            <div class="info-value"><?php echo htmlspecialchars($inscricao_atual['cad_usu_nome'] ?? 'Sistema'); ?></div>
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <h4><i class="fas fa-user"></i> Dados Pessoais</h4>
+                        <div class="info-item">
+                            <div class="info-label">Nome Completo</div>
+                            <div class="info-value"><?php echo htmlspecialchars($inscricao_atual['cad_social_nome']); ?></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">CPF</div>
+                            <div class="info-value"><?php echo formatarCPF($inscricao_atual['cad_social_cpf']); ?></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">RG</div>
+                            <div class="info-value"><?php echo htmlspecialchars($inscricao_atual['cad_social_rg'] ?? 'Não informado'); ?></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Data de Nascimento</div>
+                            <div class="info-value"><?php echo formatarDataBR($inscricao_atual['cad_social_data_nascimento']); ?></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Gênero</div>
+                            <div class="info-value"><?php echo htmlspecialchars($inscricao_atual['cad_social_genero']); ?></div>
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <h4><i class="fas fa-phone"></i> Contato</h4>
+                        <div class="info-item">
+                            <div class="info-label">E-mail</div>
+                            <div class="info-value"><?php echo htmlspecialchars($inscricao_atual['cad_social_email']); ?></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Celular</div>
+                            <div class="info-value"><?php echo formatarTelefone($inscricao_atual['cad_social_celular']); ?></div>
+                        </div>
+                        <?php if ($inscricao_atual['cad_social_telefone']): ?>
+                        <div class="info-item">
+                            <div class="info-label">Telefone</div>
+                            <div class="info-value"><?php echo formatarTelefone($inscricao_atual['cad_social_telefone']); ?></div>
+                        </div>
+                        <?php endif; ?>
+                        <div class="info-item">
+                            <div class="info-label">Autoriza Notificações</div>
+                            <div class="info-value"><?php echo $inscricao_atual['cad_social_autoriza_email'] ? 'Sim' : 'Não'; ?></div>
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <h4><i class="fas fa-home"></i> Endereço</h4>
+                        <div class="info-item">
+                            <div class="info-label">Endereço Completo</div>
+                            <div class="info-value">
+                                <?php echo htmlspecialchars($inscricao_atual['cad_social_rua']); ?>, 
+                                <?php echo htmlspecialchars($inscricao_atual['cad_social_numero']); ?>
+                                <?php echo $inscricao_atual['cad_social_complemento'] ? ', ' . htmlspecialchars($inscricao_atual['cad_social_complemento']) : ''; ?><br>
+                                <?php echo htmlspecialchars($inscricao_atual['cad_social_bairro']); ?><br>
+                                <?php echo htmlspecialchars($inscricao_atual['cad_social_cidade']); ?> - 
+                                CEP: <?php echo substr($inscricao_atual['cad_social_cep'], 0, 5) . '-' . substr($inscricao_atual['cad_social_cep'], 5); ?>
+                            </div>
+                        </div>
+                        <?php if ($inscricao_atual['cad_social_ponto_referencia']): ?>
+                        <div class="info-item">
+                            <div class="info-label">Ponto de Referência</div>
+                            <div class="info-value"><?php echo htmlspecialchars($inscricao_atual['cad_social_ponto_referencia']); ?></div>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs de Informações Detalhadas -->
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <i class="fas fa-folder-open"></i>
+                    Informações Detalhadas
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="tabs">
+                    <button class="tab active" onclick="showTab('informacoes-adicionais')">
+                        <i class="fas fa-info-circle"></i> Informações Adicionais
+                    </button>
+                    <button class="tab" onclick="showTab('situacao-trabalho')">
+                        <i class="fas fa-briefcase"></i> Situação Trabalhista
+                    </button>
+                    <button class="tab" onclick="showTab('moradia')">
+                        <i class="fas fa-home"></i> Situação de Moradia
+                    </button>
+                    <?php if ($inscricao_atual['cad_social_estado_civil'] == 'CASADO(A)' || $inscricao_atual['cad_social_estado_civil'] == 'UNIÃO ESTÁVEL/AMASIADO(A)'): ?>
+                    <button class="tab" onclick="showTab('conjuge')">
+                        <i class="fas fa-user-friends"></i> Cônjuge
+                    </button>
+                    <?php endif; ?>
+                    <button class="tab" onclick="showTab('dependentes')">
+                        <i class="fas fa-users"></i> Dependentes (<?php echo count($dependentes); ?>)
+                    </button>
+                    <button class="tab" onclick="showTab('historico')">
+                        <i class="fas fa-history"></i> Histórico (<?php echo count($comentarios); ?>)
+                    </button>
+                    <button class="tab" onclick="showTab('arquivos')">
+                        <i class="fas fa-file-alt"></i> Arquivos
+                    </button>
+                </div>
+
+                <!-- Tab: Informações Adicionais -->
+                <div id="informacoes-adicionais" class="tab-content active">
+                    <div class="info-grid">
+                        <div class="info-section">
+                            <h4><i class="fas fa-user-plus"></i> Informações Pessoais</h4>
+                            <div class="info-item">
+                                <div class="info-label">Estado Civil</div>
+                                <div class="info-value"><?php echo htmlspecialchars($inscricao_atual['cad_social_estado_civil']); ?></div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Escolaridade</div>
+                                <div class="info-value"><?php echo htmlspecialchars($inscricao_atual['cad_social_escolaridade']); ?></div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Possui Deficiência</div>
+                                <div class="info-value"><?php echo htmlspecialchars($inscricao_atual['cad_social_deficiencia']); ?></div>
+                            </div>
+                            <?php if ($inscricao_atual['cad_social_deficiencia'] !== 'NÃO' && $inscricao_atual['cad_social_deficiencia_fisica_detalhe']): ?>
+                            <div class="info-item">
+                                <div class="info-label">Detalhes da Deficiência</div>
+                                <div class="info-value"><?php echo htmlspecialchars($inscricao_atual['cad_social_deficiencia_fisica_detalhe']); ?></div>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Situação Trabalhista -->
+                <div id="situacao-trabalho" class="tab-content">
+                    <div class="info-grid">
+                        <div class="info-section">
+                            <h4><i class="fas fa-briefcase"></i> Situação de Trabalho</h4>
+                            <div class="info-item">
+                                <div class="info-label">Situação de Trabalho</div>
+                                <div class="info-value"><?php echo htmlspecialchars($inscricao_atual['cad_social_situacao_trabalho']); ?></div>
+                            </div>
+                            <?php if ($inscricao_atual['cad_social_situacao_trabalho'] != 'DESEMPREGADO'): ?>
+                            <div class="info-item">
+                                <div class="info-label">Profissão</div>
+                                <div class="info-value"><?php echo htmlspecialchars($inscricao_atual['cad_social_profissao'] ?? 'Não informado'); ?></div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Empregador</div>
+                                <div class="info-value"><?php echo htmlspecialchars($inscricao_atual['cad_social_empregador'] ?? 'Não informado'); ?></div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Cargo</div>
+                                <div class="info-value"><?php echo htmlspecialchars($inscricao_atual['cad_social_cargo'] ?? 'Não informado'); ?></div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Tempo de Serviço</div>
+                                <div class="info-value"><?php echo htmlspecialchars($inscricao_atual['cad_social_tempo_servico'] ?? 'Não informado'); ?></div>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Situação de Moradia -->
+                <div id="moradia" class="tab-content">
+                    <div class="info-grid">
+                        <div class="info-section">
+                            <h4><i class="fas fa-home"></i> Situação Habitacional</h4>
+                            <div class="info-item">
+                                <div class="info-label">Tipo de Moradia</div>
+                                <div class="info-value"><?php echo htmlspecialchars($inscricao_atual['cad_social_tipo_moradia']); ?></div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Situação da Propriedade</div>
+                                <div class="info-value"><?php echo htmlspecialchars($inscricao_atual['cad_social_situacao_propriedade']); ?></div>
+                            </div>
+                            <?php if ($inscricao_atual['cad_social_situacao_propriedade'] == 'ALUGADA' && $inscricao_atual['cad_social_valor_aluguel']): ?>
+                            <div class="info-item">
+                                <div class="info-label">Valor do Aluguel</div>
+                                <div class="info-value">R$ <?php echo number_format($inscricao_atual['cad_social_valor_aluguel'], 2, ',', '.'); ?></div>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Cônjuge -->
+                <?php if ($inscricao_atual['cad_social_estado_civil'] == 'CASADO(A)' || $inscricao_atual['cad_social_estado_civil'] == 'UNIÃO ESTÁVEL/AMASIADO(A)'): ?>
+                <div id="conjuge" class="tab-content">
+                    <div class="info-grid">
+                        <div class="info-section">
+                            <h4><i class="fas fa-user-friends"></i> Informações do Cônjuge</h4>
+                            <div class="info-item">
+                                <div class="info-label">Nome do Cônjuge</div>
+                                <div class="info-value"><?php echo htmlspecialchars($inscricao_atual['cad_social_conjuge_nome'] ?? 'Não informado'); ?></div>
+                            </div>
+                            <?php if ($inscricao_atual['cad_social_conjuge_cpf']): ?>
+                            <div class="info-item">
+                                <div class="info-label">CPF do Cônjuge</div>
+                                <div class="info-value"><?php echo formatarCPF($inscricao_atual['cad_social_conjuge_cpf']); ?></div>
+                            </div>
+                            <?php endif; ?>
+                            <?php if ($inscricao_atual['cad_social_conjuge_data_nascimento']): ?>
+                            <div class="info-item">
+                                <div class="info-label">Data de Nascimento</div>
+                                <div class="info-value"><?php echo formatarDataBR($inscricao_atual['cad_social_conjuge_data_nascimento']); ?></div>
+                            </div>
+                            <?php endif; ?>
+                            <div class="info-item">
+                                <div class="info-label">Cônjuge possui renda</div>
+                                <div class="info-value"><?php echo htmlspecialchars($inscricao_atual['cad_social_conjuge_renda'] ?? 'Não informado'); ?></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <!-- Tab: Dependentes -->
+                <div id="dependentes" class="tab-content">
+                    <?php if (empty($dependentes)): ?>
+                    <div class="empty-state">
+                        <i class="fas fa-users"></i>
+                        <h3>Nenhum dependente cadastrado</h3>
+                        <p>Não há dependentes registrados para esta inscrição.</p>
+                    </div>
+                    <?php else: ?>
+                    <?php foreach ($dependentes as $index => $dependente): ?>
+                    <div class="dependente-card">
+                        <div class="dependente-header">
+                            <i class="fas fa-user"></i>
+                            Dependente <?php echo $index + 1; ?>: <?php echo htmlspecialchars($dependente['cad_social_dependente_nome']); ?>
+                        </div>
+                        <div class="info-grid">
+                            <div class="info-section">
+                                <div class="info-item">
+                                    <div class="info-label">Data de Nascimento</div>
+                                    <div class="info-value"><?php echo formatarDataBR($dependente['cad_social_dependente_data_nascimento']); ?></div>
+                                </div>
+                                <?php if ($dependente['cad_social_dependente_cpf']): ?>
+                                <div class="info-item">
+                                    <div class="info-label">CPF</div>
+                                    <div class="info-value"><?php echo formatarCPF($dependente['cad_social_dependente_cpf']); ?></div>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                            <div class="info-section">
+                                <div class="info-item">
+                                    <div class="info-label">Possui Deficiência</div>
+                                    <div class="info-value"><?php echo htmlspecialchars($dependente['cad_social_dependente_deficiencia']); ?></div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Possui Renda</div>
+                                    <div class="info-value"><?php echo htmlspecialchars($dependente['cad_social_dependente_renda']); ?></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Tab: Histórico -->
+                <div id="historico" class="tab-content">
+                    <?php if (empty($comentarios)): ?>
+                    <div class="empty-state">
+                        <i class="fas fa-history"></i>
+                        <h3>Nenhum histórico encontrado</h3>
+                        <p>Não há registros de histórico para esta inscrição.</p>
+                    </div>
+                    <?php else: ?>
+                    <?php foreach ($comentarios as $comentario): ?>
+                    <div class="historico-item">
+                        <div class="historico-header">
+                            <div class="historico-acao"><?php echo htmlspecialchars($comentario['cad_social_hist_acao']); ?></div>
+                            <div class="historico-data"><?php echo formatarData($comentario['cad_social_hist_data']); ?></div>
+                        </div>
+                        <div class="historico-usuario">
+                            <i class="fas fa-user"></i> <?php echo htmlspecialchars($comentario['usuario_nome'] ?? 'Sistema'); ?>
+                        </div>
+                        <?php if ($comentario['cad_social_hist_observacao']): ?>
+                        <div class="historico-observacao">
+                            <?php echo nl2br(htmlspecialchars($comentario['cad_social_hist_observacao'])); ?>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Tab: Arquivos -->
+                <div id="arquivos" class="tab-content">
+                    <!-- Arquivos do Sistema -->
+                    <h4 style="margin-bottom: 15px; color: var(--primary-color);">
+                        <i class="fas fa-folder"></i> Arquivos do Sistema
+                    </h4>
+                    
+                    <?php if (empty($arquivos)): ?>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; color: #666;">
+                        <i class="fas fa-folder-open" style="font-size: 2rem; margin-bottom: 10px; color: #ddd;"></i>
+                        <p>Nenhum arquivo do sistema anexado.</p>
+                    </div>
+                    <?php else: ?>
+                    <?php foreach ($arquivos as $arquivo): ?>
+                    <div class="arquivo-item">
+                        <div class="arquivo-info">
+                            <div class="arquivo-nome">
+                                <i class="fas fa-file"></i> <?php echo htmlspecialchars($arquivo['cad_social_arq_nome_original'] ?? $arquivo['cad_social_arq_nome']); ?>
+                            </div>
+                            <div class="arquivo-meta">
+                                <span><i class="fas fa-user"></i> <?php echo htmlspecialchars($arquivo['usuario_nome'] ?? 'Sistema'); ?></span>
+                                <span style="margin-left: 15px;"><i class="fas fa-calendar"></i> <?php echo formatarData($arquivo['cad_social_arq_data']); ?></span>
+                                <?php if (isset($arquivo['cad_social_arq_tamanho'])): ?>
+                                <span style="margin-left: 15px;"><i class="fas fa-weight"></i> <?php echo formatarTamanhoArquivo($arquivo['cad_social_arq_tamanho']); ?></span>
+                                <?php endif; ?>
+                            </div>
+                            <?php if ($arquivo['cad_social_arq_descricao']): ?>
+                            <div style="margin-top: 5px; font-style: italic; color: #666;">
+                                <?php echo htmlspecialchars($arquivo['cad_social_arq_descricao']); ?>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="arquivo-actions">
+                            <a href="../uploads/habitacao/sistema/<?php echo htmlspecialchars($arquivo['cad_social_arq_nome']); ?>" 
+                               class="btn btn-primary btn-sm" target="_blank" title="Visualizar">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="../uploads/habitacao/sistema/<?php echo htmlspecialchars($arquivo['cad_social_arq_nome']); ?>" 
+                               class="btn btn-success btn-sm" download title="Baixar">
+                                <i class="fas fa-download"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
+
+                    <!-- Arquivos do Cidadão -->
+                    <h4 style="margin: 30px 0 15px 0; color: var(--primary-color);">
+                        <i class="fas fa-folder-open"></i> Arquivos do Cidadão
+                    </h4>
+                    
+                    <?php 
+                    $arquivos_cidadao = [];
+                    if ($inscricao_atual['cad_social_cpf_documento']) $arquivos_cidadao[] = ['nome' => 'Documento de CPF', 'arquivo' => $inscricao_atual['cad_social_cpf_documento'], 'icon' => 'fa-id-card'];
+                    if ($inscricao_atual['cad_social_escolaridade_documento']) $arquivos_cidadao[] = ['nome' => 'Comprovante de Escolaridade', 'arquivo' => $inscricao_atual['cad_social_escolaridade_documento'], 'icon' => 'fa-graduation-cap'];
+                    if ($inscricao_atual['cad_social_viuvo_documento']) $arquivos_cidadao[] = ['nome' => 'Certidão de Óbito', 'arquivo' => $inscricao_atual['cad_social_viuvo_documento'], 'icon' => 'fa-file-alt'];
+                    if ($inscricao_atual['cad_social_laudo_deficiencia']) $arquivos_cidadao[] = ['nome' => 'Laudo de Deficiência', 'arquivo' => $inscricao_atual['cad_social_laudo_deficiencia'], 'icon' => 'fa-file-medical'];
+                    if ($inscricao_atual['cad_social_conjuge_comprovante_renda']) $arquivos_cidadao[] = ['nome' => 'Comprovante de Renda do Cônjuge', 'arquivo' => $inscricao_atual['cad_social_conjuge_comprovante_renda'], 'icon' => 'fa-money-bill-wave'];
+                    if ($inscricao_atual['cad_social_carteira_trabalho']) $arquivos_cidadao[] = ['nome' => 'Carteira de Trabalho', 'arquivo' => $inscricao_atual['cad_social_carteira_trabalho'], 'icon' => 'fa-id-badge'];
+                    ?>
+                    
+                    <?php if (empty($arquivos_cidadao)): ?>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; color: #666;">
+                        <i class="fas fa-folder-open" style="font-size: 2rem; margin-bottom: 10px; color: #ddd;"></i>
+                        <p>Nenhum arquivo do cidadão anexado.</p>
+                    </div>
+                    <?php else: ?>
+                    <?php foreach ($arquivos_cidadao as $arquivo): ?>
+                    <div class="arquivo-item">
+                        <div class="arquivo-info">
+                            <div class="arquivo-nome">
+                                <i class="fas <?php echo $arquivo['icon']; ?>"></i> <?php echo $arquivo['nome']; ?>
+                            </div>
+                            <div class="arquivo-meta">
+                                <span><i class="fas fa-user"></i> Cidadão</span>
+                                <span style="margin-left: 15px;"><i class="fas fa-calendar"></i> <?php echo formatarData($inscricao_atual['cad_social_data_cadastro']); ?></span>
+                            </div>
+                        </div>
+                        <div class="arquivo-actions">
+                            <a href="../uploads/habitacao/<?php echo htmlspecialchars($arquivo['arquivo']); ?>" 
+                               class="btn btn-primary btn-sm" target="_blank" title="Visualizar">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="../uploads/habitacao/<?php echo htmlspecialchars($arquivo['arquivo']); ?>" 
+                               class="btn btn-success btn-sm" download title="Baixar">
+                                <i class="fas fa-download"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ações -->
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <i class="fas fa-cogs"></i>
+                    Ações
+                </div>
+            </div>
+            <div class="card-body">
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <a href="assistencia_habitacao.php?id=<?php echo $inscricao_id; ?>" class="btn btn-primary">
+                        <i class="fas fa-edit"></i> Gerenciar Cadastro
+                    </a>
+                    <button type="button" class="btn btn-info" onclick="window.print()">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                    <a href="assistencia_habitacao.php" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Voltar para Lista
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-    function initializePage() {
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+        });
+
+        function initializePage() {
             // Toggle sidebar
             const toggleBtn = document.querySelector('.toggle-btn');
             const mobileToggle = document.querySelector('.mobile-toggle');
@@ -1240,7 +1740,7 @@ $cor_tema = $is_admin ? '#e74c3c' : '#e91e63';
             
             // ESC para voltar
             if (e.key === 'Escape') {
-                window.location.href = 'assistencia.php';
+                window.location.href = 'assistencia_habitacao.php';
             }
             
             // Ctrl+1 a Ctrl+8 para alternar entre abas

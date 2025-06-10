@@ -7,6 +7,37 @@ if (!isset($_SESSION['user_logado'])) {
     exit;
 }
 
+// Tratar mensagens de erro da sessão
+if (isset($_SESSION['erro_habitacao'])) {
+    $erro_msg = $_SESSION['erro_habitacao'];
+    unset($_SESSION['erro_habitacao']); // Limpar após exibir
+}
+
+// Tratar mensagens de sucesso da sessão  
+if (isset($_SESSION['sucesso_habitacao'])) {
+    $sucesso_msg = $_SESSION['sucesso_habitacao'];
+    unset($_SESSION['sucesso_habitacao']); // Limpar após exibir
+}
+
+// Tratar parâmetros de erro da URL
+if (isset($_GET['error']) && $_GET['error'] === 'true') {
+    if (isset($_GET['msg'])) {
+        $erro_msg = urldecode($_GET['msg']);
+    } else {
+        $erro_msg = 'Ocorreu um erro inesperado. Tente novamente.';
+    }
+}
+
+// Tratar parâmetros de sucesso da URL (JavaScript já trata, mas por segurança)
+if (isset($_GET['success']) && $_GET['success'] === 'true') {
+    if (isset($_GET['protocolo'])) {
+        $protocolo = urldecode($_GET['protocolo']);
+        $sucesso_msg = "Cadastro realizado com sucesso! Protocolo: {$protocolo}";
+    } else {
+        $sucesso_msg = 'Cadastro realizado com sucesso!';
+    }
+}
+
 // Campos do usuário a serem usados no formulário
 $nome = isset($_SESSION['user_nome']) ? $_SESSION['user_nome']:'';
 $cpf = isset($_SESSION['user_cpf']) ? $_SESSION['user_cpf']:'';
@@ -53,7 +84,9 @@ try {
         switch ($status) {
             case 'PENDENTE DE ANÁLISE':
             case 'EM ANÁLISE':
-            case 'AGUARDANDO DOCUMENTAÇÃO':
+            case 'EM ANÁLISE FINANCEIRA':
+            case 'FINANCEIRO APROVADO':
+            case 'EM FASE DE SELEÇÃO':
                 $pode_cadastrar = false;
                 $mensagem_aviso = "
                     <div class='alert alert-info' style='margin: 20px 0; padding: 15px; background-color: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px; border-left: 4px solid #17a2b8;'>
@@ -71,7 +104,6 @@ try {
                 ";
                 break;
                 
-            case 'APROVADO':
             case 'CONTEMPLADO':
                 $pode_cadastrar = false;
                 $mensagem_aviso = "
@@ -87,8 +119,8 @@ try {
                 ";
                 break;
                 
-            case 'NEGADO':
-                $dias_necessarios = 180;
+            case 'FINANCEIRO REPROVADO':
+                $dias_necessarios = 30;
                 if ($dias_desde < $dias_necessarios) {
                     $pode_cadastrar = false;
                     $dias_restantes = $dias_necessarios - $dias_desde;
@@ -97,7 +129,7 @@ try {
                     $mensagem_aviso = "
                         <div class='alert alert-warning' style='margin: 20px 0; padding: 15px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; border-left: 4px solid #ffc107;'>
                             <h4 style='margin-top: 0; color: #856404;'><i class='fas fa-clock'></i> Aguarde para Novo Cadastro</h4>
-                            <p style='margin-bottom: 10px;'><strong>Seu último cadastro foi negado. Você deve aguardar para fazer um novo.</strong></p>
+                            <p style='margin-bottom: 10px;'><strong>Seu último cadastro foi reprovado. Você deve aguardar para fazer um novo.</strong></p>
                             <p style='margin-bottom: 8px;'><strong>📋 Protocolo Anterior:</strong> {$cadastro_existente['cad_social_protocolo']}</p>
                             <p style='margin-bottom: 8px;'><strong>📅 Data do Cadastro:</strong> {$data_cadastro}</p>
                             <p style='margin-bottom: 8px;'><strong>⏳ Tempo Restante:</strong> {$dias_restantes} dias</p>
@@ -118,8 +150,8 @@ try {
                 }
                 break;
                 
-            case 'CANCELADO':
-                $dias_necessarios = 90;
+            case 'CADASTRO REPROVADO':
+                $dias_necessarios = 30;
                 if ($dias_desde < $dias_necessarios) {
                     $pode_cadastrar = false;
                     $dias_restantes = $dias_necessarios - $dias_desde;
@@ -128,7 +160,7 @@ try {
                     $mensagem_aviso = "
                         <div class='alert alert-warning' style='margin: 20px 0; padding: 15px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; border-left: 4px solid #ffc107;'>
                             <h4 style='margin-top: 0; color: #856404;'><i class='fas fa-clock'></i> Aguarde para Novo Cadastro</h4>
-                            <p style='margin-bottom: 10px;'><strong>Seu último cadastro foi cancelado. Você deve aguardar para fazer um novo.</strong></p>
+                            <p style='margin-bottom: 10px;'><strong>Seu último cadastro foi reprovado. Você deve aguardar para fazer um novo.</strong></p>
                             <p style='margin-bottom: 8px;'><strong>📋 Protocolo Anterior:</strong> {$cadastro_existente['cad_social_protocolo']}</p>
                             <p style='margin-bottom: 8px;'><strong>📅 Data do Cancelamento:</strong> {$data_cadastro}</p>
                             <p style='margin-bottom: 8px;'><strong>⏳ Tempo Restante:</strong> {$dias_restantes} dias</p>
@@ -148,37 +180,7 @@ try {
                     ";
                 }
                 break;
-                
-            case 'INDEFERIDO':
-            case 'ARQUIVADO':
-                $dias_necessarios = 30;
-                if ($dias_desde < $dias_necessarios) {
-                    $pode_cadastrar = false;
-                    $dias_restantes = $dias_necessarios - $dias_desde;
-                    $data_liberacao = date('d/m/Y', strtotime("+{$dias_restantes} days"));
-                    
-                    $mensagem_aviso = "
-                        <div class='alert alert-warning' style='margin: 20px 0; padding: 15px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; border-left: 4px solid #ffc107;'>
-                            <h4 style='margin-top: 0; color: #856404;'><i class='fas fa-clock'></i> Aguarde para Novo Cadastro</h4>
-                            <p style='margin-bottom: 10px;'><strong>Você deve aguardar {$dias_restantes} dias para fazer um novo cadastro.</strong></p>
-                            <p style='margin-bottom: 8px;'><strong>📋 Protocolo Anterior:</strong> {$cadastro_existente['cad_social_protocolo']}</p>
-                            <p style='margin-bottom: 8px;'><strong>📊 Status Anterior:</strong> {$status}</p>
-                            <p style='margin-bottom: 8px;'><strong>📅 Data:</strong> {$data_cadastro}</p>
-                            <p style='margin-bottom: 8px;'><strong>🗓️ Liberado em:</strong> {$data_liberacao}</p>
-                        </div>
-                    ";
-                } else {
-                    $mensagem_aviso = "
-                        <div class='alert alert-info' style='margin: 20px 0; padding: 15px; background-color: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px; border-left: 4px solid #17a2b8;'>
-                            <h4 style='margin-top: 0; color: #0c5460;'><i class='fas fa-info-circle'></i> Novo Cadastro Liberado</h4>
-                            <p style='margin-bottom: 10px;'>Você pode realizar um novo cadastro no Programa Habitacional.</p>
-                            <p style='margin-bottom: 8px;'><strong>📋 Cadastro Anterior:</strong> {$cadastro_existente['cad_social_protocolo']} (Status: {$status})</p>
-                            <p style='margin-bottom: 0;'>Preencha o formulário abaixo para fazer sua nova solicitação.</p>
-                        </div>
-                    ";
-                }
-                break;
-                
+                              
             default:
                 // Para outros status, mostrar info mas permitir cadastro
                 $mensagem_aviso = "
@@ -206,6 +208,8 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https:;">
+    <meta name="referrer" content="same-origin">
     <title>Cadastro Habitacional - Eai Cidadão!</title>
     <!-- Font Awesome para ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -381,6 +385,131 @@ try {
                 width: 100%;
             }
         }
+
+        .alert {
+            position: relative;
+            animation: slideInDown 0.5s ease-out;
+        }
+        
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .alert i {
+            opacity: 0.8;
+        }
+        
+        .alert-danger {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        }
+        
+        /* Estilo para status message do JavaScript */
+        .status-message {
+            margin-bottom: 25px;
+            padding: 15px 20px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .status-message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            border-left: 4px solid #28a745;
+        }
+        
+        .status-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .status-message.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            border-left: 4px solid #17a2b8;
+        }
+        #print-button {
+            position: relative !important;
+            z-index: 999999 !important;
+            pointer-events: auto !important;
+            opacity: 1 !important;
+            cursor: pointer !important;
+            display: inline-block !important;
+        }
+
+        #print-button:not(:disabled) {
+            pointer-events: auto !important;
+            opacity: 1 !important;
+            cursor: pointer !important;
+        }
+
+        /* Container de botões sempre visível */
+        .buttons-container {
+            position: relative !important;
+            z-index: 999998 !important;
+            pointer-events: auto !important;
+            display: flex !important;
+        }
+
+        /* Remover qualquer overlay que possa estar bloqueando */
+        .form-disabled-overlay,
+        .form-overlay,
+        [class*="overlay"][style*="position: fixed"],
+        [class*="overlay"][style*="position: absolute"] {
+            display: none !important;
+            pointer-events: none !important;
+        }
+
+        /* Garantir que elementos com z-index muito alto não bloqueiem */
+        *[style*="z-index: 9999"] {
+            pointer-events: none !important;
+        }
+
+        /* Exceto o botão de impressão */
+        #print-button[style*="z-index: 9999"] {
+            pointer-events: auto !important;
+        }
+
+        /* Destacar o botão de impressão */
+        .highlight {
+            animation: pulse-green 2s infinite !important;
+        }
+
+        @keyframes pulse-green {
+            0% { 
+                transform: scale(1.1);
+                box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);
+            }
+            50% { 
+                transform: scale(1.15);
+                box-shadow: 0 6px 20px rgba(46, 125, 50, 0.5);
+            }
+            100% { 
+                transform: scale(1.1);
+                box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);
+            }
+        }
+
+        /* Garantir que formulário desabilitado não bloqueia botões */
+        #habitacao-form[disabled] .buttons-container,
+        #habitacao-form[disabled] #print-button {
+            pointer-events: auto !important;
+            opacity: 1 !important;
+        }
     </style>
 </head>
 
@@ -450,7 +579,51 @@ try {
                 <div class="step-text">Interesse</div>
             </li>
         </ul>
-
+        <?php if (!empty($erro_msg)): ?>
+        <div class="alert alert-danger" style="
+            margin-bottom: 25px; 
+            padding: 15px 20px; 
+            background-color: #f8d7da; 
+            color: #721c24; 
+            border: 1px solid #f5c6cb; 
+            border-left: 4px solid #dc3545;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        ">
+            <div style="display: flex; align-items: center;">
+                <i class="fas fa-exclamation-triangle" style="margin-right: 10px; font-size: 1.2rem;"></i>
+                <div>
+                    <strong>Erro no Cadastro:</strong><br>
+                    <?php echo htmlspecialchars($erro_msg); ?>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+        
+        <!-- Mensagens de Sucesso (caso JavaScript não funcione) -->
+        <?php if (!empty($sucesso_msg) && !isset($_GET['success'])): ?>
+        <div class="alert alert-success" style="
+            margin-bottom: 25px; 
+            padding: 15px 20px; 
+            background-color: #d4edda; 
+            color: #155724; 
+            border: 1px solid #c3e6cb; 
+            border-left: 4px solid #28a745;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        ">
+            <div style="display: flex; align-items: center;">
+                <i class="fas fa-check-circle" style="margin-right: 10px; font-size: 1.2rem;"></i>
+                <div>
+                    <?php echo htmlspecialchars($sucesso_msg); ?>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+        
+        <!-- Status Message Container (para JavaScript) -->
+        <div id="status-message" style="display: none;"></div>
+        
         <form id="habitacao-form" method="post" action="../controller/processar_habitacao.php" enctype="multipart/form-data">
             
             <!-- STEP 1: INFORMAÇÕES DO RESPONSÁVEL FAMILIAR -->
@@ -758,39 +931,38 @@ try {
                                 <option value="EMPREGADO SEM CARTEIRA ASSINADA">EMPREGADO SEM CARTEIRA ASSINADA</option>
                                 <option value="APOSENTADO">APOSENTADO</option>
                                 <option value="PENSIONISTA">PENSIONISTA</option>
-                                <option value="EMPRESÁRIO">EMPRESÁRIO</option>
                             </select>
                         </div>
                     </div>
 
                     <!-- Campos para empregados (aparecem apenas quando Empregado é selecionado) -->
                     <div id="emprego_campos" class="dependent-fields">
-                        <div class="form-row">
+                        <div class="form-row" id="pro">
                             <div class="form-group third-width">
                                 <label for="profissao" class="required">Profissão</label>
                                 <input type="text" class="form-control uppercase-input" id="profissao" name="profissao">
                             </div>
-                            <div class="form-group third-width">
+                            <div class="form-group third-width" id="emp">
                                 <label for="empregador" class="required">Empregador</label>
                                 <input type="text" class="form-control uppercase-input" id="empregador" name="empregador">
                             </div>
-                            <div class="form-group third-width">
+                            <div class="form-group third-width" id="car">
                                 <label for="cargo" class="required">Cargo</label>
                                 <input type="text" class="form-control uppercase-input" id="cargo" name="cargo">
                             </div>
                         </div>
                         
                         <div class="form-row">
-                            <div class="form-group third-width">
+                            <div class="form-group third-width" id="ram">
                                 <label for="ramo_atividade" class="required">Ramo de atividade</label>
                                 <input type="text" class="form-control uppercase-input" id="ramo_atividade" name="ramo_atividade">
                             </div>
-                            <div class="form-group third-width">
+                            <div class="form-group third-width" id="tem">
                                 <label for="tempo_servico" class="required">Tempo de Serviço</label>
                                 <input type="text" class="form-control" id="tempo_servico" name="tempo_servico" placeholder="Ex: 2 anos e 6 meses">
                             </div>
-                            <div class="form-group third-width">
-                                <label for="carteira_trabalho" class="required">Anexar carteira de trabalho</label>
+                            <div class="form-group third-width" id="anex">
+                                <label for="carteira_trabalho" class="required">Anexar Comprovante de Renda</label>
                                 <div class="file-input-container">
                                     <input type="file" class="file-input" id="carteira_trabalho" name="carteira_trabalho" accept=".pdf,.jpg,.jpeg,.png">
                                     <div class="upload-progress-container">
@@ -935,16 +1107,14 @@ try {
                         <div class="form-group full-width">
                             <div style="display: flex; align-items: flex-start; margin-top: 15px; background-color: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 3px solid #0d47a1;">
                                 <input type="checkbox" id="autoriza_credito" name="autoriza_credito" style="margin-right: 10px; margin-top: 3px;" required>
-                                <label for="autoriza_credito" class="required">Estou ciente e autorizo que a ACESIO, realize consultas de crédito em meu nome para fins de avaliação neste programa habitacional.</label>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group full-width">
-                            <div style="display: flex; align-items: flex-start; margin-top: 15px; background-color: #fff3cd; padding: 15px; border-radius: 8px; border-left: 3px solid #e91e63;">
-                                <input type="checkbox" id="medida_protetiva" name="medida_protetiva" style="margin-right: 10px; margin-top: 3px;">
-                                <label for="medida_protetiva">Declaro que o titular ou cônjuge é mulher atendida pela Lei Federal Nº 11.340 de 7 de agosto de 2006 (Lei Maria da Penha).</label>
+                                <label for="autoriza_credito" class="required">
+Autorizo a instituição responsável pela execução do Programa Habitacional HABITASIO a acessar minhas informações financeiras e de crédito, incluindo, mas não se limitando, aos dados constantes nos sistemas de proteção ao crédito como SERASA, SPC e outros bancos de dados creditícios, bem como no Sistema de Informações de Crédito (SCR) do Banco Central do Brasil, exclusivamente para fins de validação e credenciamento, como etapa preliminar necessária à minha participação no processo de seleção e/ou sorteio para aquisição de unidade habitacional.<br>
+
+Estou ciente de que esta autorização se destina exclusivamente à análise cadastral e de crédito, como condição inicial para participação no processo, não configurando, sob nenhuma hipótese, direito adquirido à aprovação definitiva, tampouco garantia de contemplação ou aquisição do imóvel.<br>
+
+Tenho ciência, ainda, de que a validação de crédito é apenas a primeira etapa do processo, sendo que eventuais aprovações posteriores dependerão do atendimento aos demais requisitos previstos no regulamento do programa, bem como da disponibilidade de unidades habitacionais.<br>
+
+Por fim, declaro estar ciente de que esta autorização não representa violação ao sigilo bancário ou creditício, uma vez que se dá mediante meu consentimento expresso e específico para esta finalidade.</label>
                             </div>
                         </div>
                     </div>
@@ -967,11 +1137,6 @@ try {
                 </div>
             </div>
 
-            <div class="buttons-container" style="display: none;">
-                <button type="button" class="print-button" id="print-button" href="social-relatorio-habitacao.php">
-                    <i class="fas fa-print"></i> Imprimir Comprovante
-                </button>
-            </div>
         </form>
         
         <?php else: ?>

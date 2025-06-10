@@ -1,6 +1,6 @@
 <?php
 /**
- * Arquivo: processar_habitacao.php (Versão Corrigida)
+ * Arquivo: processar_habitacao.php (Versão Completa Final)
  * Descrição: Processa o formulário de cadastro para programas habitacionais
  * 
  * Parte do sistema Eai Cidadão! - Município de Santa Izabel do Oeste
@@ -15,10 +15,8 @@ error_reporting(E_ALL);
 session_start();
 
 // Define o cabeçalho para JSON se for uma solicitação AJAX
-$is_ajax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
-if ($is_ajax) {
-    header('Content-Type: application/json; charset=utf-8');
-}
+$is_ajax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+           strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 
 try {
     // Verifica se o usuário está logado
@@ -51,6 +49,52 @@ try {
         return $data;
     }
 
+    // Função para validar CPF
+    function validarCPF($cpf) {
+        // Remove formatação
+        $cpf = preg_replace('/[^0-9]/', '', $cpf);
+        
+        // Verifica se tem 11 dígitos
+        if (strlen($cpf) != 11) return false;
+        
+        // Verifica se todos os dígitos são iguais
+        if (preg_match('/(\d)\1{10}/', $cpf)) return false;
+        
+        // Validação do algoritmo do CPF
+        for ($t = 9; $t < 11; $t++) {
+            for ($d = 0, $c = 0; $c < $t; $c++) {
+                $d += $cpf[$c] * (($t + 1) - $c);
+            }
+            $d = ((10 * $d) % 11) % 10;
+            if ($cpf[$c] != $d) return false;
+        }
+        
+        return true;
+    }
+
+    // Função para validar e-mail
+    function validarEmail($email) {
+        return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+    }
+
+    // Função para verificar se CPF já existe no sistema
+    function cpfJaExiste($cpf, $conn, $excluir_id = null) {
+        $sql = "SELECT cad_social_id FROM tb_cad_social WHERE cad_social_cpf = :cpf";
+        if ($excluir_id) {
+            $sql .= " AND cad_social_id != :excluir_id";
+        }
+        $sql .= " LIMIT 1";
+        
+        $stmt = $conn->prepare($sql);
+        $stmt->bindParam(':cpf', $cpf);
+        if ($excluir_id) {
+            $stmt->bindParam(':excluir_id', $excluir_id);
+        }
+        $stmt->execute();
+        
+        return $stmt->rowCount() > 0;
+    }
+
     // Função para processar upload de arquivo
     function processarUpload($arquivo, $tipo, $cpf) {
         if (!isset($arquivo) || !isset($arquivo['tmp_name']) || empty($arquivo['tmp_name'])) {
@@ -59,28 +103,43 @@ try {
         
         // Verificar se houve erro no upload
         if ($arquivo['error'] !== UPLOAD_ERR_OK) {
-            return false;
+            switch ($arquivo['error']) {
+                case UPLOAD_ERR_INI_SIZE:
+                case UPLOAD_ERR_FORM_SIZE:
+                    throw new Exception("Arquivo muito grande. Tamanho máximo permitido: 5MB");
+                case UPLOAD_ERR_PARTIAL:
+                    throw new Exception("Upload do arquivo foi interrompido");
+                case UPLOAD_ERR_NO_FILE:
+                    return null;
+                default:
+                    throw new Exception("Erro no upload do arquivo");
+            }
         }
         
         // Verificar tipo de arquivo
         $allowed = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
-        if (!in_array($arquivo['type'], $allowed)) {
-            return false;
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $arquivo['tmp_name']);
+        finfo_close($finfo);
+        
+        if (!in_array($mimeType, $allowed)) {
+            throw new Exception("Tipo de arquivo não permitido. Use apenas JPG, PNG ou PDF");
         }
         
         // Verificar tamanho (5MB)
         if ($arquivo['size'] > 5 * 1024 * 1024) {
-            return false;
+            throw new Exception("Arquivo muito grande. Tamanho máximo: 5MB");
         }
         
         // Obter extensão do arquivo
         $ext = pathinfo($arquivo['name'], PATHINFO_EXTENSION);
+        $ext = strtolower($ext);
             
         // Obter a data atual no formato AAAAMMDD
         $data_atual = date('Ymd');
 
         // Criar nome do arquivo usando o tipo, CPF e data
-        $novo_nome = "HAB_{$tipo}_{$cpf}_{$data_atual}.{$ext}";
+        $novo_nome = "HAB_{$tipo}_{$cpf}_{$data_atual}_" . uniqid() . ".{$ext}";
         
         // Definir caminho para salvar
         $upload_dir = "../uploads/habitacao/";
@@ -88,7 +147,7 @@ try {
         // Verificar se o diretório existe, se não, criar
         if (!is_dir($upload_dir)) {
             if (!mkdir($upload_dir, 0755, true)) {
-                return false;
+                throw new Exception("Erro ao criar diretório de upload");
             }
         }
         
@@ -99,13 +158,14 @@ try {
             return $novo_nome;
         }
         
-        return false;
+        throw new Exception("Erro ao salvar arquivo no servidor");
     }
 
     // Capturar dados do formulário - RESPONSÁVEL FAMILIAR
     $nome = isset($_POST['nome']) ? strtoupper(sanitize($_POST['nome'])) : null;
     $cpf = isset($_POST['cpf']) ? sanitize($_POST['cpf']) : null;
     $cpf = $cpf ? preg_replace('/[^0-9]/', '', $cpf) : null;
+    $rg = isset($_POST['rg']) ? strtoupper(sanitize($_POST['rg'])) : null;
     $nacionalidade = isset($_POST['nacionalidade']) ? strtoupper(sanitize($_POST['nacionalidade'])) : null;
     $nome_social_opcao = isset($_POST['nome_social_opcao']) ? sanitize($_POST['nome_social_opcao']) : 'NÃO';
     $nome_social = ($nome_social_opcao === 'SIM' && isset($_POST['nome_social'])) ? strtoupper(sanitize($_POST['nome_social'])) : null;
@@ -192,6 +252,88 @@ try {
     $medida_protetiva = isset($_POST['medida_protetiva']) ? 1 : 0;
     $autoriza_email = isset($_POST['autoriza_email']) ? 1 : 0;
     
+    // ===== VALIDAÇÕES =====
+    
+    // Validar campos obrigatórios
+    $campos_obrigatorios = [
+        'Nome completo' => $nome,
+        'CPF' => $cpf,
+        'Data de nascimento' => $data_nascimento,
+        'Gênero' => $genero,
+        'Raça/Cor' => $raca,
+        'Estado civil' => $estado_civil,
+        'Nome da mãe' => $nome_mae,
+        'Situação trabalhista' => $situacao_trabalho,
+        'Tipo de moradia' => $tipo_moradia,
+        'Situação da propriedade' => $situacao_propriedade,
+        'Rua' => $rua,
+        'Número' => $numero,
+        'Bairro' => $bairro,
+        'Cidade' => $cidade,
+        'CEP' => $cep,
+        'Celular' => $celular,
+        'E-mail' => $email,
+        'Programa de interesse' => $programa_interesse
+    ];
+    
+    foreach ($campos_obrigatorios as $campo_nome => $valor) {
+        if (empty($valor)) {
+            throw new Exception("O campo '{$campo_nome}' é obrigatório.");
+        }
+    }
+    
+    // Validar CPF principal
+    if (!validarCPF($cpf)) {
+        throw new Exception("CPF do responsável inválido.");
+    }
+    
+    // Verificar se CPF já existe
+    if (cpfJaExiste($cpf, $conn)) {
+        throw new Exception("Este CPF já possui um cadastro no sistema.");
+    }
+    
+    // Validar e-mail
+    if (!validarEmail($email)) {
+        throw new Exception("E-mail inválido.");
+    }
+    
+    // Validar idade mínima (18 anos)
+    $data_nasc = new DateTime($data_nascimento);
+    $hoje = new DateTime();
+    $idade = $hoje->diff($data_nasc)->y;
+    if ($idade < 18) {
+        throw new Exception("O responsável deve ter pelo menos 18 anos de idade.");
+    }
+    
+    // Validar autorização de crédito (obrigatória)
+    if ($autoriza_credito !== 1) {
+        throw new Exception("É obrigatório autorizar a consulta de crédito para prosseguir.");
+    }
+    
+    // Validações específicas para cônjuge
+    if ($has_conjuge) {
+        if (empty($conjuge_nome)) {
+            throw new Exception("Nome do cônjuge é obrigatório para estado civil informado.");
+        }
+        if (empty($conjuge_cpf)) {
+            throw new Exception("CPF do cônjuge é obrigatório para estado civil informado.");
+        }
+        if (!validarCPF($conjuge_cpf)) {
+            throw new Exception("CPF do cônjuge inválido.");
+        }
+        if ($cpf === $conjuge_cpf) {
+            throw new Exception("CPF do cônjuge não pode ser igual ao CPF do responsável.");
+        }
+        if (empty($conjuge_data_nascimento)) {
+            throw new Exception("Data de nascimento do cônjuge é obrigatória.");
+        }
+    }
+    
+    // Validar documento obrigatório se for viúvo
+    if ($estado_civil === 'VIÚVO(A)' && !isset($_FILES['viuvo_documento'])) {
+        throw new Exception("É obrigatório anexar certidão de óbito para estado civil viúvo(a).");
+    }
+    
     // Processar uploads de documentos
     $cpf_documento = isset($_FILES['cpf_documento']) ? processarUpload($_FILES['cpf_documento'], 'cpf', $cpf) : null;
     $escolaridade_documento = isset($_FILES['escolaridade_documento']) ? processarUpload($_FILES['escolaridade_documento'], 'escolaridade', $cpf) : null;
@@ -200,44 +342,7 @@ try {
     $conjuge_comprovante_renda = ($has_conjuge && $conjuge_renda === 'SIM' && isset($_FILES['conjuge_comprovante_renda'])) ? processarUpload($_FILES['conjuge_comprovante_renda'], 'conjuge_renda', $cpf) : null;
     $carteira_trabalho = (($situacao_trabalho === 'EMPREGADO COM CARTEIRA ASSINADA') && isset($_FILES['carteira_trabalho'])) ? processarUpload($_FILES['carteira_trabalho'], 'ctps', $cpf) : null;
     
-    // Validar campos obrigatórios
-    $campos_obrigatorios = [
-        'nome' => $nome,
-        'cpf' => $cpf,
-        'data_nascimento' => $data_nascimento,
-        'genero' => $genero,
-        'raca' => $raca,
-        'estado_civil' => $estado_civil,
-        'nome_mae' => $nome_mae,
-        'situacao_trabalho' => $situacao_trabalho,
-        'tipo_moradia' => $tipo_moradia,
-        'situacao_propriedade' => $situacao_propriedade,
-        'rua' => $rua,
-        'numero' => $numero,
-        'bairro' => $bairro,
-        'cidade' => $cidade,
-        'cep' => $cep,
-        'celular' => $celular,
-        'email' => $email,
-        'programa_interesse' => $programa_interesse
-    ];
-    
-    foreach ($campos_obrigatorios as $campo => $valor) {
-        if (empty($valor)) {
-            throw new Exception("O campo {$campo} é obrigatório.");
-        }
-    }
-    
-    // Validar autorização de crédito (obrigatória)
-    if ($autoriza_credito !== 1) {
-        throw new Exception("É obrigatório autorizar a consulta de crédito para prosseguir.");
-    }
-    
-    // Validar uploads obrigatórios
-    if ($cpf_documento === false) {
-        throw new Exception("O documento de CPF enviado é inválido. Verifique o formato ou tamanho do arquivo.");
-    }
-    
+    // Validar upload obrigatório do CPF
     if ($cpf_documento === null) {
         throw new Exception("É obrigatório anexar um documento de CPF.");
     }
@@ -367,7 +472,7 @@ try {
     $stmt->execute();
     $inscricao_id = $conn->lastInsertId();
     
-    //Inserir dependentes, se houver
+    // Inserir dependentes, se houver
     if (count($dependentes) > 0 && $inscricao_id) {
         $sql_dependente = "INSERT INTO tb_cad_social_dependentes (
             cad_social_id, cad_social_dependente_nome, cad_social_dependente_data_nascimento,
@@ -380,7 +485,7 @@ try {
             :deficiencia, :renda, :comprovante_renda
         )";
         
-        $stmt = $conn->prepare($sql_dependente);
+        $stmt_dep = $conn->prepare($sql_dependente);
         
         foreach ($dependentes as $i => $dep) {
             // Processar documentos do dependente
@@ -397,16 +502,16 @@ try {
                 $dep_renda_docs = processarUpload($_FILES["dependente_comprovante_renda_" . ($i+1)], "deprenda" . ($i+1), $cpf);
             }
             
-            $stmt->bindValue(':inscricao_id', $inscricao_id);
-            $stmt->bindValue(':nome', $dep['nome']);
-            $stmt->bindValue(':data_nascimento', $dep['data_nascimento']);
-            $stmt->bindValue(':cpf', $dep['cpf']);
-            $stmt->bindValue(':rg', $dep['rg']);
-            $stmt->bindValue(':documentos', $dep_docs);
-            $stmt->bindValue(':deficiencia', $dep['deficiencia']);
-            $stmt->bindValue(':renda', $dep['renda']);
-            $stmt->bindValue(':comprovante_renda', $dep_renda_docs);
-            $stmt->execute();
+            $stmt_dep->bindValue(':inscricao_id', $inscricao_id);
+            $stmt_dep->bindValue(':nome', $dep['nome']);
+            $stmt_dep->bindValue(':data_nascimento', $dep['data_nascimento']);
+            $stmt_dep->bindValue(':cpf', $dep['cpf']);
+            $stmt_dep->bindValue(':rg', $dep['rg']);
+            $stmt_dep->bindValue(':documentos', $dep_docs);
+            $stmt_dep->bindValue(':deficiencia', $dep['deficiencia']);
+            $stmt_dep->bindValue(':renda', $dep['renda']);
+            $stmt_dep->bindValue(':comprovante_renda', $dep_renda_docs);
+            $stmt_dep->execute();
         }
     }
 
@@ -461,22 +566,45 @@ try {
     // Commit da transação
     $conn->commit();
     
-    // Resposta para requisição AJAX
+    // Log do sucesso
+    error_log("Cadastro habitação realizado com sucesso - ID: {$inscricao_id}, Protocolo: {$protocolo}");
+    
+    // Armazenar informações de sucesso na sessão
+    $_SESSION['cadastro_realizado'] = true;
+    $_SESSION['inscricao_id'] = $inscricao_id;
+    $_SESSION['protocolo'] = $protocolo;
+    $_SESSION['data_cadastro'] = date('Y-m-d H:i:s');
+    
+    // ===== RESPOSTA PARA AJAX =====
     if ($is_ajax) {
+        // Limpar qualquer output anterior
+        if (ob_get_level()) {
+            ob_clean();
+        }
+        
+        // Definir header JSON
+        header('Content-Type: application/json; charset=utf-8');
+        
+        // Retornar JSON de sucesso
         echo json_encode([
             'status' => 'success',
-            'message' => 'Cadastro realizado com sucesso! Seu protocolo é: ' . $protocolo,
-            'redirect' => "../pages/social-relatorio-habitacao.php?id={$inscricao_id}",
-            'inscricao_id' => $inscricao_id,
-            'protocolo' => $protocolo
+            'message' => 'Cadastro realizado com sucesso! Protocolo: ' . $protocolo,
+            'protocolo' => $protocolo,
+            'inscricao_id' => $inscricao_id
         ]);
-        exit;
+        exit();
     }
     
-    // Redirecionamento padrão
-    $_SESSION['sucesso_habitacao'] = "Cadastro realizado com sucesso! Seu protocolo é: " . $protocolo;
-    header("Location: ../pages/social-relatorio-habitacao.php?id={$inscricao_id}");
-    exit;
+    // ===== RESPOSTA PARA FORMULÁRIO NORMAL =====
+    // Limpar buffer de saída antes do redirecionamento
+    if (ob_get_level()) {
+        ob_end_clean();
+    }
+    
+    // Redirecionar para socialhabitacao.php com parâmetros de sucesso
+    $redirect_url = "../pages/socialhabitacao.php?success=true&id=" . $inscricao_id . "&protocolo=" . urlencode($protocolo);
+    header("Location: " . $redirect_url);
+    exit();
     
 } catch (Exception $e) {
     // Rollback em caso de erro
@@ -487,18 +615,139 @@ try {
     // Registrar erro no log
     error_log("Erro no cadastro habitacional: " . $e->getMessage());
     
-    // Resposta para requisição AJAX
+    // ===== RESPOSTA DE ERRO PARA AJAX =====
     if ($is_ajax) {
+        // Limpar qualquer output anterior
+        if (ob_get_level()) {
+            ob_clean();
+        }
+        
+        // Definir header JSON  
+        header('Content-Type: application/json; charset=utf-8');
+        
+        // Retornar JSON de erro
         echo json_encode([
             'status' => 'error',
             'message' => $e->getMessage()
         ]);
-        exit;
+        exit();
     }
     
-    // Redirecionamento padrão
-    $_SESSION['erro_habitacao'] = "Erro ao processar o cadastro: " . $e->getMessage();
-    header("Location: ../pages/socialhabitacao.php");
-    exit;
+    // ===== RESPOSTA DE ERRO PARA FORMULÁRIO NORMAL =====
+    // Armazenar erro na sessão para exibição
+    $_SESSION['erro_habitacao'] = $e->getMessage();
+    
+    // Redirecionar de volta para o formulário com erro
+    $error_redirect = "../pages/socialhabitacao.php?error=true&msg=" . urlencode($e->getMessage());
+    
+    // Limpar buffer de saída antes do redirecionamento
+    if (ob_get_level()) {
+        ob_end_clean();
+    }
+    
+    header("Location: " . $error_redirect);
+    exit();
+}
+
+/**
+ * Funções auxiliares adicionais
+ */
+
+/**
+ * Função para limpar arquivos temporários em caso de erro
+ */
+function limparArquivosTemporarios($arquivos) {
+    foreach ($arquivos as $arquivo) {
+        if ($arquivo && file_exists("../uploads/habitacao/" . $arquivo)) {
+            unlink("../uploads/habitacao/" . $arquivo);
+        }
+    }
+}
+
+/**
+ * Função para validar data
+ */
+function validarData($data) {
+    $d = DateTime::createFromFormat('Y-m-d', $data);
+    return $d && $d->format('Y-m-d') === $data;
+}
+
+/**
+ * Função para validar telefone brasileiro
+ */
+function validarTelefone($telefone) {
+    $telefone = preg_replace('/[^0-9]/', '', $telefone);
+    return (strlen($telefone) === 10 || strlen($telefone) === 11);
+}
+
+/**
+ * Função para validar CEP brasileiro
+ */
+function validarCEP($cep) {
+    $cep = preg_replace('/[^0-9]/', '', $cep);
+    return (strlen($cep) === 8 && is_numeric($cep));
+}
+
+/**
+ * Função para sanitizar nomes próprios
+ */
+function sanitizarNome($nome) {
+    $nome = trim($nome);
+    $nome = preg_replace('/\s+/', ' ', $nome); // Remove espaços extras
+    $nome = ucwords(strtolower($nome)); // Primeira letra maiúscula
+    return $nome;
+}
+
+/**
+ * Função para gerar hash seguro para arquivos
+ */
+function gerarHashArquivo($nomeOriginal, $cpf) {
+    return hash('sha256', $nomeOriginal . $cpf . time());
+}
+
+/**
+ * Função para registrar atividade do usuário
+ */
+function registrarAtividade($conn, $usuario_id, $acao, $detalhes) {
+    try {
+        $sql = "INSERT INTO tb_log_atividades (usuario_id, acao, detalhes, data_atividade, ip_address) 
+                VALUES (:usuario_id, :acao, :detalhes, NOW(), :ip)";
+        
+        $stmt = $conn->prepare($sql);
+        $stmt->bindParam(':usuario_id', $usuario_id);
+        $stmt->bindParam(':acao', $acao);
+        $stmt->bindParam(':detalhes', $detalhes);
+        $stmt->bindParam(':ip', $_SERVER['REMOTE_ADDR']);
+        $stmt->execute();
+    } catch (Exception $e) {
+        // Log de erro mas não interrompe o processo principal
+        error_log("Erro ao registrar atividade: " . $e->getMessage());
+    }
+}
+
+/**
+ * Função para enviar notificação por email (opcional)
+ */
+function enviarNotificacaoEmail($email, $nome, $protocolo) {
+    // Implementar envio de email se necessário
+    // PHPMailer ou função mail() do PHP
+    
+    $assunto = "Cadastro Habitacional Realizado - Protocolo: {$protocolo}";
+    $mensagem = "
+        Olá {$nome},
+        
+        Seu cadastro para programas habitacionais foi realizado com sucesso!
+        
+        Protocolo: {$protocolo}
+        Data: " . date('d/m/Y H:i') . "
+        
+        Você pode acompanhar o status da sua solicitação através do sistema.
+        
+        Atenciosamente,
+        Prefeitura Municipal de Santa Izabel do Oeste
+    ";
+    
+    // Descomente e configure se quiser enviar emails
+    // mail($email, $assunto, $mensagem);
 }
 ?>

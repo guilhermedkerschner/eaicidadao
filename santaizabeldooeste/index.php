@@ -11,7 +11,7 @@ $nome_usuario = isset($_SESSION['user_nome']) ? $_SESSION['user_nome'] : '';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="./images/logo_eai.ico" type="imagem/x-icon">
+    <link rel="icon" href="../img/logo_eai.ico" type="imagem/x-icon">
     <title>Eai Cidadão! - Município de Santa Izabel do Oeste</title>
     <!-- Font Awesome para ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">

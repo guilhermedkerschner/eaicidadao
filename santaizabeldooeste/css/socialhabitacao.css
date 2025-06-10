@@ -320,6 +320,7 @@ footer {
 
 /* Estilos para o botão de impressão do comprovante */
 .print-button {
+    display: none;
     background-color: #2e7d32;
     color: white;
     border: none;
@@ -592,6 +593,10 @@ input[type="checkbox"].invalid {
     font-size: 1.2rem;
 }
 
+#print-button {
+    display: none;
+}
+
 .cadastro-concluido .success-text p {
     color: #155724;
     margin: 0;
@@ -599,20 +604,6 @@ input[type="checkbox"].invalid {
 }
 
 /* Overlay para formulário desabilitado */
-.form-disabled-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(255, 255, 255, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10;
-    backdrop-filter: blur(2px);
-}
-
 .overlay-message {
     background-color: #fff;
     padding: 15px 25px;

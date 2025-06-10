@@ -9,6 +9,29 @@ document.addEventListener('DOMContentLoaded', function() {
     const prevButtons = document.querySelectorAll('.btn-step-prev');
     const nextButtons = document.querySelectorAll('.btn-step-next');
     
+    // Verificar se é uma página de sucesso antes de mostrar botão de impressão
+    const urlParams = new URLSearchParams(window.location.search);
+    const isSuccess = urlParams.get('success');
+    const printButton = document.getElementById('print-button');
+    
+    if (printButton) {
+        if (isSuccess === 'true' || isSuccess === '1') {
+            // Mostrar botão apenas em caso de sucesso
+            printButton.style.display = 'block';
+            printButton.addEventListener('click', function() {
+                const inscricaoId = this.getAttribute('data-inscricao-id') || urlParams.get('id');
+                if (inscricaoId) {
+                    window.open(`social-relatorio-habitacao.php?id=${inscricaoId}`);
+                } else {
+                    alert('ID da inscrição não encontrado.');
+                }
+            });
+        } else {
+            // Ocultar botão durante preenchimento
+            printButton.style.display = 'none';
+        }
+    }
+    
     // Função para exibir a etapa
     function showStep(stepNumber) {
         // Ocultar todas as etapas
@@ -36,12 +59,11 @@ document.addEventListener('DOMContentLoaded', function() {
         window.scrollTo(0, 0);
     }
     
-    // Função para validar campos da etapa
+    // Função para validar campos da etapa - CORRIGIDA
     function validateStep(stepNumber) {
         const step = document.getElementById('step-' + stepNumber);
         const requiredInputs = step.querySelectorAll('input[required], select[required]');
-        const validateStepOriginal = validateStep;
-        let isValid = validateStepOriginal(stepNumber);;
+        let isValid = true; // ← CORREÇÃO: Inicializar como true em vez de recursão
         
         requiredInputs.forEach(input => {
             // Verificar apenas elementos visíveis
@@ -279,19 +301,30 @@ document.addEventListener('DOMContentLoaded', function() {
     if (situacaoTrabalhoSelect) {
         situacaoTrabalhoSelect.addEventListener('change', function() {
             const empregoCampos = document.getElementById('emprego_campos');
-            const empregado = ['EMPREGADO COM CARTEIRA ASSINADA'].includes(this.value);
+            const valorSelecionado = this.value;
             
-            if (empregado) {
-                empregoCampos.style.display = 'block';
-                document.getElementById('profissao').required = true;
-                document.getElementById('empregador').required = true;
-                document.getElementById('cargo').required = true;
-                document.getElementById('ramo_atividade').required = true;
-                document.getElementById('tempo_servico').required = true;
-                if (this.value === 'EMPREGADO COM CARTEIRA ASSINADA') {
-                    document.getElementById('carteira_trabalho').required = true;
-                }
-            } else {
+            // Reset todos os campos primeiro
+            resetarCampos();
+            
+            switch (valorSelecionado) {
+                case 'EMPREGADO COM CARTEIRA ASSINADA':
+                    mostrarTodosCampos();
+                    break;
+
+                case 'EMPREGADO SEM CARTEIRA ASSINADA':    
+                case 'PENSIONISTA':
+                case 'APOSENTADO':
+                case 'AUTÔNOMO':
+                    mostrarApenasCarteira();
+                    break;
+                    
+                default:
+                    // Desempregado ou outros - campos já foram resetados
+                    empregoCampos.style.display = 'none';
+                    break;
+            }
+            
+            function resetarCampos() {
                 empregoCampos.style.display = 'none';
                 document.getElementById('profissao').required = false;
                 document.getElementById('empregador').required = false;
@@ -299,6 +332,37 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('ramo_atividade').required = false;
                 document.getElementById('tempo_servico').required = false;
                 document.getElementById('carteira_trabalho').required = false;
+            }
+            
+            function mostrarTodosCampos() {
+                empregoCampos.style.display = 'block';
+                document.getElementById('profissao').required = true;
+                document.getElementById('empregador').required = true;
+                document.getElementById('cargo').required = true;
+                document.getElementById('ramo_atividade').required = true;
+                document.getElementById('tempo_servico').required = true;
+                document.getElementById('carteira_trabalho').required = true;
+                
+                // Mostra todos os campos
+                document.getElementById('pro').style.display = 'block';
+                document.getElementById('emp').style.display = 'block';
+                document.getElementById('car').style.display = 'block';
+                document.getElementById('ram').style.display = 'block';
+                document.getElementById('tem').style.display = 'block';
+            }
+            
+            function mostrarApenasCarteira() {
+                empregoCampos.style.display = 'block';
+                
+                // Esconde campos desnecessários
+                document.getElementById('pro').style.display = 'none';
+                document.getElementById('emp').style.display = 'none';
+                document.getElementById('car').style.display = 'none';
+                document.getElementById('ram').style.display = 'none';
+                document.getElementById('tem').style.display = 'none';
+                
+                // Apenas carteira é obrigatória
+                document.getElementById('carteira_trabalho').required = true;
             }
         });
     }
@@ -495,7 +559,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Verificar se há mensagem de erro ou sucesso na URL e exibe
-    const urlParams = new URLSearchParams(window.location.search);
     const statusMsg = urlParams.get('msg');
     const statusType = urlParams.get('type') || 'info';
     
@@ -515,17 +578,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Configuração do botão de impressão (quando visível)
-    const printButton = document.getElementById('print-button');
-    if (printButton) {
-        printButton.addEventListener('click', function() {
-            // O ID da inscrição deve ser recuperado após o cadastro bem-sucedido
-            // Normalmente seria armazenado em algum lugar ou retornado pelo servidor
-            const inscricaoId = this.getAttribute('data-inscricao-id') || '123';
-            window.open(`social-relatorio-habitacao.php?id=${inscricaoId}`);
-        });
-    }
-    
     // Configuração especial para o checkbox de autorização de crédito
     const autorizaCreditoCheckbox = document.getElementById('autoriza_credito');
     if (autorizaCreditoCheckbox) {
@@ -535,4 +587,231 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    
+    // ===== REDIRECIONAMENTO AUTOMÁTICO APÓS SUCESSO =====
+    
+    /**
+     * Função para redirecionar automaticamente para o relatório após cadastro bem-sucedido
+     */
+    function handleSuccessfulSubmission() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const isSuccess = urlParams.get('success');
+        const inscricaoId = urlParams.get('id') || urlParams.get('inscricao_id');
+        
+        if (isSuccess === 'true' || isSuccess === '1') {
+            // Ocultar o formulário e mostrar mensagem de sucesso
+            hideFormShowSuccess();
+            
+            // Mostrar mensagem de sucesso com countdown
+            showSuccessMessage(inscricaoId);
+            
+            // Redirecionar após 5 segundos
+            setTimeout(() => {
+                if (inscricaoId) {
+                    window.location.href = `social-relatorio-habitacao.php?id=${inscricaoId}`;
+                } else {
+                    alert('Cadastro realizado com sucesso! ID da inscrição não encontrado.');
+                    window.location.href = 'socialhabitacao.php';
+                }
+            }, 5000);
+        }
+    }
+    
+    /**
+     * Ocultar formulário e mostrar container de sucesso
+     */
+    function hideFormShowSuccess() {
+        // Ocultar o formulário principal
+        const formContainer = document.querySelector('.form-container, .container > form, form');
+        if (formContainer) {
+            formContainer.style.display = 'none';
+        }
+        
+        // Ocultar navegação de steps se existir
+        const stepNav = document.querySelector('.step-nav');
+        if (stepNav) {
+            stepNav.style.display = 'none';
+        }
+    }
+    
+    /**
+     * Mostrar mensagem de sucesso com countdown
+     */
+    function showSuccessMessage(inscricaoId) {
+        // Mostrar e configurar o botão de impressão original da página (se existir)
+        const originalPrintButton = document.getElementById('print-button');
+        if (originalPrintButton && inscricaoId) {
+            originalPrintButton.style.display = 'block';
+            originalPrintButton.setAttribute('data-inscricao-id', inscricaoId);
+        }
+        
+        // Criar container de sucesso
+        const successContainer = document.createElement('div');
+        successContainer.id = 'success-container';
+        successContainer.innerHTML = `
+            <div style="
+                max-width: 600px;
+                margin: 50px auto;
+                padding: 40px;
+                text-align: center;
+                background: #fff;
+                border-radius: 12px;
+                box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+                border-top: 5px solid #4caf50;
+            ">
+                <div style="font-size: 4rem; color: #4caf50; margin-bottom: 20px;">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                
+                <h2 style="color: #2e7d32; margin-bottom: 15px; font-size: 2rem;">
+                    Cadastro Realizado com Sucesso!
+                </h2>
+                
+                <div style="
+                    background: #e8f5e9;
+                    padding: 20px;
+                    border-radius: 8px;
+                    margin: 25px 0;
+                    border-left: 4px solid #4caf50;
+                ">
+                    <h3 style="color: #2e7d32; margin-bottom: 10px;">
+                        <i class="fas fa-info-circle"></i> Informações do seu Cadastro
+                    </h3>
+                    <p style="margin: 5px 0;"><strong>ID da Inscrição:</strong> ${inscricaoId || 'Gerando...'}</p>
+                    <p style="margin: 5px 0;"><strong>Data:</strong> ${new Date().toLocaleString('pt-BR')}</p>
+                    <p style="font-size: 0.9rem; color: #666; margin-top: 10px;">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        Guarde estas informações para consultas futuras
+                    </p>
+                </div>
+                
+                <div id="countdown-section" style="
+                    font-size: 1.2rem;
+                    color: #666;
+                    margin: 25px 0;
+                    padding: 15px;
+                    background: #f8f9fa;
+                    border-radius: 8px;
+                ">
+                    <i class="fas fa-clock"></i> 
+                    Redirecionando automaticamente para o relatório em 
+                    <strong><span id="countdown-number">5</span></strong> segundos...
+                </div>
+                
+                <div style="margin-top: 30px;">
+                    <button onclick="goToReportNow()" style="
+                        background: #2e7d32;
+                        color: white;
+                        padding: 15px 30px;
+                        border: none;
+                        border-radius: 6px;
+                        font-size: 1.1rem;
+                        cursor: pointer;
+                       margin: 10px;
+                       transition: all 0.3s;
+                       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                   " onmouseover="this.style.background='#1b5e20'; this.style.transform='translateY(-2px)'" 
+                      onmouseout="this.style.background='#2e7d32'; this.style.transform='translateY(0)'">
+                       <i class="fas fa-file-pdf"></i> Ver Relatório Agora
+                   </button>
+                   
+                   <button onclick="printReport('${inscricaoId}')" style="
+                       background: #1976d2;
+                       color: white;
+                       padding: 15px 30px;
+                       border: none;
+                       border-radius: 6px;
+                       font-size: 1.1rem;
+                       cursor: pointer;
+                       margin: 10px;
+                       transition: all 0.3s;
+                       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                   " onmouseover="this.style.background='#1565c0'; this.style.transform='translateY(-2px)'" 
+                      onmouseout="this.style.background='#1976d2'; this.style.transform='translateY(0)'">
+                       <i class="fas fa-print"></i> Imprimir Relatório
+                   </button>
+                   
+                   <button onclick="cancelRedirect()" style="
+                       background: #666;
+                       color: white;
+                       padding: 15px 30px;
+                       border: none;
+                       border-radius: 6px;
+                       font-size: 1rem;
+                       cursor: pointer;
+                       margin: 10px;
+                       transition: all 0.3s;
+                   " onmouseover="this.style.background='#555'" 
+                      onmouseout="this.style.background='#666'">
+                       <i class="fas fa-times"></i> Cancelar Redirecionamento
+                   </button>
+               </div>
+               
+               <div style="margin-top: 20px; font-size: 0.9rem; color: #777;">
+                   <a href="socialhabitacao.php" style="color: #2e7d32; text-decoration: none;">
+                       <i class="fas fa-plus"></i> Fazer Novo Cadastro
+                   </a>
+               </div>
+           </div>
+       `;
+       
+       // Adicionar ao body
+       document.body.appendChild(successContainer);
+       
+       // Iniciar countdown
+       startCountdown(inscricaoId);
+       
+       // Definir funções globais para os botões
+       window.goToReportNow = function() {
+           if (inscricaoId) {
+               window.location.href = `social-relatorio-habitacao.php?id=${inscricaoId}`;
+           } else {
+               alert('ID da inscrição não encontrado.');
+           }
+       };
+       
+       window.cancelRedirect = function() {
+           clearInterval(window.countdownInterval);
+           document.getElementById('countdown-section').innerHTML = `
+               <i class="fas fa-info-circle"></i> 
+               Redirecionamento cancelado. Use os botões acima para navegar.
+           `;
+       };
+       
+       // Função para imprimir relatório
+       window.printReport = function(inscricaoId) {
+           if (inscricaoId) {
+               window.open(`social-relatorio-habitacao.php?id=${inscricaoId}`);
+           } else {
+               alert('ID da inscrição não encontrado para impressão.');
+           }
+       };
+   }
+   
+   /**
+    * Iniciar countdown
+    */
+   function startCountdown(inscricaoId) {
+       let timeLeft = 5;
+       const countdownElement = document.getElementById('countdown-number');
+       
+       window.countdownInterval = setInterval(() => {
+           timeLeft--;
+           if (countdownElement) {
+               countdownElement.textContent = timeLeft;
+           }
+           
+           if (timeLeft <= 0) {
+               clearInterval(window.countdownInterval);
+               if (inscricaoId) {
+                   window.location.href = `social-relatorio-habitacao.php?id=${inscricaoId}`;
+               } else {
+                   window.location.href = 'socialhabitacao.php';
+               }
+           }
+       }, 1000);
+   }
+   
+   // Executar verificação de sucesso
+   handleSuccessfulSubmission();
 });

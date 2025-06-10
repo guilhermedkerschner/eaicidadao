@@ -1,75 +1,126 @@
 <?php
 /**
- * Sidebar component for admin area
- * Sistema Eai Cidadão! - Prefeitura de Santa Izabel do Oeste
+ * Arquivo: includes/sidebar.php
+ * Menu lateral dinâmico baseado na configuração
  */
 
-// Verificar se a sessão já foi iniciada
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+// Incluir configuração do menu se não foi incluída
+if (!defined('MENU_CONFIG_LOADED')) {
+    require_once 'menu_config.php';
 }
 
-// Verificar se o usuário tem permissão para acessar esta área
-if (!isset($_SESSION['usersystem_logado'])) {
-    header("Location: ../acessdeniedrestrict.php");
-    exit;
+// Página atual para destacar menu ativo
+$pagina_atual = basename($_SERVER['PHP_SELF'], '.php');
+
+// Sincronizar departamentos do banco (opcional)
+if (isset($conn)) {
+    sincronizarDepartamentos($conn);
 }
 
-// Base URL - ajuste conforme a estrutura do seu projeto
-$base_url = isset($base_url) ? $base_url : "..";
-
-// Obter a página atual para destacar o item do menu
-$current_page = basename($_SERVER['PHP_SELF'], '.php');
+// Obter departamentos ativos
+$departamentos_ativos = getDepartamentosAtivos();
 ?>
 
+<!-- Sidebar -->
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <h3>Prefeitura</h3>
-        <button class="toggle-btn" id="toggle-sidebar">
+        <h3><?php echo $titulo_sistema ?? 'Sistema'; ?></h3>
+        <button class="toggle-btn">
             <i class="fas fa-bars"></i>
         </button>
     </div>
     
     <ul class="menu">
-        <li class="menu-item <?php echo ($current_page == 'dashboard') ? 'active' : ''; ?>">
-            <a href="<?php echo $base_url; ?>/system/dashboard.php" class="menu-link">
+        <!-- Dashboard -->
+        <li class="menu-item">
+            <a href="dashboard.php" class="menu-link <?php echo ($pagina_atual == 'dashboard') ? 'active' : ''; ?>">
                 <span class="menu-icon"><i class="fas fa-tachometer-alt"></i></span>
                 <span class="menu-text">Dashboard</span>
             </a>
         </li>
         
-        <!-- Secretarias (em ordem alfabética) -->
+        <?php if ($is_admin ?? false): ?>
+        <!-- Menus administrativos -->
+        <div class="menu-separator"></div>
+        <div class="menu-category">Administração</div>
+        
+        <?php foreach ($menus_admin as $menu_key => $menu_config): ?>
         <li class="menu-item">
             <a href="#" class="menu-link">
-                <span class="menu-icon"><i class="fas fa-leaf"></i></span>
-                <span class="menu-text">Agricultura</span>
+                <span class="menu-icon"><i class="<?php echo $menu_config['icon']; ?>"></i></span>
+                <span class="menu-text"><?php echo $menu_config['nome']; ?></span>
                 <span class="arrow"><i class="fas fa-chevron-right"></i></span>
             </a>
             <ul class="submenu">
-                <li><a href="#" class="submenu-link">Projetos</a></li>
-                <li><a href="#" class="submenu-link">Programas</a></li>
-                <li><a href="#" class="submenu-link">Relatórios</a></li>
+                <?php foreach ($menu_config['submenu'] as $item_nome => $item_config): ?>
+                <li><a href="<?php echo $item_config['url']; ?>" class="submenu-link <?php echo isSubmenuAtivo($item_config['url'], $pagina_atual) ? 'active' : ''; ?>">
+                    <i class="<?php echo $item_config['icon']; ?> me-2"></i><?php echo $item_nome; ?>
+                </a></li>
+                <?php endforeach; ?>
             </ul>
         </li>
+        <?php endforeach; ?>
         
-        <li class="menu-item">
+        <!-- Departamentos para admin -->
+        <div class="menu-separator"></div>
+        <div class="menu-category">Departamentos</div>
+        
+        <?php foreach ($departamentos_ativos as $dept_key => $dept_config): ?>
+        <li class="menu-item <?php echo isMenuDepartamentoAberto($dept_key, $pagina_atual) ? 'open' : ''; ?>">
             <a href="#" class="menu-link">
-                <span class="menu-icon"><i class="fas fa-hands-helping"></i></span>
-                <span class="menu-text">Assistência Social</span>
+                <span class="menu-icon"><i class="<?php echo $dept_config['icon']; ?>"></i></span>
+                <span class="menu-text"><?php echo $dept_config['nome']; ?></span>
                 <span class="arrow"><i class="fas fa-chevron-right"></i></span>
             </a>
             <ul class="submenu">
-                <li><a href="#" class="submenu-link">Atendimentos</a></li>
-                <li><a href="#" class="submenu-link">Benefícios</a></li>
-                <li><a href="#" class="submenu-link">Relatórios</a></li>
+                <?php foreach ($dept_config['submenu'] as $item_nome => $item_config): ?>
+                <li><a href="<?php echo $item_config['url']; ?>" class="submenu-link <?php echo isSubmenuAtivo($item_config['url'], $pagina_atual) ? 'active' : ''; ?>">
+                    <i class="<?php echo $item_config['icon']; ?> me-2"></i><?php echo $item_nome; ?>
+                </a></li>
+                <?php endforeach; ?>
             </ul>
         </li>
+        <?php endforeach; ?>
         
-        <!-- Restante dos itens do menu existente -->
-        <!-- ... -->
+        <?php else: ?>
+        <!-- Menu específico do departamento para usuários normais -->
+        <?php 
+        $usuario_dept = strtoupper($usuario_departamento ?? '');
+        if (isset($departamentos_ativos[$usuario_dept]) && usuarioTemAcessoDepartamento($usuario_departamento, $usuario_dept, false)): 
+            $dept_config = $departamentos_ativos[$usuario_dept];
+        ?>
+        <div class="menu-separator"></div>
+        <div class="menu-category"><?php echo $dept_config['nome']; ?></div>
+        
+        <li class="menu-item <?php echo isMenuDepartamentoAberto($usuario_dept, $pagina_atual) ? 'open' : ''; ?>">
+            <a href="#" class="menu-link">
+                <span class="menu-icon"><i class="<?php echo $dept_config['icon']; ?>"></i></span>
+                <span class="menu-text"><?php echo $dept_config['nome']; ?></span>
+                <span class="arrow"><i class="fas fa-chevron-right"></i></span>
+            </a>
+            <ul class="submenu">
+                <?php foreach ($dept_config['submenu'] as $item_nome => $item_config): ?>
+                <li><a href="<?php echo $item_config['url']; ?>" class="submenu-link <?php echo isSubmenuAtivo($item_config['url'], $pagina_atual) ? 'active' : ''; ?>">
+                    <i class="<?php echo $item_config['icon']; ?> me-2"></i><?php echo $item_nome; ?>
+                </a></li>
+                <?php endforeach; ?>
+            </ul>
+        </li>
+        <?php endif; ?>
+        <?php endif; ?>
+        
+        <!-- Menu comum -->
+        <div class="menu-separator"></div>
         
         <li class="menu-item">
-            <a href="<?php echo $base_url; ?>/controller/logout.php" class="menu-link">
+            <a href="perfil.php" class="menu-link <?php echo ($pagina_atual == 'perfil') ? 'active' : ''; ?>">
+                <span class="menu-icon"><i class="fas fa-user-cog"></i></span>
+                <span class="menu-text">Meu Perfil</span>
+            </a>
+        </li>
+        
+        <li class="menu-item">
+            <a href="../controller/logout_system.php" class="menu-link">
                 <span class="menu-icon"><i class="fas fa-sign-out-alt"></i></span>
                 <span class="menu-text">Sair</span>
             </a>

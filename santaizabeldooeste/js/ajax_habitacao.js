@@ -1,7 +1,7 @@
 /**
  * Script AJAX para o formulário de Cadastro Habitacional
  * Sistema Eai Cidadão! - Prefeitura de Santa Izabel do Oeste
- * Versão Completa Atualizada com Ocultamento de Botão
+ * Versão Corrigida - GARANTINDO que o botão de impressão NUNCA seja bloqueado
  */
 document.addEventListener('DOMContentLoaded', function() {
     // Referência ao formulário
@@ -40,133 +40,101 @@ document.addEventListener('DOMContentLoaded', function() {
             if (type === 'success') {
                 setTimeout(() => {
                     statusMessage.style.display = 'none';
-                }, 8000); // Aumentado para 8 segundos para dar tempo de ler
+                }, 8000);
             }
-        }
-    }
-    
-    // Função para ocultar permanentemente o botão de cadastrar
-    function ocultarBotaoCadastrar() {
-        const submitButton = document.getElementById('submit-button');
-        const stepActions = submitButton.closest('.step-actions');
-        
-        if (submitButton) {
-            // Ocultar o botão com animação suave
-            submitButton.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-            submitButton.style.opacity = '0';
-            submitButton.style.transform = 'scale(0.8)';
-            
-            setTimeout(() => {
-                submitButton.style.display = 'none';
-            }, 500);
-        }
-        
-        // Adicionar mensagem informativa no lugar do botão
-        if (stepActions && !document.getElementById('cadastro-concluido-msg')) {
-            const mensagemConcluida = document.createElement('div');
-            mensagemConcluida.id = 'cadastro-concluido-msg';
-            mensagemConcluida.className = 'cadastro-concluido';
-            mensagemConcluida.innerHTML = `
-                <div class="success-icon">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="success-text">
-                    <h4>Cadastro Realizado com Sucesso!</h4>
-                    <p>Seu cadastro foi enviado e está em análise. Use o botão abaixo para imprimir seu comprovante.</p>
-                </div>
-            `;
-            stepActions.appendChild(mensagemConcluida);
         }
     }
     
     // Função para reabilitar o botão em caso de erro
     function reabilitarBotaoCadastrar(button, originalContent) {
-        button.disabled = false;
-        button.innerHTML = originalContent;
-        button.style.opacity = '1';
-        button.style.cursor = 'pointer';
-    }
-    
-    // Função para mostrar o botão de impressão
-    function mostrarBotaoImpressao(inscricaoId) {
-        const buttonsContainer = document.querySelector('.buttons-container');
-        if (buttonsContainer) {
-            buttonsContainer.style.display = 'flex';
-            
-            const printButton = document.getElementById('print-button');
-            if (printButton && inscricaoId) {
-                // Armazenar ID da inscrição no botão
-                printButton.setAttribute('data-inscricao-id', inscricaoId);
-                
-                // Configurar evento de clique
-                printButton.onclick = function() {
-                    const id = this.getAttribute('data-inscricao-id');
-                    window.open(`social-relatorio-habitacao.php?id=${id}`, '_blank');
-                };
-                
-                // Animar a entrada do botão
-                printButton.style.opacity = '0';
-                printButton.style.transform = 'translateY(20px)';
-                
-                setTimeout(() => {
-                    printButton.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                    printButton.style.opacity = '1';
-                    printButton.style.transform = 'translateY(0)';
-                    
-                    // Adicionar efeito de destaque
-                    printButton.classList.add('highlight');
-                    setTimeout(() => {
-                        printButton.classList.remove('highlight');
-                    }, 6000);
-                }, 300);
-            }
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = originalContent;
+            button.style.opacity = '1';
+            button.style.cursor = 'pointer';
         }
     }
     
-    // Função para desabilitar todo o formulário após sucesso
-    function desabilitarFormulario() {
-        // Desabilitar todos os inputs, selects e textareas
-        const formElements = document.querySelectorAll('#habitacao-form input, #habitacao-form select, #habitacao-form textarea');
+    // Função CORRIGIDA para desabilitar formulário SEM AFETAR botão de impressão
+    function desabilitarFormularioSeguro() {
+        console.log('📝 Desabilitando formulário de forma SEGURA...');
+        
+        // APENAS desabilitar inputs do formulário (exceto botão de impressão)
+        const formElements = form.querySelectorAll('input:not(#print-button), select, textarea');
         formElements.forEach(element => {
+            // Pular elementos que não são do formulário principal
+            if (element.id === 'print-button' || 
+                element.closest('.buttons-container') ||
+                element.classList.contains('btn-print')) {
+                return; // NÃO mexer nesses elementos
+            }
+            
             element.disabled = true;
-            element.style.backgroundColor = '#f5f5f5';
-            element.style.color = '#888';
+            element.style.backgroundColor = '#f8f8f8';
+            element.style.color = '#999';
+            element.style.opacity = '0.7';
         });
         
-        // Desabilitar botões de navegação das etapas
-        const navButtons = document.querySelectorAll('.btn-step-prev, .btn-step-next');
+        // Desabilitar APENAS os botões de navegação das etapas (não outros botões)
+        const navButtons = document.querySelectorAll('.btn-step-prev, .btn-step-next, #submit-button');
         navButtons.forEach(button => {
-            button.disabled = true;
-            button.style.opacity = '0.5';
-            button.style.cursor = 'not-allowed';
+            if (button.id !== 'print-button') {
+                button.disabled = true;
+                button.style.opacity = '0.5';
+                button.style.cursor = 'not-allowed';
+            }
         });
         
-        // Desabilitar navegação por clique nas etapas
-        const stepItems = document.querySelectorAll('.step-nav li');
-        stepItems.forEach(item => {
-            item.style.pointerEvents = 'none';
-            item.style.opacity = '0.7';
-            item.classList.add('disabled');
-        });
+        console.log('✅ Formulário desabilitado SEM afetar botão de impressão');
+    }
+    
+    // Função NOVA para garantir que o botão de impressão NUNCA seja bloqueado
+    function protegerBotaoImpressao(inscricaoId) {
+        const printButton = document.getElementById('print-button');
+        const buttonsContainer = document.querySelector('.buttons-container');
         
-        // Adicionar overlay visual ao formulário
-        const formContainer = document.getElementById('habitacao-form');
-        if (formContainer && !document.getElementById('form-overlay')) {
-            const overlay = document.createElement('div');
-            overlay.id = 'form-overlay';
-            overlay.className = 'form-disabled-overlay';
-            overlay.innerHTML = `
-                <div class="overlay-message">
-                    <i class="fas fa-lock"></i>
-                    <span>Formulário protegido após cadastro bem-sucedido</span>
-                </div>
-            `;
-            formContainer.style.position = 'relative';
-            formContainer.appendChild(overlay);
+        if (printButton) {
+            // Configurações de segurança máxima
+            printButton.disabled = false;
+            printButton.style.opacity = '1';
+            printButton.style.cursor = 'pointer';
+            printButton.style.pointerEvents = 'auto';
+            printButton.style.position = 'relative';
+            printButton.style.zIndex = '999999';
+            printButton.style.display = 'inline-block';
+            printButton.setAttribute('data-inscricao-id', inscricaoId);
+            
+            // Remover qualquer event listener antigo e adicionar novo
+            const newPrintButton = printButton.cloneNode(true);
+            printButton.parentNode.replaceChild(newPrintButton, printButton);
+            
+            // Configurar evento de forma definitiva
+            newPrintButton.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const id = this.getAttribute('data-inscricao-id');
+                console.log('🖨️ BOTÃO DE IMPRESSÃO CLICADO - ID:', id);
+                if (id) {
+                    window.open(`social-relatorio-habitacao.php?id=${id}`, '_blank');
+                } else {
+                    alert('ID da inscrição não encontrado para impressão.');
+                }
+                return false;
+            };
+            
+            // Garantir que o container também esteja livre
+            if (buttonsContainer) {
+                buttonsContainer.style.display = 'flex';
+                buttonsContainer.style.position = 'relative';
+                buttonsContainer.style.zIndex = '999998';
+                buttonsContainer.style.pointerEvents = 'auto';
+            }
+            
+            console.log('🛡️ Botão de impressão PROTEGIDO com ID:', inscricaoId);
         }
     }
     
-    // Função para lidar com a submissão do formulário via AJAX (ATUALIZADA)
+    // Função para lidar com a submissão do formulário via AJAX
     function handleFormSubmit(e) {
         e.preventDefault();
         
@@ -177,13 +145,15 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Desabilitar o botão de submit imediatamente para evitar duplo envio
         const submitButton = document.getElementById('submit-button');
-        const originalButtonContent = submitButton.innerHTML;
+        const originalButtonContent = submitButton ? submitButton.innerHTML : '';
         
         // Alterar aparência do botão para indicar processamento
-        submitButton.disabled = true;
-        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
-        submitButton.style.opacity = '0.6';
-        submitButton.style.cursor = 'not-allowed';
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+            submitButton.style.opacity = '0.6';
+            submitButton.style.cursor = 'not-allowed';
+        }
         
         // Mostrar overlay de carregamento
         showLoading();
@@ -196,52 +166,123 @@ document.addEventListener('DOMContentLoaded', function() {
         xhr.open('POST', '../controller/processar_habitacao.php', true);
         xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         
-        // Configurar manipuladores de eventos
+        // Configurar manipulador de sucesso
         xhr.onload = function() {
             hideLoading();
+            
+            console.log('=== DEBUG AJAX RESPONSE ===');
+            console.log('Status:', xhr.status);
+            console.log('Response Text:', xhr.responseText);
+            console.log('==============================');
             
             if (xhr.status >= 200 && xhr.status < 300) {
                 try {
                     const response = JSON.parse(xhr.responseText);
                     
+                    console.log('=== DEBUG PARSED RESPONSE ===');
+                    console.log('Response Object:', response);
+                    console.log('Status:', response.status);
+                    console.log('================================');
+                    
                     if (response.status === 'success') {
-                        // Sucesso - ocultar o botão permanentemente
-                        ocultarBotaoCadastrar();
+                        console.log('✅ Cadastro realizado com sucesso!');
+                        console.log('Protocolo:', response.protocolo);
+                        console.log('ID da Inscrição:', response.inscricao_id);
                         
-                        // Mostrar mensagem de sucesso
-                        showStatusMessage(response.message, 'success');
+                        // 1. PRIMEIRO: Proteger o botão de impressão IMEDIATAMENTE
+                        protegerBotaoImpressao(response.inscricao_id);
                         
-                        // Mostrar botão de impressão do comprovante
-                        mostrarBotaoImpressao(response.inscricao_id);
+                        // 2. Ocultar APENAS o botão de cadastrar
+                        if (submitButton) {
+                            submitButton.style.display = 'none';
+                        }
                         
-                        // Desabilitar todo o formulário para evitar alterações
-                        desabilitarFormulario();
-                        
-                        // Rolar para a mensagem de sucesso
-                        setTimeout(() => {
-                            document.getElementById('status-message').scrollIntoView({ 
+                        // 3. Mostrar mensagem de sucesso
+                        if (statusMessage) {
+                            statusMessage.innerHTML = `
+                                <div style="
+                                    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+                                    border: 2px solid #4caf50;
+                                    border-radius: 12px;
+                                    padding: 30px;
+                                    text-align: center;
+                                    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+                                    margin: 20px 0;
+                                ">
+                                    <div style="font-size: 4rem; color: #4caf50; margin-bottom: 20px;">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <h2 style="color: #2e7d32; margin-bottom: 15px;">
+                                        Cadastro Realizado com Sucesso!
+                                    </h2>
+                                    <div style="
+                                        background: rgba(46, 125, 50, 0.1);
+                                        padding: 15px;
+                                        border-radius: 8px;
+                                        margin: 20px 0;
+                                        border-left: 4px solid #4caf50;
+                                    ">
+                                        <p style="margin: 5px 0; font-size: 1.1rem;"><strong>Protocolo:</strong> ${response.protocolo}</p>
+                                        <p style="margin: 5px 0; color: #666; font-size: 0.9rem;">
+                                            <i class="fas fa-info-circle"></i> 
+                                            Guarde estas informações para consultas futuras
+                                        </p>
+                                    </div>
+                                    <p style="font-size: 1.1rem; color: #2e7d32; margin: 20px 0;">
+                                        <strong>Use o botão "Imprimir Comprovante" abaixo!</strong>
+                                    </p>
+                                </div>
+                            `;
+                            statusMessage.className = 'status-message success';
+                            statusMessage.style.display = 'block';
+                            
+                            // Rolar até a mensagem
+                            statusMessage.scrollIntoView({ 
                                 behavior: 'smooth', 
                                 block: 'center' 
                             });
+                        }
+                        
+                        // 4. Desabilitar formulário de forma SEGURA (sem afetar botão de impressão)
+                        desabilitarFormularioSeguro();
+                        
+                        // 5. REFORÇAR proteção do botão após 1 segundo
+                        setTimeout(() => {
+                            protegerBotaoImpressao(response.inscricao_id);
                         }, 1000);
+                        
+                        // 6. REFORÇAR proteção do botão após 3 segundos
+                        setTimeout(() => {
+                            protegerBotaoImpressao(response.inscricao_id);
+                        }, 3000);
+                        
+                        // 7. COMENTAR ou REMOVER redirecionamento automático para evitar interferência
+                        /*
+                        setTimeout(() => {
+                            console.log('🔄 Redirecionando para o relatório...');
+                            window.location.href = `social-relatorio-habitacao.php?id=${response.inscricao_id}`;
+                        }, 3000);
+                        */
+                        
+                        console.log('🎉 Processo de sucesso concluído - Botão de impressão LIVRE!');
                         
                     } else {
                         // Erro - reabilitar o botão
                         reabilitarBotaoCadastrar(submitButton, originalButtonContent);
-                        showStatusMessage(response.message, 'error');
+                        showStatusMessage(response.message || 'Erro desconhecido', 'error');
                     }
                 } catch (e) {
+                    console.error('❌ Erro ao fazer parse do JSON:', e);
+                    console.error('Response que causou erro:', xhr.responseText);
                     // Erro de parsing - reabilitar o botão
                     reabilitarBotaoCadastrar(submitButton, originalButtonContent);
                     showStatusMessage('Erro ao processar a resposta do servidor. Por favor, tente novamente.', 'error');
-                    console.error('Erro ao analisar a resposta JSON:', e);
-                    console.error('Resposta recebida:', xhr.responseText);
                 }
             } else {
+                console.error('❌ Status HTTP diferente de 200-299:', xhr.status);
                 // Erro HTTP - reabilitar o botão
                 reabilitarBotaoCadastrar(submitButton, originalButtonContent);
                 showStatusMessage('Erro de comunicação com o servidor. Por favor, tente novamente mais tarde.', 'error');
-                console.error('Erro na requisição AJAX. Status:', xhr.status);
             }
         };
         
@@ -314,8 +355,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Validar CPF do cônjuge, se aplicável
-        const estadoCivil = document.getElementById('estado_civil').value;
-        if (['CASADO(A)', 'UNIÃO ESTÁVEL/AMASIADO(A)'].includes(estadoCivil)) {
+        const estadoCivil = document.getElementById('estado_civil');
+        if (estadoCivil && ['CASADO(A)', 'UNIÃO ESTÁVEL/AMASIADO(A)'].includes(estadoCivil.value)) {
             const cpfConjuge = document.getElementById('conjuge_cpf');
             if (cpfConjuge && cpfConjuge.value.trim() !== '') {
                 if (!validarCPF(cpfConjuge.value)) {
@@ -531,12 +572,17 @@ document.addEventListener('DOMContentLoaded', function() {
                         hideLoading();
                         
                         if (!data.erro) {
-                            document.getElementById('rua').value = data.logradouro.toUpperCase();
-                            document.getElementById('bairro').value = data.bairro.toUpperCase();
-                            document.getElementById('cidade').value = data.localidade.toUpperCase();
+                            const ruaInput = document.getElementById('rua');
+                            const bairroInput = document.getElementById('bairro');
+                            const cidadeInput = document.getElementById('cidade');
+                            const numeroInput = document.getElementById('numero');
+                            
+                            if (ruaInput) ruaInput.value = data.logradouro.toUpperCase();
+                            if (bairroInput) bairroInput.value = data.bairro.toUpperCase();
+                            if (cidadeInput) cidadeInput.value = data.localidade.toUpperCase();
                             
                             // Foco no campo de número
-                            document.getElementById('numero').focus();
+                            if (numeroInput) numeroInput.focus();
                         } else {
                             showStatusMessage('CEP não encontrado. Verifique o número informado.', 'warning');
                         }
@@ -625,8 +671,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     let progress = 0;
                     const interval = setInterval(() => {
                         progress += 5;
-                        progressBar.style.width = `${progress}%`;
-                        progressText.textContent = `${progress}%`;
+                        if (progressBar) progressBar.style.width = `${progress}%`;
+                        if (progressText) progressText.textContent = `${progress}%`;
                         
                         if (progress >= 100) {
                             clearInterval(interval);
@@ -648,7 +694,161 @@ document.addEventListener('DOMContentLoaded', function() {
         campo.addEventListener('change', function() {
             this.classList.remove('input-error');
         });
-    });
-    
-    console.log('Ajax habitação carregado com sucesso - versão atualizada com ocultamento de botão');
+   });
+   
+   // Adicionar CSS dinâmico para o efeito de destaque
+   const style = document.createElement('style');
+   style.textContent = `
+       .highlight {
+           animation: pulse-green 2s infinite;
+       }
+
+       @keyframes pulse-green {
+           0% { 
+               transform: scale(1.1);
+               box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);
+           }
+           50% { 
+               transform: scale(1.15);
+               box-shadow: 0 6px 20px rgba(46, 125, 50, 0.5);
+           }
+           100% { 
+               transform: scale(1.1);
+               box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);
+           }
+       }
+
+       .input-error {
+           border-color: #f44336 !important;
+           box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.2) !important;
+       }
+
+       .status-message.success {
+           background-color: #e8f5e9;
+           color: #2e7d32;
+           border-left: 4px solid #4caf50;
+       }
+
+       .status-message.error {
+           background-color: #ffebee;
+           color: #c62828;
+           border-left: 4px solid #f44336;
+       }
+
+       .status-message.warning {
+           background-color: #fff8e1;
+           color: #f57c00;
+           border-left: 4px solid #ff9800;
+       }
+
+       /* PROTEÇÃO MÁXIMA PARA O BOTÃO DE IMPRESSÃO */
+       .buttons-container {
+           position: relative !important;
+           z-index: 999999 !important;
+           pointer-events: auto !important;
+           display: flex !important;
+       }
+
+       #print-button {
+           position: relative !important;
+           z-index: 1000000 !important;
+           pointer-events: auto !important;
+           opacity: 1 !important;
+           cursor: pointer !important;
+           display: inline-block !important;
+       }
+
+       #print-button:not(:disabled) {
+           opacity: 1 !important;
+           cursor: pointer !important;
+           pointer-events: auto !important;
+           background-color: #28a745 !important;
+           border-color: #28a745 !important;
+       }
+
+       #print-button:hover {
+           background-color: #218838 !important;
+           border-color: #1e7e34 !important;
+           transform: translateY(-2px) !important;
+       }
+
+       /* Evitar que qualquer overlay bloqueie o botão */
+       .form-overlay,
+       .form-disabled-overlay,
+       [id*="overlay"]:not(#loading-overlay) {
+           z-index: 50000 !important;
+       }
+
+       .cadastro-concluido {
+           background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+           border: 2px solid #4caf50;
+           border-radius: 8px;
+           padding: 20px;
+           margin: 20px 0;
+           box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+       }
+   `;
+   document.head.appendChild(style);
+   
+});
+
+// ===== PROTEÇÃO GLOBAL CONTÍNUA (FORA do DOMContentLoaded) =====
+
+// Função para proteger o botão de impressão globalmente
+function protegerBotaoGlobal() {
+   const printButton = document.getElementById('print-button');
+   if (printButton) {
+       printButton.style.pointerEvents = 'auto';
+       printButton.style.opacity = '1';
+       printButton.style.zIndex = '1000000';
+       
+       if (!printButton.onclick && printButton.getAttribute('data-inscricao-id')) {
+           const inscricaoId = printButton.getAttribute('data-inscricao-id');
+           printButton.onclick = function(e) {
+               e.preventDefault();
+               e.stopPropagation();
+               console.log('🖨️ IMPRESSÃO GLOBAL - ID:', inscricaoId);
+               window.open(`social-relatorio-habitacao.php?id=${inscricaoId}`, '_blank');
+               return false;
+           };
+       }
+       
+       document.querySelectorAll('[style*="position: fixed"], [style*="position: absolute"]').forEach(element => {
+           const zIndex = parseInt(element.style.zIndex || 0);
+           if (zIndex > 900000 && zIndex < 1000000) {
+               element.style.zIndex = '50000'; // Rebaixar z-index
+           }
+       });
+   }
+}
+
+// Monitorar e proteger o botão periodicamente
+setInterval(protegerBotaoGlobal, 2000);
+
+// Proteger quando a página carrega completamente
+window.addEventListener('load', protegerBotaoGlobal);
+
+// Proteger quando há mudanças no DOM
+const observer = new MutationObserver(function(mutations) {
+   mutations.forEach(function(mutation) {
+       if (mutation.type === 'childList') {
+           const newElements = Array.from(mutation.addedNodes).filter(node => node.nodeType === 1);
+           newElements.forEach(element => {
+               if (element.style && element.style.position === 'fixed' || element.style.position === 'absolute') {
+                   const zIndex = parseInt(element.style.zIndex || 0);
+                   if (zIndex > 900000) {
+                       console.log('🛡️ Elemento com z-index alto detectado, rebaixando...');
+                       element.style.zIndex = '50000';
+                   }
+               }
+           });
+           
+           protegerBotaoGlobal();
+       }
+   });
+});
+
+observer.observe(document.body, {
+   childList: true,
+   subtree: true
 });

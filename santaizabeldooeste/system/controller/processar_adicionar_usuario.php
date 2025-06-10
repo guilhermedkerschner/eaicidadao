@@ -116,7 +116,7 @@ if (empty($departamento)) {
     $erros[] = "O departamento é obrigatório.";
 }
 
-if (!in_array($nivel, [1, 2])) {
+if (!in_array($nivel, [1, 2, 3, 4])) {
     $erros[] = "Nível de acesso inválido.";
 }
 

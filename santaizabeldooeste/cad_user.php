@@ -47,6 +47,7 @@ if (isset($_SESSION['dados_cadastro'])) {
     <link rel="stylesheet" type="text/css" href="./css/login-cidadao.css">
     <link rel="stylesheet" type="text/css" href="./css/cad-cidadao.css">
     <link rel="stylesheet" type="text/css" href="./css/cadastro-cidadao-extras.css">
+    <link rel="stylesheet" type="text/css" href="./css/foto-upload.css">
 </head>
 
 <body>
@@ -83,7 +84,7 @@ if (isset($_SESSION['dados_cadastro'])) {
         </div>
         <?php endif; ?>
 
-        <form class="cadastro-form" action="./controller/processar_cadastro_usuario.php" method="post">
+        <form class="cadastro-form" action="./controller/processar_cadastro_usuario.php" method="post" enctype="multipart/form-data">
             <h4 class="form-title">Dados Pessoais</h4>
             <div class="form-row">
                 <div class="form-col">
@@ -122,6 +123,65 @@ if (isset($_SESSION['dados_cadastro'])) {
                         <div class="input-group">
                             <i class="fas fa-phone"></i>
                             <input type="text" id="telefone" name="telefone" class="form-control" placeholder="(00) 00000-0000" value="<?php echo $telefone; ?>" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nova seção para foto do usuário -->
+            <h4 class="form-title">Foto do Usuário</h4>
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="foto_usuario" class="required-field">Foto/Selfie</label>
+                        <div class="photo-upload-container">
+                            <div class="photo-preview" id="photo-preview">
+                                <i class="fas fa-camera"></i>
+                                <span>Clique para adicionar sua foto</span>
+                            </div>
+                            <input type="file" id="foto_usuario" name="foto_usuario" accept="image/jpeg,image/jpg,image/png" required style="display: none;">
+                            <div class="photo-controls">
+                                <button type="button" id="btn-camera" class="btn-photo">
+                                    <i class="fas fa-camera"></i> Tirar Foto
+                                </button>
+                                <button type="button" id="btn-galeria" class="btn-photo">
+                                    <i class="fas fa-image"></i> Escolher da Galeria
+                                </button>
+                                <button type="button" id="btn-remover" class="btn-photo btn-remove" style="display: none;">
+                                    <i class="fas fa-trash"></i> Remover
+                                </button>
+                            </div>
+                        </div>
+                        <small class="form-text">
+                            Formatos aceitos: JPG, JPEG, PNG. Tamanho máximo: 5MB.<br>
+                            A foto deve mostrar claramente seu rosto para identificação.
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal para captura de foto via webcam -->
+            <div id="camera-modal" class="camera-modal" style="display: none;">
+                <div class="camera-modal-content">
+                    <div class="camera-header">
+                        <h3>Tirar Foto</h3>
+                        <button type="button" id="close-camera" class="close-btn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="camera-body">
+                        <video id="camera-video" autoplay playsinline></video>
+                        <canvas id="camera-canvas" style="display: none;"></canvas>
+                        <div class="camera-controls">
+                            <button type="button" id="capture-photo" class="btn-capture">
+                                <i class="fas fa-camera"></i> Capturar
+                            </button>
+                            <button type="button" id="retake-photo" class="btn-retake" style="display: none;">
+                                <i class="fas fa-redo"></i> Tirar Novamente
+                            </button>
+                            <button type="button" id="confirm-photo" class="btn-confirm" style="display: none;">
+                                <i class="fas fa-check"></i> Confirmar
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -309,8 +369,9 @@ if (isset($_SESSION['dados_cadastro'])) {
         </form>
     </div>
 
-    <!-- Carrega o arquivo JavaScript externo em vez do script embutido -->
+    <!-- Carrega os arquivos JavaScript -->
     <script src="./js/cadastro-cidadao.js"></script>
+    <script src="./js/foto-upload.js"></script>
 </body>
 
 </html>
