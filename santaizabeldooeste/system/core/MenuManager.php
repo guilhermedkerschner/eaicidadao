@@ -13,14 +13,147 @@ class MenuManager {
     private $departmentColorIndex = 0;
 
     public function __construct($userSession = null) {
-        $this->modules = require_once __DIR__ . '/../config/modules.php';
-        $this->permissions = require_once __DIR__ . '/../config/permissions.php';
-        $this->theme = require_once __DIR__ . '/../config/theme.php';
-        $this->departments = require_once __DIR__ . '/../config/departments.php';
+        // Verificar e carregar arquivos de configuração com validação
+        $this->loadConfigurations();
         $this->userSession = $userSession;
         
         // Atribuir cores automaticamente aos módulos departamentais
         $this->assignDepartmentColors();
+    }
+
+    /**
+     * Carrega as configurações com validação de erro
+     */
+    private function loadConfigurations() {
+        // Carregar módulos
+        $modulesFile = __DIR__ . '/../config/modules.php';
+        if (file_exists($modulesFile)) {
+            $this->modules = require_once $modulesFile;
+        }
+        if (!is_array($this->modules)) {
+            $this->modules = $this->getDefaultModules();
+        }
+
+        // Carregar permissões
+        $permissionsFile = __DIR__ . '/../config/permissions.php';
+        if (file_exists($permissionsFile)) {
+            $this->permissions = require_once $permissionsFile;
+        }
+        if (!is_array($this->permissions)) {
+            $this->permissions = $this->getDefaultPermissions();
+        }
+
+        // Carregar tema
+        $themeFile = __DIR__ . '/../config/theme.php';
+        if (file_exists($themeFile)) {
+            $this->theme = require_once $themeFile;
+        }
+        if (!is_array($this->theme)) {
+            $this->theme = $this->getDefaultTheme();
+        }
+
+        // Carregar departamentos
+        $departmentsFile = __DIR__ . '/../config/departments.php';
+        if (file_exists($departmentsFile)) {
+            $this->departments = require_once $departmentsFile;
+        }
+        if (!is_array($this->departments)) {
+            $this->departments = $this->getDefaultDepartments();
+        }
+    }
+
+    /**
+     * Retorna configuração padrão de módulos
+     */
+    private function getDefaultModules() {
+        return [
+            'dashboard' => [
+                'info' => [
+                    'name' => 'Dashboard',
+                    'icon' => 'fas fa-tachometer-alt',
+                    'category' => 'admin',
+                    'color' => '#007bff'
+                ],
+                'files' => [
+                    'main' => 'dashboard.php'
+                ],
+                'menu' => [
+                    'parent' => false,
+                    'submenu' => []
+                ],
+                'permissions' => [
+                    'levels' => [1, 2, 3, 4],
+                    'departments' => ['all']
+                ]
+            ],
+            'usuarios' => [
+                'info' => [
+                    'name' => 'Usuários',
+                    'icon' => 'fas fa-users',
+                    'category' => 'admin',
+                    'color' => '#dc3545'
+                ],
+                'files' => [
+                    'main' => 'lista_usuarios.php'
+                ],
+                'menu' => [
+                    'parent' => false,
+                    'submenu' => []
+                ],
+                'permissions' => [
+                    'levels' => [1, 2],
+                    'departments' => ['all']
+                ]
+            ]
+        ];
+    }
+
+    /**
+     * Retorna configuração padrão de permissões
+     */
+    private function getDefaultPermissions() {
+        return [
+            'levels' => [
+                1 => ['name' => 'Administrador', 'access' => 'all'],
+                2 => ['name' => 'Coordenador', 'access' => 'department'],
+                3 => ['name' => 'Operador', 'access' => 'limited'],
+                4 => ['name' => 'Usuário', 'access' => 'basic']
+            ]
+        ];
+    }
+
+    /**
+     * Retorna configuração padrão de tema
+     */
+    private function getDefaultTheme() {
+        return [
+            'colors' => [
+                'primary' => '#007bff',
+                'secondary' => '#6c757d',
+                'success' => '#28a745',
+                'danger' => '#dc3545',
+                'warning' => '#ffc107',
+                'info' => '#17a2b8',
+                'department_1' => '#007bff'
+            ],
+            'category_colors' => [
+                'admin' => '#dc3545',
+                'department' => '#007bff',
+                'user' => '#28a745',
+                'report' => '#ffc107'
+            ]
+        ];
+    }
+
+    /**
+     * Retorna configuração padrão de departamentos
+     */
+    private function getDefaultDepartments() {
+        return [
+            'ADMINISTRACAO' => ['name' => 'Administração', 'color' => '#dc3545'],
+            'ESPORTE' => ['name' => 'Esporte', 'color' => '#007bff'],
+            'ASSISTENCIA_SOCIAL' => ['name' => 'Assistência Social', 'color' => '#28a745']
+        ];
     }
 
     /**
@@ -30,9 +163,14 @@ class MenuManager {
         $departmentColorIndex = 1;
         
         foreach ($this->modules as $key => &$module) {
-            if ($module['info']['category'] === 'department') {
+            // Verificar se o módulo tem a estrutura esperada
+            if (!isset($module['info']) || !is_array($module['info'])) {
+                $module['info'] = ['category' => 'user', 'color' => '#6c757d'];
+            }
+
+            if (($module['info']['category'] ?? '') === 'department') {
                 $colorKey = 'department_' . $departmentColorIndex;
-                $module['info']['color'] = $this->theme['colors'][$colorKey] ?? $this->theme['colors']['department_1'];
+                $module['info']['color'] = $this->theme['colors'][$colorKey] ?? $this->theme['colors']['department_1'] ?? '#007bff';
                 $departmentColorIndex++;
                 
                 // Reset se passar do limite de cores disponíveis
@@ -41,8 +179,8 @@ class MenuManager {
                 }
             } else {
                 // Atribuir cor baseada na categoria
-                $category = $module['info']['category'];
-                $module['info']['color'] = $this->theme['category_colors'][$category] ?? $this->theme['colors']['secondary'];
+                $category = $module['info']['category'] ?? 'user';
+                $module['info']['color'] = $this->theme['category_colors'][$category] ?? $this->theme['colors']['secondary'] ?? '#6c757d';
             }
         }
     }
@@ -58,56 +196,56 @@ class MenuManager {
         $availableModules = [];
         $userLevel = $this->userSession['usuario_nivel_id'] ?? 4;
         $userDepartment = strtoupper($this->userSession['usuario_departamento'] ?? '');
-        $isAdmin = ($userLevel == 1);
 
         foreach ($this->modules as $key => $module) {
-            // Verificar nível mínimo
-            if ($userLevel > $module['access']['min_level']) {
+            // Verificar estrutura do módulo
+            if (!isset($module['permissions']) || !is_array($module['permissions'])) {
                 continue;
             }
 
-            // Verificar departamento (admin tem acesso a tudo)
-            if (!$isAdmin) {
-                $allowedDepartments = $module['access']['departments'];
-                if (!in_array('ALL', $allowedDepartments) && !in_array($userDepartment, $allowedDepartments)) {
-                    continue;
-                }
+            $permissions = $module['permissions'];
+            
+            // Verificar se o usuário tem permissão por nível
+            $hasLevelPermission = in_array($userLevel, $permissions['levels'] ?? []);
+            
+            // Verificar se o usuário tem permissão por departamento
+            $departments = $permissions['departments'] ?? [];
+            $hasDepartmentPermission = in_array('all', $departments) || 
+                                       in_array($userDepartment, $departments);
+            
+            if ($hasLevelPermission && $hasDepartmentPermission) {
+                $availableModules[$key] = $module;
             }
-
-            $availableModules[$key] = $module;
         }
-
-        // Ordenar por ordem definida
-        uasort($availableModules, function($a, $b) {
-            return $a['info']['order'] <=> $b['info']['order'];
-        });
 
         return $availableModules;
     }
 
+    
     /**
-     * Gera o HTML da sidebar com base nos módulos disponíveis
+     * Gera o HTML da sidebar com base nos módulos disponíveis (método corrigido)
      */
     public function generateSidebar($currentPage = '') {
-        $modules = $this->getAvailableModules();
-        $isAdmin = ($this->userSession['usuario_nivel_id'] ?? 4) == 1;
+        return $this->generateMenu($currentPage);
+    }
+
+    /**
+     * Gera HTML do menu
+     */
+    public function generateMenu($currentPage = '') {
+        $availableModules = $this->getAvailableModules();
+        $groupedModules = $this->groupModulesByCategory($availableModules);
         
         $html = '<ul class="menu">';
         
-        // Agrupar módulos por categoria
-        $groupedModules = $this->groupModulesByCategory($modules);
-        
-        foreach ($groupedModules as $category => $categoryModules) {
-            if (!empty($categoryModules)) {
-                // Adicionar separador e título da categoria (exceto para o primeiro)
-                if ($category !== 'system') {
-                    $html .= '<div class="menu-separator"></div>';
-                    $html .= '<div class="menu-category">' . $this->getCategoryName($category) . '</div>';
-                }
-                
-                foreach ($categoryModules as $key => $module) {
-                    $html .= $this->generateMenuItemHTML($key, $module, $currentPage);
-                }
+        foreach ($groupedModules as $category => $modules) {
+            if ($category !== 'user') {
+                $html .= '<div class="menu-separator"></div>';
+                $html .= '<div class="menu-category">' . $this->getCategoryName($category) . '</div>';
+            }
+            
+            foreach ($modules as $key => $module) {
+                $html .= $this->generateMenuItemHTML($key, $module, $currentPage);
             }
         }
         
@@ -121,18 +259,46 @@ class MenuManager {
     }
 
     /**
+     * Retorna as cores do tema atual baseado no usuário
+     */
+    public function getThemeColors() {
+        $isAdmin = ($this->userSession['usuario_nivel_id'] ?? 4) == 1;
+        $userDepartment = strtoupper($this->userSession['usuario_departamento'] ?? '');
+        
+        $colors = [
+            'primary' => $this->theme['colors']['secondary'] ?? '#3498db',
+            'title' => 'Sistema'
+        ];
+        
+        if ($isAdmin) {
+            $colors['primary'] = $this->theme['colors']['admin'] ?? '#e74c3c';
+            $colors['title'] = 'Administração Geral';
+        } elseif (isset($this->departments[$userDepartment])) {
+            $colors['primary'] = $this->departments[$userDepartment]['color'] ?? '#3498db';
+            $colors['title'] = $this->departments[$userDepartment]['name'] ?? 'Sistema';
+        }
+        
+        return $colors;
+    }
+
+    /**
      * Agrupa módulos por categoria
      */
     private function groupModulesByCategory($modules) {
-        $grouped = [
-            'system' => [],
-            'admin' => [],
-            'department' => [],
-            'user' => []
-        ];
+        $grouped = [];
         
         foreach ($modules as $key => $module) {
-            $category = $module['info']['category'] ?? 'department';
+            $category = $module['info']['category'] ?? 'user';
+            
+            // Reorganizar ordem das categorias
+            if ($category === 'admin') $category = 'admin';
+            elseif ($category === 'department') $category = 'department';
+            else $category = 'user';
+            
+            if (!isset($grouped[$category])) {
+                $grouped[$category] = [];
+            }
+            
             $grouped[$category][$key] = $module;
         }
         
@@ -158,18 +324,18 @@ class MenuManager {
      * Gera HTML para um item de menu
      */
     private function generateMenuItemHTML($key, $module, $currentPage) {
-        $info = $module['info'];
-        $menu = $module['menu'];
+        $info = $module['info'] ?? [];
+        $menu = $module['menu'] ?? [];
         $isActive = $this->isModuleActive($key, $currentPage);
-        $hasSubmenu = $menu['parent'] && !empty($menu['submenu']);
+        $hasSubmenu = ($menu['parent'] ?? false) && !empty($menu['submenu'] ?? []);
         
         $html = '<li class="menu-item' . ($isActive && $hasSubmenu ? ' open' : '') . '">';
         
         if ($hasSubmenu) {
             // Item com submenu
             $html .= '<a href="#" class="menu-link' . ($isActive ? ' active' : '') . '">';
-            $html .= '<span class="menu-icon"><i class="' . $info['icon'] . '"></i></span>';
-            $html .= '<span class="menu-text">' . $info['name'] . '</span>';
+            $html .= '<span class="menu-icon"><i class="' . ($info['icon'] ?? 'fas fa-circle') . '"></i></span>';
+            $html .= '<span class="menu-text">' . ($info['name'] ?? 'Item') . '</span>';
             $html .= '<span class="arrow"><i class="fas fa-chevron-right"></i></span>';
             $html .= '</a>';
             
@@ -181,7 +347,7 @@ class MenuManager {
                 
                 $html .= '<li>';
                 $html .= '<a href="' . $subFile . '" class="submenu-link' . ($subIsActive ? ' active' : '') . '">';
-                $html .= $subItem['name'];
+                $html .= ($subItem['name'] ?? 'Subitem');
                 $html .= '</a>';
                 $html .= '</li>';
             }
@@ -190,8 +356,8 @@ class MenuManager {
             // Item simples
             $mainFile = $module['files']['main'] ?? '#';
             $html .= '<a href="' . $mainFile . '" class="menu-link' . ($isActive ? ' active' : '') . '">';
-            $html .= '<span class="menu-icon"><i class="' . $info['icon'] . '"></i></span>';
-            $html .= '<span class="menu-text">' . $info['name'] . '</span>';
+            $html .= '<span class="menu-icon"><i class="' . ($info['icon'] ?? 'fas fa-circle') . '"></i></span>';
+            $html .= '<span class="menu-text">' . ($info['name'] ?? 'Item') . '</span>';
             $html .= '</a>';
         }
         
@@ -219,7 +385,7 @@ class MenuManager {
      */
     private function isModuleActive($moduleKey, $currentPage) {
         $module = $this->modules[$moduleKey] ?? null;
-        if (!$module) return false;
+        if (!$module || !is_array($module)) return false;
         
         // Verificar arquivo principal
         if (isset($module['files']['main']) && $this->isPageActive($module['files']['main'], $currentPage)) {
@@ -227,9 +393,9 @@ class MenuManager {
         }
         
         // Verificar submenu
-        if (isset($module['menu']['submenu'])) {
+        if (isset($module['menu']['submenu']) && is_array($module['menu']['submenu'])) {
             foreach ($module['menu']['submenu'] as $subItem) {
-                if (isset($subItem['files'])) {
+                if (isset($subItem['files']) && is_array($subItem['files'])) {
                     foreach ($subItem['files'] as $file) {
                         if ($this->isPageActive($file, $currentPage)) {
                             return true;
@@ -257,21 +423,9 @@ class MenuManager {
         
         foreach ($this->modules as $key => $module) {
             if ($this->isModuleActive($key, $currentPage)) {
-                $breadcrumb[$module['info']['name']] = $module['files']['main'] ?? '#';
-                
-                // Verificar se é uma subpágina
-                if (isset($module['menu']['submenu'])) {
-                    foreach ($module['menu']['submenu'] as $subKey => $subItem) {
-                        if (isset($subItem['files'])) {
-                            foreach ($subItem['files'] as $file) {
-                                if ($this->isPageActive($file, $currentPage)) {
-                                    $breadcrumb[$subItem['name']] = $file;
-                                    break 2;
-                                }
-                            }
-                        }
-                    }
-                }
+                $moduleName = $module['info']['name'] ?? 'Página';
+                $mainFile = $module['files']['main'] ?? '#';
+                $breadcrumb[$moduleName] = $mainFile;
                 break;
             }
         }
@@ -280,27 +434,10 @@ class MenuManager {
     }
 
     /**
-     * Retorna as cores do tema atual baseado no usuário
+     * Retorna configurações de departamentos
      */
-    public function getThemeColors() {
-        $isAdmin = ($this->userSession['usuario_nivel_id'] ?? 4) == 1;
-        $userDepartment = strtoupper($this->userSession['usuario_departamento'] ?? '');
-        
-        if ($isAdmin) {
-            return [
-                'primary' => $this->theme['colors']['admin'],
-                'title' => 'Administração Geral'
-            ];
-        } elseif (isset($this->departments[$userDepartment])) {
-            return [
-                'primary' => $this->departments[$userDepartment]['color'],
-                'title' => $this->departments[$userDepartment]['name']
-            ];
-        }
-        
-        return [
-            'primary' => $this->theme['colors']['secondary'],
-            'title' => 'Sistema'
-        ];
+    public function getDepartments() {
+        return $this->departments;
     }
 }
+?>
