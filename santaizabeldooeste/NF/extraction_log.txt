@@ -1,0 +1,5 @@
+Arquivo: uploads/68593de70242b_Jean (1).pdf
+Método: method1
+Tamanho texto: 70016
+Dados: {"numero_nota":"4","data_nota":"2025-06-23","nome_razao_social":"EMPRESA NAO IDENTIFICADA","cnpj":"20250602150","cpf":"20250602150","valor_nota":1,"tomador_nome":"CLIENTE NAO IDENTIFICADO","endereco":null,"cep":"20250602","tipo_produto_servico":"Produto","method_used":"method1","text_length":70016}
+

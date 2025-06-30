@@ -1,0 +1,79 @@
+[2025-06-24 13:18:39] === Iniciando processamento ===
+[2025-06-24 13:18:40] Testando python: Python 3.13.5
+
+[2025-06-24 13:18:40] Python encontrado: python
+[2025-06-24 13:18:40] Processando: Jean (1).pdf
+[2025-06-24 13:18:40] Teste bibliotecas: OK
+
+[2025-06-24 13:18:40] Comando: python extract_nf.py "uploads/685a89900ad91_Jean (1).pdf" 2>&1
+[2025-06-24 13:18:41] Output: INSERT INTO notas_fiscais (numero_nota, data_nota, nome_razao_social, cnpj, tipo_produto_servico, produto, servico, valor_nota, tomador_nome, tomador_cpf, tomador_endereco, tomador_cep) VALUES (NULL, '2025-06-02', 'Documento Auxiliar da Nota Fiscal de Serviço Eletrônica
+BABINSKI TERRAPLENAGEM', '20.250.000/0000-98', 'Serviço', NULL, 'DOS SERVIÇOS VALOR TOTAL ALIQ. VALOR IMPOSTO RETIDO', 792.0, 'DO SERVIÇO Município de Prestação do Serviço', '026.863.009-73', 'Linha Jacutinga,SN
+Cidade UF Fone CE
+[2025-06-24 13:18:41] âœ“ Sucesso: Jean (1).pdf
+[2025-06-24 13:24:42] === Iniciando processamento ===
+[2025-06-24 13:24:42] Testando python: Python 3.13.5
+
+[2025-06-24 13:24:42] Python encontrado: python
+[2025-06-24 13:24:42] Processando: Jean (1).pdf
+[2025-06-24 13:24:42] Teste bibliotecas: OK
+
+[2025-06-24 13:24:42] Comando: python extract_nf.py "uploads/685a8afa6910c_Jean (1).pdf" 2>&1
+[2025-06-24 13:24:43] Output: INSERT INTO notas_fiscais (numero_nota, data_nota, nome_razao_social, cnpj, tipo_produto_servico, produto, servico, valor_nota, tomador_nome, tomador_cpf, tomador_endereco, tomador_cep) VALUES ('000000981', '2025-06-02', 'r da Nota Fiscal de Serviço Eletrônica
+BABINSKI TERRAPLENAGEM LTDA', '20.250.000/0000-98', 'Serviço', NULL, 'cimento de mercadorias', NULL, 'JEAN PIERR CATTO', '202.500.000-00', 'Linha Jacutinga,SN
+Cidade UF Fone CEP
+Coronel Vivida PR', '85509-282');
+
+[2025-06-24 13:24:43] âœ“ Sucesso: Jean (1).pdf
+[2025-06-24 13:34:45] === Iniciando processamento ===
+[2025-06-24 13:34:45] Testando python: Python 3.13.5
+
+[2025-06-24 13:34:45] Python encontrado: python
+[2025-06-24 13:34:45] Processando: Jean (1).pdf
+[2025-06-24 13:34:46] Teste bibliotecas: OK
+
+[2025-06-24 13:34:46] Comando: python extract_nf_professional.py "uploads/685a8d5597855_Jean (1).pdf" 2>&1
+[2025-06-24 13:34:46] Output: INSERT INTO notas_fiscais (numero_nota, data_nota, nome_razao_social, cnpj, tipo_produto_servico, produto, servico, valor_nota, tomador_nome, tomador_cpf, tomador_endereco, tomador_cep) VALUES ('202500000000981', '2025-06-02', NULL, '36.729.203/0001-60', 'Serviço', NULL, 'LOCAÇÃO MÁQUINA E', 20000.0, 'JEAN PIERR CATTO', '026.863.009-73', 'Linha Jacutinga,SN Cidade UF Fone', '85509-282');
+
+[2025-06-24 13:34:46] âœ“ Sucesso: Jean (1).pdf
+[2025-06-24 14:05:33] === Iniciando processamento ===
+[2025-06-24 14:05:33] Testando python: Python 3.13.5
+
+[2025-06-24 14:05:33] Python encontrado: python
+[2025-06-24 14:05:33] Processando: Jean (1).pdf
+[2025-06-24 14:05:34] Teste bibliotecas: OK
+
+[2025-06-24 14:05:34] Comando: python extract_nf_final.py "uploads/685a948db2e52_Jean (1).pdf" 2>&1
+[2025-06-24 14:05:34] Output:   File "C:\xampp\htdocs\eaicidadao\santaizabeldooeste\NF\extract_nf_final.py", line 26
+    'Ã"': 'Ó', 'Ã'': 'Ò', 'Ã"': 'Ô', 'Ã•': 'Õ', 'Ã–': 'Ö',
+                            ^
+SyntaxError: unterminated string literal (detected at line 26)
+
+[2025-06-24 14:05:34] âœ— Erro: Jean (1).pdf
+[2025-06-24 14:06:36] === Iniciando processamento ===
+[2025-06-24 14:06:36] Testando python: Python 3.13.5
+
+[2025-06-24 14:06:36] Python encontrado: python
+[2025-06-24 14:06:36] Processando: Jean (1).pdf
+[2025-06-24 14:06:37] Teste bibliotecas: OK
+
+[2025-06-24 14:06:37] Comando: python extract_nf_final.py "uploads/685a94ccf116f_Jean (1).pdf" 2>&1
+[2025-06-24 14:06:37] Output:   File "C:\xampp\htdocs\eaicidadao\santaizabeldooeste\NF\extract_nf_final.py", line 26
+    'Ã"': 'Ó', 'Ã'': 'Ò', 'Ã"': 'Ô', 'Ã•': 'Õ', 'Ã–': 'Ö',
+                            ^
+SyntaxError: unterminated string literal (detected at line 26)
+
+[2025-06-24 14:06:37] âœ— Erro: Jean (1).pdf
+[2025-06-30 03:30:38] === Iniciando processamento ===
+[2025-06-30 03:30:38] Testando python: Python 3.13.5
+
+[2025-06-30 03:30:38] Python encontrado: python
+[2025-06-30 03:30:38] Processando: Jean (1).pdf
+[2025-06-30 03:30:40] Teste bibliotecas: OK
+
+[2025-06-30 03:30:40] Comando: python extract_nf_final.py "uploads/6861e8bee8843_Jean (1).pdf" 2>&1
+[2025-06-30 03:30:40] Output:   File "C:\xampp\htdocs\eaicidadao\santaizabeldooeste\NF\extract_nf_final.py", line 26
+    'Ã"': 'Ó', 'Ã'': 'Ò', 'Ã"': 'Ô', 'Ã•': 'Õ', 'Ã–': 'Ö',
+                            ^
+SyntaxError: unterminated string literal (detected at line 26)
+
+[2025-06-30 03:30:40] âœ— Erro: Jean (1).pdf

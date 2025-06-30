@@ -1,0 +1,3 @@
+-- Notas Fiscais - 2025-06-24 13:34:46
+
+INSERT INTO notas_fiscais (numero_nota, data_nota, nome_razao_social, cnpj, tipo_produto_servico, produto, servico, valor_nota, tomador_nome, tomador_cpf, tomador_endereco, tomador_cep) VALUES ('202500000000981', '2025-06-02', NULL, '36.729.203/0001-60', 'Serviço', NULL, 'LOCAÇÃO MÁQUINA E', 20000.0, 'JEAN PIERR CATTO', '026.863.009-73', 'Linha Jacutinga,SN Cidade UF Fone', '85509-282');

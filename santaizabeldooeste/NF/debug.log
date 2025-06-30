@@ -1,0 +1,36 @@
+[2025-06-23 13:34:06] === Iniciando processamento PHP ===
+[2025-06-23 13:34:06] Processando arquivo: Jean (1).pdf
+[2025-06-23 13:34:06] Executando: php extract_nf_simple_php.php "uploads/68593baed9ce4_Jean (1).pdf" 2>&1
+[2025-06-23 13:34:07] SaÃ­da: ERRO: NÃ£o foi possÃ­vel extrair dados bÃ¡sicos da nota fiscal
+[2025-06-23 13:34:07] âœ— Erro: Jean (1).pdf - ERRO: NÃ£o foi possÃ­vel extrair dados bÃ¡sicos da nota fiscal
+[2025-06-23 13:38:31] === Iniciando processamento PHP ===
+[2025-06-23 13:38:31] Processando arquivo: Jean (1).pdf
+[2025-06-23 13:38:31] Executando: php extract_nf_simple_php.php "uploads/68593cb776f3f_Jean (1).pdf" 2>&1
+[2025-06-23 13:38:31] SaÃ­da: ERRO: NÃ£o foi possÃ­vel extrair dados bÃ¡sicos da nota fiscal
+[2025-06-23 13:38:31] âœ— Erro: Jean (1).pdf - ERRO: NÃ£o foi possÃ­vel extrair dados bÃ¡sicos da nota fiscal
+[2025-06-23 13:43:35] === Iniciando processamento PHP ===
+[2025-06-23 13:43:35] Processando arquivo: Jean (1).pdf
+[2025-06-23 13:43:35] Executando: php extract_nf_simple_php.php "uploads/68593de70242b_Jean (1).pdf" 2>&1
+[2025-06-23 13:43:35] SaÃ­da: PHP Warning:  preg_match(): Compilation failed: missing terminating ] for character class at offset 33 in C:\xampp\htdocs\eaicidadao\santaizabeldooeste\NF\extract_nf_simple_php.php on line 252
+INSERT INTO notas_fiscais (numero_nota, data_nota, nome_razao_social, cnpj, tipo_produto_servico, produto, servico, valor_nota, tomador_nome, tomador_cpf, tomador_endereco, tomador_cep) VALUES ('4', '2025-06-23', 'EMPRESA NAO IDENTIFICADA', '20250602150', 'Produto', NULL, NULL, 1, 'CLIENTE NAO IDENTIFICADO
+[2025-06-23 13:43:35] âœ“ Sucesso: Jean (1).pdf
+[2025-06-24 02:23:10] === Iniciando processamento PHP ===
+[2025-06-24 02:23:10] Processando arquivo: Jean (1).pdf
+[2025-06-24 02:23:10] Executando: php extract_nf_professional.php "uploads/6859efeedc84d_Jean (1).pdf" 2>&1
+[2025-06-24 02:23:11] SaÃ­da: INSERT INTO notas_fiscais (numero_nota, data_nota, nome_razao_social, cnpj, tipo_produto_servico, produto, servico, valor_nota, tomador_nome, tomador_cpf, tomador_endereco, tomador_cep) VALUES (NULL, NULL, NULL, NULL, 'Produto', NULL, NULL, NULL, NULL, '202.506.021-50', NULL, '20250602');
+[2025-06-24 02:23:11] âœ“ Sucesso: Jean (1).pdf
+[2025-06-24 13:12:31] === Iniciando processamento PHP ===
+[2025-06-24 13:12:31] Processando arquivo: Jean (1).pdf
+[2025-06-24 13:12:31] Executando:  extract_nf.py "uploads/685a881fd0727_Jean (1).pdf" 2>&1
+[2025-06-24 13:12:33] SaÃ­da: INSERT INTO notas_fiscais (numero_nota, data_nota, nome_razao_social, cnpj, tipo_produto_servico, produto, servico, valor_nota, tomador_nome, tomador_cpf, tomador_endereco, tomador_cep) VALUES (NULL, '2025-06-02', 'Documento Auxiliar da Nota Fiscal de Serviço Eletrônica
+BABINSKI TERRAPLENAGEM', '20.250.000/0000-98', 'Serviço', NULL, 'DOS SERVIÇOS VALOR TOTAL ALIQ. VALOR IMPOSTO RETIDO', 792.0, 'DO SERVIÇO Município de Prestação do Serviço', '026.863.009-73', 'Linha Jacutinga,SN
+Cidade UF Fone CE
+[2025-06-24 13:12:33] âœ“ Sucesso: Jean (1).pdf
+[2025-06-24 13:14:53] === Iniciando processamento PHP ===
+[2025-06-24 13:14:53] Processando arquivo: Jean (4).pdf
+[2025-06-24 13:14:53] Executando:  extract_nf.py "uploads/685a88ade8555_Jean (4).pdf" 2>&1
+[2025-06-24 13:14:54] SaÃ­da: INSERT INTO notas_fiscais (numero_nota, data_nota, nome_razao_social, cnpj, tipo_produto_servico, produto, servico, valor_nota, tomador_nome, tomador_cpf, tomador_endereco, tomador_cep) VALUES ('202500000000', '2025-06-02', 'Eletrônica
+SOLIMAR METALURGICA ESTRUTURAS METALICAS E Número da NFS-e
+VIDRAÇARIA', '20.250.000/0000-17', 'Serviço', NULL, 'DOS SERVIÇOS VALOR TOTAL ALIQ. VALOR IMPOSTO RETIDO', 192.85, 'DO SERVIÇO Município de Prestação do Serviço
+Nome', '540.000.007-76', 'Linha Jacutinga,S'
+[2025-06-24 13:14:54] âœ“ Sucesso: Jean (4).pdf
