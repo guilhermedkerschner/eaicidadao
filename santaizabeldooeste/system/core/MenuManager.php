@@ -85,25 +85,6 @@ class MenuManager {
                     'levels' => [1, 2, 3, 4],
                     'departments' => ['all']
                 ]
-            ],
-            'usuarios' => [
-                'info' => [
-                    'name' => 'Usuários',
-                    'icon' => 'fas fa-users',
-                    'category' => 'admin',
-                    'color' => '#dc3545'
-                ],
-                'files' => [
-                    'main' => 'lista_usuarios.php'
-                ],
-                'menu' => [
-                    'parent' => false,
-                    'submenu' => []
-                ],
-                'permissions' => [
-                    'levels' => [1, 2],
-                    'departments' => ['all']
-                ]
             ]
         ];
     }
@@ -134,7 +115,8 @@ class MenuManager {
                 'danger' => '#dc3545',
                 'warning' => '#ffc107',
                 'info' => '#17a2b8',
-                'department_1' => '#007bff'
+                'admin' => '#e74c3c',
+                'department_1' => '#4caf50'
             ],
             'category_colors' => [
                 'admin' => '#dc3545',
@@ -151,7 +133,7 @@ class MenuManager {
     private function getDefaultDepartments() {
         return [
             'ADMINISTRACAO' => ['name' => 'Administração', 'color' => '#dc3545'],
-            'ESPORTE' => ['name' => 'Esporte', 'color' => '#007bff'],
+            'ESPORTE' => ['name' => 'Esporte', 'color' => '#4caf50'],
             'ASSISTENCIA_SOCIAL' => ['name' => 'Assistência Social', 'color' => '#28a745']
         ];
     }
@@ -198,20 +180,35 @@ class MenuManager {
         $userDepartment = strtoupper($this->userSession['usuario_departamento'] ?? '');
 
         foreach ($this->modules as $key => $module) {
-            // Verificar estrutura do módulo
-            if (!isset($module['permissions']) || !is_array($module['permissions'])) {
-                continue;
+            // Verificar estrutura do módulo - aceitar tanto 'permissions' quanto 'access'
+            $permissions = null;
+            if (isset($module['permissions'])) {
+                $permissions = $module['permissions'];
+            } elseif (isset($module['access'])) {
+                // Converter estrutura 'access' para 'permissions'
+                $permissions = [
+                    'levels' => range($module['access']['min_level'] ?? 4, 4),
+                    'departments' => $module['access']['departments'] ?? ['all']
+                ];
             }
 
-            $permissions = $module['permissions'];
+            if (!$permissions) {
+                continue;
+            }
             
             // Verificar se o usuário tem permissão por nível
             $hasLevelPermission = in_array($userLevel, $permissions['levels'] ?? []);
             
+            // Se é admin (nível 1), tem acesso a tudo
+            if ($userLevel == 1) {
+                $hasLevelPermission = true;
+            }
+            
             // Verificar se o usuário tem permissão por departamento
             $departments = $permissions['departments'] ?? [];
             $hasDepartmentPermission = in_array('all', $departments) || 
-                                       in_array($userDepartment, $departments);
+                                     in_array('ALL', $departments) ||
+                                     in_array($userDepartment, $departments);
             
             if ($hasLevelPermission && $hasDepartmentPermission) {
                 $availableModules[$key] = $module;
@@ -221,9 +218,8 @@ class MenuManager {
         return $availableModules;
     }
 
-    
     /**
-     * Gera o HTML da sidebar com base nos módulos disponíveis (método corrigido)
+     * Gera o HTML da sidebar com base nos módulos disponíveis
      */
     public function generateSidebar($currentPage = '') {
         return $this->generateMenu($currentPage);
@@ -412,7 +408,15 @@ class MenuManager {
      * Verifica se uma página está ativa
      */
     private function isPageActive($file, $currentPage) {
-        return basename($file) === basename($currentPage);
+        $filePage = basename($file, '.php');
+        $currentPageClean = basename($currentPage, '.php');
+        
+        // Verificações específicas para páginas relacionadas
+        if ($filePage === 'esporte_campeonatos' && $currentPageClean === 'campeonato_equipes') {
+            return true;
+        }
+        
+        return $filePage === $currentPageClean;
     }
 
     /**

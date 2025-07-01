@@ -90,43 +90,143 @@
         }
 
         // Form submission
-        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            document.getElementById('uploadForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const progressContainer = document.getElementById('progressContainer');
+                const progressBar = document.getElementById('progressBar');
+                const results = document.getElementById('results');
+                
+                progressContainer.style.display = 'block';
+                results.innerHTML = '';
+                
+                document.getElementById('uploadForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const formData = new FormData(this);
-            const progressContainer = document.getElementById('progressContainer');
-            const progressBar = document.getElementById('progressBar');
-            const results = document.getElementById('results');
+            if (fileInput.files.length === 0) {
+                alert('Por favor, selecione pelo menos um arquivo PDF.');
+                return;
+            }
+
+            console.log('Iniciando processamento de', fileInput.files.length, 'arquivos');
+
+            // Desabilita botão e mostra loading
+            processBtn.disabled = true;
+            processBtn.innerHTML = '<span class="loading"></span> Processando...';
             
-            progressContainer.style.display = 'block';
+            // Mostra barra de progresso
+            progressContainer.classList.remove('hidden');
+            progressBar.style.width = '10%';
+            progressBar.textContent = 'Iniciando...';
+            
+            // Limpa resultados anteriores
             results.innerHTML = '';
-            
-            fetch('process.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
+
+            const formData = new FormData();
+            for (let file of fileInput.files) {
+                formData.append('pdfs[]', file);
+                console.log('Adicionado arquivo:', file.name);
+            }
+
+            try {
+                // Simula progresso
+                let progress = 10;
+                const progressInterval = setInterval(() => {
+                    if (progress < 90) {
+                        progress += Math.random() * 20;
+                        progressBar.style.width = progress + '%';
+                        progressBar.textContent = Math.round(progress) + '%';
+                    }
+                }, 500);
+
+                console.log('Enviando requisição para process.php...');
+                
+                const response = await fetch('process.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.text()) // Mudei de .json() para .text()
+                .then(responseText => {
+                    console.log('Resposta completa do servidor:', responseText);
+                    
+                    // Tenta fazer parse do JSON
+                    try {
+                        const data = JSON.parse(responseText);
+                        processedData = data;
+                        displayResults(data);
+                    } catch (error) {
+                        // Se não conseguir fazer parse, mostra o erro HTML
+                        results.innerHTML = `
+                            <div class="results error">
+                                <h3>❌ Erro no Servidor</h3>
+                                <h4>Resposta do servidor:</h4>
+                                <pre style="background: #f8f8f8; padding: 10px; overflow-x: auto; font-size: 12px;">${responseText}</pre>
+                            </div>
+                        `;
+                    }
+                })
+
+                console.log('Resposta recebida:', response.status, response.statusText);
+
+                clearInterval(progressInterval);
                 progressBar.style.width = '100%';
                 progressBar.textContent = '100%';
-                
-                if (data.success) {
-                    results.innerHTML = `
-                        <h3 class="success">Processamento Concluído!</h3>
-                        <p>Processadas: ${data.processed}/${data.total} notas fiscais</p>
-                        <p>Erros: ${data.errors}</p>
-                        <h4>SQLs Gerados:</h4>
-                        <div class="sql-output">${data.sqls.join('\n\n')}</div>
-                        <a href="download.php?file=${data.filename}" class="btn">Download SQL</a>
-                    `;
-                } else {
-                    results.innerHTML = `<p class="error">Erro: ${data.message}</p>`;
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-            })
-            .catch(error => {
-                results.innerHTML = `<p class="error">Erro na requisição: ${error}</p>`;
-            });
+
+                const responseText = await response.text();
+                console.log('Resposta completa:', responseText);
+
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                    console.log('JSON parseado:', data);
+                } catch (parseError) {
+                    console.error('Erro ao fazer parse do JSON:', parseError);
+                    throw new Error('Resposta inválida do servidor: ' + responseText.substring(0, 200));
+                }
+
+                processedData = data;
+                displayResults(data);
+
+            } catch (error) {
+                console.error('Erro completo:', error);
+                results.innerHTML = `
+                    <div class="results error">
+                        <h3>❌ Erro no Processamento</h3>
+                        <p><strong>Erro:</strong> ${error.message}</p>
+                        <p><strong>Possíveis causas:</strong></p>
+                        <ul>
+                            <li>Python não está instalado ou não está no PATH</li>
+                            <li>Bibliotecas Python não instaladas (pdfplumber, PyPDF2)</li>
+                            <li>Arquivo extract_nf.py não encontrado</li>
+                            <li>Permissões de pasta</li>
+                        </ul>
+                        <p><strong>Para diagnosticar:</strong> Abra o Console do navegador (F12) e veja os logs</p>
+                    </div>
+                `;
+            } finally {
+                // Reabilita botão
+                processBtn.disabled = false;
+                processBtn.innerHTML = '⚡ Processar Notas Fiscais';
+            }
         });
+
+        // Função para download seguro via JavaScript
+        function downloadSQL(filename, content) {
+            const blob = new Blob([content], { type: 'application/sql' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
     </script>
 </body>
 </html>

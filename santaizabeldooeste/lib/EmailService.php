@@ -325,6 +325,87 @@ class EmailService {
             " . PREFEITURA_NOME;
     }
     
+    function gerarTemplateConfirmacaoCadastro($dadosUsuario, $protocolo) {
+        $template = '
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Confirmação de Cadastro - Programa Habitacional</title>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; }
+                .header { background-color: #0d47a1; color: white; padding: 20px; text-align: center; }
+                .content { padding: 20px; }
+                .protocolo { background-color: #e3f2fd; padding: 15px; border-left: 4px solid #0d47a1; margin: 20px 0; }
+                .protocolo-numero { font-size: 1.5em; font-weight: bold; color: #0d47a1; }
+                .info-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+                .info-table th, .info-table td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+                .info-table th { background-color: #f5f5f5; font-weight: bold; }
+                .footer { background-color: #f8f9fa; padding: 15px; text-align: center; font-size: 0.9em; color: #666; }
+                .alert { background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; margin: 15px 0; border-radius: 4px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>Confirmação de Cadastro</h1>
+                    <p>Programa Habitacional - HABITASIO</p>
+                    <p>Prefeitura Municipal de Santa Izabel do Oeste</p>
+                </div>
+                
+                <div class="content">
+                    <p>Olá, <strong>' . htmlspecialchars($dadosUsuario['nome']) . '</strong>,</p>
+                    
+                    <p>Seu cadastro no Programa Habitacional foi realizado com sucesso!</p>
+                    
+                    <div class="protocolo">
+                        <p><strong>Número do Protocolo:</strong></p>
+                        <div class="protocolo-numero">' . htmlspecialchars($protocolo) . '</div>
+                    </div>
+                    
+                    <h3>Dados do Cadastro:</h3>
+                    <table class="info-table">
+                        <tr><th>Nome Completo:</th><td>' . htmlspecialchars($dadosUsuario['nome']) . '</td></tr>
+                        <tr><th>CPF:</th><td>' . htmlspecialchars($dadosUsuario['cpf']) . '</td></tr>
+                        <tr><th>Email:</th><td>' . htmlspecialchars($dadosUsuario['email']) . '</td></tr>
+                        <tr><th>Celular:</th><td>' . htmlspecialchars($dadosUsuario['celular']) . '</td></tr>
+                        <tr><th>Programa de Interesse:</th><td>' . htmlspecialchars($dadosUsuario['programa_interesse']) . '</td></tr>
+                        <tr><th>Data do Cadastro:</th><td>' . date('d/m/Y H:i:s') . '</td></tr>
+                        <tr><th>Status:</th><td><strong>PENDENTE DE ANÁLISE</strong></td></tr>
+                    </table>
+                    
+                    <div class="alert">
+                        <h4>📋 Próximos Passos:</h4>
+                        <ul>
+                            <li>Seu cadastro será analisado pela equipe da Secretaria de Assistência Social</li>
+                            <li>Você será contatado caso seja necessário complementar alguma informação</li>
+                            <li>Para acompanhar o status, acesse o portal Eai Cidadão! com seu protocolo</li>
+                            <li>Guarde este email e o número do protocolo para suas consultas</li>
+                        </ul>
+                    </div>
+                    
+                    <h4>📞 Contato da Secretaria de Assistência Social:</h4>
+                    <p><strong>Endereço:</strong> Rua Jacarandá, 620 - Centro, Santa Izabel do Oeste - PR</p>
+                    <p><strong>Telefones:</strong> (46) 3552-1512 (Secretaria) | (46) 3552-1513 (CRAS)</p>
+                    <p><strong>Email:</strong> social@santaizabeldooeste.pr.gov.br</p>
+                    <p><strong>Horário:</strong> Segunda a Sexta, das 08:00 às 11:30 e das 13:00 às 17:00</p>
+                </div>
+                
+                <div class="footer">
+                    <p>Este é um email automático, não responda a esta mensagem.</p>
+                    <p>Para dúvidas, entre em contato através dos canais oficiais da Secretaria de Assistência Social.</p>
+                    <p>&copy; 2025 Prefeitura Municipal de Santa Izabel do Oeste - Sistema Eai Cidadão!</p>
+                </div>
+            </div>
+        </body>
+        </html>';
+        
+        return $template;
+    }
+
+
     /**
      * Registra logs de envio de email
      */

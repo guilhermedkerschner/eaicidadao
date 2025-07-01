@@ -74,6 +74,7 @@ $userSession = [
 
 $menuManager = new MenuManager($userSession);
 
+
 // Obter configurações do tema
 $themeColors = $menuManager->getThemeColors();
 $availableModules = $menuManager->getAvailableModules();

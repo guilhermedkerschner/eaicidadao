@@ -328,8 +328,8 @@ session_start();
             </div>
 
             <div class="footer">
-                <p>© 2025 Prefeitura Municipal de Santa Izabel do Oeste. Todos os direitos reservados.</p>
-                <p>CNPJ: 76.205.715/0001-42</p>
+                <p>© 2025 Todos os direitos reservados.</p>
+                <p></p>
             </div>
         </div>
     </div>
@@ -378,11 +378,11 @@ session_start();
             // Obter o caminho da imagem correta com base no município selecionado
             let logoPath = "img/logo_sio.png"; // Logo padrão para Santa Izabel
             
-            if (municipio === "Ampére - PR") {
+           /* if (municipio === "Ampére - PR") {
                 logoPath = "img/logo_ampere.png";
             } else if (municipio === "Realeza - PR") {
                 logoPath = "img/logo_realeza.png";
-            }
+            }*/
             
             // Atualizar o texto do seletor
             selectText.innerHTML = `
@@ -409,11 +409,11 @@ session_start();
                 // Redirecionar para páginas diferentes com base no município selecionado
                 if (municipioAtual === "Santa Izabel do Oeste - PR") {
                     window.location.href = 'santaizabeldooeste/index.php';
-                } else if (municipioAtual === "Ampére - PR") {
-                    window.location.href = 'ampere/index.php';
-                } else if (municipioAtual === "Realeza - PR") {
-                    window.location.href = 'realeza/index.php';
-                }
+//                } else if (municipioAtual === "Ampére - PR") {
+//                    window.location.href = 'ampere/index.php';
+//                } else if (municipioAtual === "Realeza - PR") {
+//                    window.location.href = 'realeza/index.php';
+//                }
             }
         });
     </script>

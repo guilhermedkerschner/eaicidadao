@@ -320,7 +320,6 @@ footer {
 
 /* Estilos para o botão de impressão do comprovante */
 .print-button {
-    display: none;
     background-color: #2e7d32;
     color: white;
     border: none;
